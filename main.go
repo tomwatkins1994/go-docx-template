@@ -21,11 +21,39 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	f, err := os.Create("generated.docx")
+	if err != nil {
+		panic(err)
+	}
 	fmt.Println("Plain text:")
-	for _, it := range doc.Document.Body.Items {
-		switch it.(type) {
+	for _, item := range doc.Document.Body.Items {
+		switch item.(type) {
 		case *docx.Paragraph, *docx.Table: // printable
-			fmt.Println(it)
+			p, ok := item.(*docx.Paragraph)
+			if ok {
+				fmt.Println("Found paragraph")
+				for _, pChild := range p.Children {
+					run, ok := pChild.(*docx.Run)
+					if ok {
+						for i, runChild := range run.Children {
+							text, ok := runChild.(*docx.Text)
+							if ok {
+								text.Text = "Hello"
+								fmt.Printf("Found run text %v: %v", i, text.Text)
+							}
+						}
+					}
+				}
+			}
+			fmt.Println(item)
 		}
+	}
+	_, err = doc.WriteTo(f)
+	if err != nil {
+		panic(err)
+	}
+	err = f.Close()
+	if err != nil {
+		panic(err)
 	}
 }
