@@ -1,0 +1,4 @@
+github.com/fumiama/go-docx v0.0.0-20240924153044-f7d29bb5c371 h1:zKTZh3yEWAt3Bf2JGH9l7uHmOuJeX1/bshN332E6i98=
+github.com/fumiama/go-docx v0.0.0-20240924153044-f7d29bb5c371/go.mod h1:ssRF0IaB1hCcKIObp3FkZOsjTcAHpgii70JelNb4H8M=
+github.com/fumiama/imgsz v0.0.2 h1:fAkC0FnIscdKOXwAxlyw3EUba5NzxZdSxGaq3Uyfxak=
+github.com/fumiama/imgsz v0.0.2/go.mod h1:dR71mI3I2O5u6+PCpd47M9TZptzP+39tRBcbdIkoqM4=
