@@ -71,7 +71,10 @@ func (d *DocxTmpl) Render(data any) error {
 		if start, ok := t.(xml.StartElement); ok {
 			if start.Name.Local == "Body" {
 				clear(d.Document.Body.Items)
-				d.Document.Body.UnmarshalXML(decoder, start)
+				err = d.Document.Body.UnmarshalXML(decoder, start)
+				if err != nil {
+					return err
+				}
 				break
 			}
 		}
