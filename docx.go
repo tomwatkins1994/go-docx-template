@@ -27,3 +27,20 @@ func Parse(filename string) (*DocxTmpl, error) {
 
 	return &DocxTmpl{doc}, nil
 }
+
+func (d *DocxTmpl) ProcessTags() error {
+	for _, item := range d.Document.Body.Items {
+		switch item.(type) {
+		case *docx.Paragraph, *docx.Table: // printable
+			paragraph, ok := item.(*docx.Paragraph)
+			if ok {
+				err := replaceTagsInParagraph(paragraph)
+				if err != nil {
+					return err
+				}
+			}
+		}
+	}
+
+	return nil
+}
