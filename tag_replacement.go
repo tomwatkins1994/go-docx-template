@@ -2,8 +2,8 @@ package main
 
 import (
 	"bytes"
+	"html/template"
 	"log"
-	"text/template"
 
 	"github.com/fumiama/go-docx"
 )
@@ -36,11 +36,11 @@ func replaceTagsInParagraph(paragraph *docx.Paragraph, data any) error {
 							return err
 						}
 						if containsTags {
-							newText, err := replaceTagsInText(currentText, data)
-							if err != nil {
-								return err
-							}
-							text.Text = newText
+							// newText, err := replaceTagsInText(currentText, data)
+							// if err != nil {
+							// 	return err
+							// }
+							text.Text = currentText //newText
 						}
 					}
 				}
