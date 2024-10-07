@@ -2,7 +2,6 @@ package main
 
 import (
 	"bytes"
-	"fmt"
 	"log"
 
 	"os"
@@ -30,46 +29,11 @@ func main() {
 	for _, item := range doc.Document.Body.Items {
 		switch item.(type) {
 		case *docx.Paragraph, *docx.Table: // printable
-			p, ok := item.(*docx.Paragraph)
+			paragraph, ok := item.(*docx.Paragraph)
 			if ok {
-				currentText := ""
-				inIncompleteTag := false
-				for _, pChild := range p.Children {
-					run, ok := pChild.(*docx.Run)
-					if ok {
-						for _, runChild := range run.Children {
-							text, ok := runChild.(*docx.Text)
-							if ok {
-								if inIncompleteTag {
-									currentText += text.Text
-								} else {
-									currentText = text.Text
-								}
-								containsIncompleteTags, err := textContainsIncompleteTags(currentText)
-								if err != nil {
-									panic(err)
-								}
-								if containsIncompleteTags {
-									text.Text = ""
-									inIncompleteTag = true
-								} else {
-									inIncompleteTag = false
-									containsTags, err := textContainsTags(currentText)
-									if err != nil {
-										panic(err)
-									}
-									if containsTags {
-										newText, err := replaceTagsInText(currentText)
-										if err != nil {
-											panic(err)
-										}
-										fmt.Printf("Replacing %v with %v\n", text.Text, newText)
-										text.Text = newText
-									}
-								}
-							}
-						}
-					}
+				err = replaceTagsInParagraph(paragraph)
+				if err != nil {
+					panic(err)
 				}
 			}
 		}
@@ -95,8 +59,50 @@ type TemplateData struct {
 	Status        string
 }
 
+func replaceTagsInParagraph(paragraph *docx.Paragraph) error {
+	currentText := ""
+	inIncompleteTag := false
+	for _, pChild := range paragraph.Children {
+		run, ok := pChild.(*docx.Run)
+		if ok {
+			for _, rChild := range run.Children {
+				text, ok := rChild.(*docx.Text)
+				if ok {
+					if inIncompleteTag {
+						currentText += text.Text
+					} else {
+						currentText = text.Text
+					}
+					containsIncompleteTags, err := textContainsIncompleteTags(currentText)
+					if err != nil {
+						return err
+					}
+					if containsIncompleteTags {
+						text.Text = ""
+						inIncompleteTag = true
+					} else {
+						inIncompleteTag = false
+						containsTags, err := textContainsTags(currentText)
+						if err != nil {
+							return err
+						}
+						if containsTags {
+							newText, err := replaceTagsInText(currentText)
+							if err != nil {
+								return err
+							}
+							text.Text = newText
+						}
+					}
+				}
+			}
+		}
+	}
+
+	return nil
+}
+
 func replaceTagsInText(text string) (string, error) {
-	fmt.Println(text)
 	tmpl, err := template.New("").Parse(text)
 	if err != nil {
 		log.Fatalf("Error parsing template: %v", err)
