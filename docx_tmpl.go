@@ -39,7 +39,7 @@ func (d *DocxTmpl) Render(data any) error {
 		case *docx.Paragraph, *docx.Table: // printable
 			paragraph, ok := item.(*docx.Paragraph)
 			if ok {
-				err := replaceTagsInParagraph(paragraph, data)
+				err := mergeTagsInParagraph(paragraph)
 				if err != nil {
 					return err
 				}
