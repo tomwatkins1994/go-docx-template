@@ -9,7 +9,13 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	err = doc.ProcessTags()
+
+	type TemplateData struct {
+		ProjectNumber string
+		Status        string
+	}
+
+	err = doc.Render()
 	if err != nil {
 		panic(err)
 	}

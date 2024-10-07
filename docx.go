@@ -28,7 +28,7 @@ func Parse(filename string) (*DocxTmpl, error) {
 	return &DocxTmpl{doc}, nil
 }
 
-func (d *DocxTmpl) ProcessTags() error {
+func (d *DocxTmpl) Render() error {
 	for _, item := range d.Document.Body.Items {
 		switch item.(type) {
 		case *docx.Paragraph, *docx.Table: // printable
