@@ -14,8 +14,8 @@ func main() {
 		ProjectNumber string
 		Status        string
 	}
-
-	err = doc.Render()
+	templateData := TemplateData{"B-00001", "New"}
+	err = doc.Render(templateData)
 	if err != nil {
 		panic(err)
 	}

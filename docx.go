@@ -28,13 +28,13 @@ func Parse(filename string) (*DocxTmpl, error) {
 	return &DocxTmpl{doc}, nil
 }
 
-func (d *DocxTmpl) Render() error {
+func (d *DocxTmpl) Render(data any) error {
 	for _, item := range d.Document.Body.Items {
 		switch item.(type) {
 		case *docx.Paragraph, *docx.Table: // printable
 			paragraph, ok := item.(*docx.Paragraph)
 			if ok {
-				err := replaceTagsInParagraph(paragraph)
+				err := replaceTagsInParagraph(paragraph, data)
 				if err != nil {
 					return err
 				}

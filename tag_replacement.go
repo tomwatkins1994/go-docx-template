@@ -8,12 +8,7 @@ import (
 	"github.com/fumiama/go-docx"
 )
 
-type TemplateData struct {
-	ProjectNumber string
-	Status        string
-}
-
-func replaceTagsInParagraph(paragraph *docx.Paragraph) error {
+func replaceTagsInParagraph(paragraph *docx.Paragraph, data any) error {
 	currentText := ""
 	inIncompleteTag := false
 	for _, pChild := range paragraph.Children {
@@ -41,7 +36,7 @@ func replaceTagsInParagraph(paragraph *docx.Paragraph) error {
 							return err
 						}
 						if containsTags {
-							newText, err := replaceTagsInText(currentText)
+							newText, err := replaceTagsInText(currentText, data)
 							if err != nil {
 								return err
 							}
@@ -56,14 +51,14 @@ func replaceTagsInParagraph(paragraph *docx.Paragraph) error {
 	return nil
 }
 
-func replaceTagsInText(text string) (string, error) {
+func replaceTagsInText(text string, data any) (string, error) {
 	tmpl, err := template.New("").Parse(text)
 	if err != nil {
 		log.Fatalf("Error parsing template: %v", err)
 		return "", err
 	}
-	templateData := TemplateData{"B-00001", "New"}
+
 	buf := &bytes.Buffer{}
-	err = tmpl.Execute(buf, templateData)
+	err = tmpl.Execute(buf, data)
 	return buf.String(), err
 }
