@@ -3,7 +3,6 @@ package main
 import (
 	"bytes"
 	"encoding/xml"
-	"fmt"
 	"io"
 	"os"
 
@@ -52,14 +51,12 @@ func (d *DocxTmpl) Render(data any) error {
 	if err != nil {
 		return err
 	}
-	fmt.Printf("Template: %v\n", documentXmlString)
 
 	// Replace the tags in XML
 	documentXmlString, err = replaceTagsInText(documentXmlString, data)
 	if err != nil {
 		return err
 	}
-	fmt.Printf("Merged template: %v\n", documentXmlString)
 
 	// Unmarshal the modified XML and replace the document body with it
 	decoder := xml.NewDecoder(bytes.NewBufferString(documentXmlString))
