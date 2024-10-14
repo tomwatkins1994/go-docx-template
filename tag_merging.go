@@ -42,3 +42,18 @@ func mergeTagsInParagraph(paragraph *docx.Paragraph) error {
 
 	return nil
 }
+
+func mergeTagsInTable(table *docx.Table) error {
+	for _, row := range table.TableRows {
+		for _, cell := range row.TableCells {
+			for _, paragraph := range cell.Paragraphs {
+				err := mergeTagsInParagraph(paragraph)
+				if err != nil {
+					return err
+				}
+			}
+		}
+	}
+
+	return nil
+}

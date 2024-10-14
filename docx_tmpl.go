@@ -34,14 +34,16 @@ func Parse(filename string) (*DocxTmpl, error) {
 
 func (d *DocxTmpl) Render(data any) error {
 	for _, item := range d.Document.Body.Items {
-		switch item.(type) {
-		case *docx.Paragraph, *docx.Table: // printable
-			paragraph, ok := item.(*docx.Paragraph)
-			if ok {
-				err := mergeTagsInParagraph(paragraph)
-				if err != nil {
-					return err
-				}
+		switch i := item.(type) {
+		case *docx.Paragraph:
+			err := mergeTagsInParagraph(i)
+			if err != nil {
+				return err
+			}
+		case *docx.Table:
+			err := mergeTagsInTable(i)
+			if err != nil {
+				return err
 			}
 		}
 	}
