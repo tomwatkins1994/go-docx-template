@@ -33,20 +33,8 @@ func Parse(filename string) (*DocxTmpl, error) {
 }
 
 func (d *DocxTmpl) Render(data any) error {
-	for _, item := range d.Document.Body.Items {
-		switch i := item.(type) {
-		case *docx.Paragraph:
-			err := mergeTagsInParagraph(i)
-			if err != nil {
-				return err
-			}
-		case *docx.Table:
-			err := mergeTagsInTable(i)
-			if err != nil {
-				return err
-			}
-		}
-	}
+	// Ensure that there are no 'part tags' in the XML document
+	d.mergeTags()
 
 	// Get the document XML
 	documentXmlString, err := d.getDocumentXml()

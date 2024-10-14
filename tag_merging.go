@@ -4,6 +4,25 @@ import (
 	"github.com/fumiama/go-docx"
 )
 
+func (d *DocxTmpl) mergeTags() error {
+	for _, item := range d.Document.Body.Items {
+		switch i := item.(type) {
+		case *docx.Paragraph:
+			err := mergeTagsInParagraph(i)
+			if err != nil {
+				return err
+			}
+		case *docx.Table:
+			err := mergeTagsInTable(i)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
+}
+
 func mergeTagsInParagraph(paragraph *docx.Paragraph) error {
 	currentText := ""
 	inIncompleteTag := false
