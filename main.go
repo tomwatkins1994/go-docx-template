@@ -12,9 +12,12 @@ func main() {
 
 	type TemplateData struct {
 		ProjectNumber string
+		Client        string
 		Status        string
+		CreatedBy     string
+		SignedOffBy   string
 	}
-	templateData := TemplateData{"B-00001", "New"}
+	templateData := TemplateData{ProjectNumber: "B-00001", Client: "TW Software", Status: "New", CreatedBy: "Tom Watkins", SignedOffBy: "Tom Watkins"}
 	err = doc.Render(templateData)
 	if err != nil {
 		panic(err)
