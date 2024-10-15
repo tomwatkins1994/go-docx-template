@@ -13,6 +13,7 @@ func (d *DocxTmpl) mergeTags() error {
 	for _, item := range d.Document.Body.Items {
 		wg.Add(1)
 		go func() {
+			item := item
 			defer wg.Done()
 			switch i := item.(type) {
 			case *docx.Paragraph:
@@ -90,6 +91,7 @@ func mergeTagsInTable(table *docx.Table) error {
 	errCh := make(chan error, len(paragraphs))
 
 	for _, paragraph := range paragraphs {
+		paragraph := paragraph
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
