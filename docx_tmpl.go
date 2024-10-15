@@ -35,10 +35,16 @@ func Parse(filename string) (*DocxTmpl, error) {
 
 func (d *DocxTmpl) Render(data any) error {
 	// Ensure that there are no 'part tags' in the XML document
-	d.mergeTags()
+	err := d.mergeTags()
+	if err != nil {
+		return err
+	}
 
 	// Handle table range tags
-	d.handleTableRangeTags()
+	err = d.handleTableRangeTags()
+	if err != nil {
+		return err
+	}
 
 	// Get the document XML
 	documentXmlString, err := d.getDocumentXml()
