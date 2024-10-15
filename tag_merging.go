@@ -7,8 +7,8 @@ import (
 )
 
 func (d *DocxTmpl) mergeTags() error {
-	errCh := make(chan error, len(d.Document.Body.Items))
 	var wg sync.WaitGroup
+	errCh := make(chan error, len(d.Document.Body.Items))
 
 	for _, item := range d.Document.Body.Items {
 		wg.Add(1)
@@ -81,8 +81,8 @@ func mergeTagsInParagraph(paragraph *docx.Paragraph) error {
 func mergeTagsInTable(table *docx.Table) error {
 	for _, row := range table.TableRows {
 		for _, cell := range row.TableCells {
-			errCh := make(chan error, len(cell.Paragraphs))
 			var wg sync.WaitGroup
+			errCh := make(chan error, len(cell.Paragraphs))
 			for _, paragraph := range cell.Paragraphs {
 				wg.Add(1)
 				go func() {
