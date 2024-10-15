@@ -26,6 +26,8 @@ func (d *DocxTmpl) handleTableRangeTags() error {
 						if cellIndex == 0 && containsRangeTag {
 							addRangeTag(cell, rangeTag)
 							containsRangeTag = false
+							rangeTag = ""
+							break
 						}
 						var err error
 						containsRangeTag, rangeTag, err = cellContainsRangeTag(cell)
@@ -90,7 +92,7 @@ func addRangeTag(cell *docx.WTableCell, rangeText string) {
 					text, ok := rChild.(*docx.Text)
 					if ok {
 						text.Text = rangeText + text.Text
-
+						return
 					}
 				}
 			}
