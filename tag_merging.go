@@ -12,14 +12,17 @@ func (d *DocxTmpl) mergeTags() error {
 
 	for _, item := range d.Document.Body.Items {
 		wg.Add(1)
-		switch i := item.(type) {
-		case *docx.Paragraph:
-			go mergeTagsInParagraph(i, errCh, &wg)
-		case *docx.Table:
-			go mergeTagsInTable(i, errCh, &wg)
-		default:
-			wg.Done()
-		}
+		go func() {
+			defer wg.Done()
+			switch i := item.(type) {
+			case *docx.Paragraph:
+				errCh <- mergeTagsInParagraph(i)
+			case *docx.Table:
+				errCh <- mergeTagsInTable(i)
+			default:
+				errCh <- nil
+			}
+		}()
 	}
 
 	go func() {
@@ -36,9 +39,7 @@ func (d *DocxTmpl) mergeTags() error {
 	return nil
 }
 
-func mergeTagsInParagraph(paragraph *docx.Paragraph, errCh chan<- error, wg *sync.WaitGroup) {
-	defer wg.Done()
-
+func mergeTagsInParagraph(paragraph *docx.Paragraph) error {
 	currentText := ""
 	inIncompleteTag := false
 	for _, pChild := range paragraph.Children {
@@ -54,8 +55,7 @@ func mergeTagsInParagraph(paragraph *docx.Paragraph, errCh chan<- error, wg *syn
 					}
 					containsIncompleteTags, err := textContainsIncompleteTags(currentText)
 					if err != nil {
-						errCh <- err
-						return
+						return err
 					}
 					if containsIncompleteTags {
 						text.Text = ""
@@ -64,8 +64,7 @@ func mergeTagsInParagraph(paragraph *docx.Paragraph, errCh chan<- error, wg *syn
 						inIncompleteTag = false
 						containsTags, err := textContainsTags(currentText)
 						if err != nil {
-							errCh <- err
-							return
+							return err
 						}
 						if containsTags {
 							text.Text = currentText
@@ -76,32 +75,32 @@ func mergeTagsInParagraph(paragraph *docx.Paragraph, errCh chan<- error, wg *syn
 		}
 	}
 
-	errCh <- nil
+	return nil
 }
 
-func mergeTagsInTable(table *docx.Table, errCh chan<- error, wg *sync.WaitGroup) {
-	defer wg.Done()
-
+func mergeTagsInTable(table *docx.Table) error {
 	for _, row := range table.TableRows {
 		for _, cell := range row.TableCells {
-			pErrCh := make(chan error, len(cell.Paragraphs))
-			var pwg sync.WaitGroup
+			errCh := make(chan error, len(cell.Paragraphs))
+			var wg sync.WaitGroup
 			for _, paragraph := range cell.Paragraphs {
-				pwg.Add(1)
-				go mergeTagsInParagraph(paragraph, pErrCh, &pwg)
+				wg.Add(1)
+				go func() {
+					defer wg.Done()
+					errCh <- mergeTagsInParagraph(paragraph)
+				}()
 			}
 			go func() {
-				pwg.Wait()
-				close(pErrCh)
+				wg.Wait()
+				close(errCh)
 			}()
-			for err := range pErrCh {
+			for err := range errCh {
 				if err != nil {
-					errCh <- err
-					return
+					return err
 				}
 			}
 		}
 	}
 
-	errCh <- nil
+	return nil
 }
