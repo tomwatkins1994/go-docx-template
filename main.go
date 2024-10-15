@@ -20,8 +20,35 @@ func main() {
 		Status        string
 		CreatedBy     string
 		SignedOffBy   string
+		People        []struct {
+			Name   string
+			Gender string
+			Age    uint8
+		}
 	}
-	templateData := TemplateData{ProjectNumber: "B-00001", Client: "TW Software", Status: "New", CreatedBy: "Tom Watkins", SignedOffBy: "Tom Watkins"}
+	templateData := TemplateData{
+		ProjectNumber: "B-00001",
+		Client:        "TW Software",
+		Status:        "New",
+		CreatedBy:     "Tom Watkins",
+		SignedOffBy:   "Tom Watkins",
+		People: []struct {
+			Name   string
+			Gender string
+			Age    uint8
+		}{
+			{
+				Name:   "Tom Watkins",
+				Gender: "Male",
+				Age:    30,
+			},
+			{
+				Name:   "Evie Argyle",
+				Gender: "Female",
+				Age:    29,
+			},
+		},
+	}
 	start = time.Now()
 	err = doc.Render(templateData)
 	if err != nil {
