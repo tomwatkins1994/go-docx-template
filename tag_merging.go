@@ -11,17 +11,20 @@ func (d *DocxTmpl) mergeTags() error {
 	errCh := make(chan error)
 
 	for _, item := range d.Document.Body.Items {
+		item := item
 		wg.Add(1)
 		go func() {
-			item := item
 			defer wg.Done()
+
+			var err error
 			switch i := item.(type) {
 			case *docx.Paragraph:
-				errCh <- mergeTagsInParagraph(i)
+				err = mergeTagsInParagraph(i)
 			case *docx.Table:
-				errCh <- mergeTagsInTable(i)
-			default:
-				errCh <- nil
+				err = mergeTagsInTable(i)
+			}
+			if err != nil {
+				errCh <- err
 			}
 		}()
 	}
@@ -95,7 +98,10 @@ func mergeTagsInTable(table *docx.Table) error {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			errCh <- mergeTagsInParagraph(paragraph)
+			err := mergeTagsInParagraph(paragraph)
+			if err != nil {
+				errCh <- err
+			}
 		}()
 	}
 	go func() {
