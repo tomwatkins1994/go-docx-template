@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"encoding/xml"
+	"fmt"
 	"io"
 	"os"
 
@@ -36,17 +37,22 @@ func (d *DocxTmpl) Render(data any) error {
 	// Ensure that there are no 'part tags' in the XML document
 	d.mergeTags()
 
+	// Handle table range tags
+	d.handleTableRangeTags()
+
 	// Get the document XML
 	documentXmlString, err := d.getDocumentXml()
 	if err != nil {
 		return err
 	}
+	// fmt.Println(documentXmlString)
 
 	// Replace the tags in XML
 	documentXmlString, err = replaceTagsInText(documentXmlString, data)
 	if err != nil {
 		return err
 	}
+	fmt.Println(documentXmlString)
 
 	// Unmarshal the modified XML and replace the document body with it
 	decoder := xml.NewDecoder(bytes.NewBufferString(documentXmlString))
