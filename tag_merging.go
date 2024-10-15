@@ -83,31 +83,30 @@ func mergeTagsInParagraph(paragraph *docx.Paragraph) error {
 }
 
 func mergeTagsInTable(table *docx.Table) error {
-	paragraphs := make([]*docx.Paragraph, 0, len(table.TableRows)*10)
-	for _, row := range table.TableRows {
-		for _, cell := range row.TableCells {
-			paragraphs = append(paragraphs, cell.Paragraphs...)
-		}
-	}
-
 	var wg sync.WaitGroup
 	errCh := make(chan error)
 
-	for _, paragraph := range paragraphs {
-		paragraph := paragraph
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
-			err := mergeTagsInParagraph(paragraph)
-			if err != nil {
-				errCh <- err
+	for _, row := range table.TableRows {
+		for _, cell := range row.TableCells {
+			for _, paragraph := range cell.Paragraphs {
+				paragraph := paragraph
+				wg.Add(1)
+				go func() {
+					defer wg.Done()
+					err := mergeTagsInParagraph(paragraph)
+					if err != nil {
+						errCh <- err
+					}
+				}()
 			}
-		}()
+		}
 	}
+
 	go func() {
 		wg.Wait()
 		close(errCh)
 	}()
+
 	for err := range errCh {
 		if err != nil {
 			return err
