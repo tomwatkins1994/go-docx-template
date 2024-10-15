@@ -15,5 +15,9 @@ func replaceTagsInText(text string, data any) (string, error) {
 
 	buf := &bytes.Buffer{}
 	err = tmpl.Execute(buf, data)
+	if err != nil {
+		return "", err
+	}
+
 	return buf.String(), err
 }
