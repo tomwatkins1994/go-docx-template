@@ -21,7 +21,9 @@ func (d *DocxTmpl) handleTableRangeTags() error {
 
 				containsRangeTag := false
 				rangeTag := ""
-				for _, row := range table.TableRows {
+				rowsToDelete := make(map[int]struct{})
+
+				for rowIndex, row := range table.TableRows {
 					for cellIndex, cell := range row.TableCells {
 						if cellIndex == 0 && containsRangeTag {
 							addRangeTag(cell, rangeTag)
@@ -35,9 +37,21 @@ func (d *DocxTmpl) handleTableRangeTags() error {
 							errCh <- err
 						}
 						if containsRangeTag {
+							rowsToDelete[rowIndex] = struct{}{}
 							break
 						}
 					}
+				}
+
+				// Remove the rows with range/end in
+				if len(rowsToDelete) > 0 {
+					newTableRows := []*docx.WTableRow{}
+					for rowIndex, row := range table.TableRows {
+						if _, found := rowsToDelete[rowIndex]; !found {
+							newTableRows = append(newTableRows, row)
+						}
+					}
+					table.TableRows = newTableRows
 				}
 			}()
 		}
