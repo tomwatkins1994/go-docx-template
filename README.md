@@ -1,5 +1,8 @@
 # Go Docx Template
 
+> [!IMPORTANT] 
+> This library is currently in active development and is therefore not recommended for production use
+
 ## Introduction
 
 A simple library for merging docx files with data.
