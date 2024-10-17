@@ -5,7 +5,7 @@
 
 ## Introduction
 
-A simple library for merging docx files with data.
+A simple Go library for merging docx files with data.
 
 This is a wrapper library around the [go-docx](https://github.com/fumiama/go-docx) library by [fumiama](https://github.com/fumiama). All of the methods on the `docx.Docx` struct from go-docx are inherited by the `docxtpl.DocxTmpl` struct with an additional `Render` method.
 
