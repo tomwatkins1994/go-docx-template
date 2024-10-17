@@ -31,7 +31,7 @@ func TestParseAndRender(t *testing.T) {
 			ProjectNumber: "B-00001",
 			Client:        "TW Software",
 			Status:        "New",
-			Image:         "test_image.png",
+			Image:         "test_templates/test_image.png",
 		}
 		parseAndRender(t, "test_basic_with_images.docx", data)
 	})
@@ -80,7 +80,7 @@ func parseAndRender(t *testing.T, filename string, data interface{}) {
 
 	// Parse the document
 	parseStart := time.Now()
-	doc, err := Parse(filename)
+	doc, err := Parse("test_templates/" + filename)
 	if err != nil {
 		t.Fatalf("%v - Parsing error: %v", t.Name(), err)
 	}
@@ -96,7 +96,7 @@ func parseAndRender(t *testing.T, filename string, data interface{}) {
 
 	// Create a new file for the output
 	saveStart := time.Now()
-	f, err := os.Create("generated_" + filename)
+	f, err := os.Create("test_templates/generated_" + filename)
 	if err != nil {
 		t.Fatalf("%v - Error creating document: %v", t.Name(), err)
 		panic(err)
