@@ -61,24 +61,26 @@ func TestParseAndRender(t *testing.T) {
 }
 
 func parseAndRender(t *testing.T, filename string, data interface{}) {
-	// Parse the document
 	start := time.Now()
+
+	// Parse the document
+	parseStart := time.Now()
 	doc, err := Parse(filename)
 	if err != nil {
 		t.Fatalf("%v - Parsing error: %v", t.Name(), err)
 	}
-	fmt.Printf("%v - Parse: %v\n", t.Name(), time.Since(start))
+	fmt.Printf("%v - Parse: %v\n", t.Name(), time.Since(parseStart))
 
 	// Render the document
-	start = time.Now()
+	renderStart := time.Now()
 	err = doc.Render(data)
 	if err != nil {
 		t.Fatalf("%v - Rendering error: %v", t.Name(), err)
 	}
-	fmt.Printf("%v - Render: %v\n", t.Name(), time.Since(start))
+	fmt.Printf("%v - Render: %v\n", t.Name(), time.Since(renderStart))
 
 	// Create a new file for the output
-	start = time.Now()
+	saveStart := time.Now()
 	f, err := os.Create("generated_" + filename)
 	if err != nil {
 		t.Fatalf("%v - Error creating document: %v", t.Name(), err)
@@ -92,5 +94,8 @@ func parseAndRender(t *testing.T, filename string, data interface{}) {
 	if err != nil {
 		t.Fatalf("%v - Error closing created document: %v", t.Name(), err)
 	}
-	fmt.Printf("%v - Save: %v\n", t.Name(), time.Since(start))
+	fmt.Printf("%v - Save: %v\n", t.Name(), time.Since(saveStart))
+
+	// Log the overall time taken
+	fmt.Printf("%v - Total: %v\n", t.Name(), time.Since(start))
 }
