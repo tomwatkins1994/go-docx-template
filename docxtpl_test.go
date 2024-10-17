@@ -3,10 +3,11 @@ package docxtpl
 import (
 	"fmt"
 	"os"
+	"testing"
 	"time"
 )
 
-func main() {
+func TestRender(t *testing.T) {
 	start := time.Now()
 	doc, err := Parse("test.docx")
 	if err != nil {
