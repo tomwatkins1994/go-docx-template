@@ -65,33 +65,32 @@ func parseAndRender(t *testing.T, filename string, data interface{}) {
 	start := time.Now()
 	doc, err := Parse(filename)
 	if err != nil {
-		t.Fatalf("Parsing error: %v", err)
+		t.Fatalf("%v - Parsing error: %v", t.Name(), err)
 	}
-	fmt.Printf("Parse: %v\n", time.Since(start))
+	fmt.Printf("%v - Parse: %v\n", t.Name(), time.Since(start))
 
 	// Render the document
 	start = time.Now()
 	err = doc.Render(data)
 	if err != nil {
-		t.Fatalf("Rendering error: %v", err)
+		t.Fatalf("%v - Rendering error: %v", t.Name(), err)
 	}
-	fmt.Printf("Render: %v\n", time.Since(start))
+	fmt.Printf("%v - Render: %v\n", t.Name(), time.Since(start))
 
 	// Create a new file for the output
 	start = time.Now()
 	f, err := os.Create("generated_" + filename)
 	if err != nil {
-		t.Fatalf("Error creating document: %v", err)
+		t.Fatalf("%v - Error creating document: %v", t.Name(), err)
 		panic(err)
 	}
 	_, err = doc.WriteTo(f)
 	if err != nil {
-		t.Fatalf("Error writing to document: %v", err)
-
+		t.Fatalf("%v - Error writing to document: %v", t.Name(), err)
 	}
 	err = f.Close()
 	if err != nil {
-		t.Fatalf("Error closing created document: %v", err)
+		t.Fatalf("%v - Error closing created document: %v", t.Name(), err)
 	}
-	fmt.Printf("Save: %v\n", time.Since(start))
+	fmt.Printf("%v - Save: %v\n", t.Name(), time.Since(start))
 }
