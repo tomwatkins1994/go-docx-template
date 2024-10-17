@@ -4,11 +4,13 @@ import (
 	"fmt"
 	"os"
 	"time"
+
+	docxtpl "github.com/tomwatkins1994/go-docx-template"
 )
 
 func main() {
 	start := time.Now()
-	doc, err := Parse("test.docx")
+	doc, err := docxtpl.Parse("test.docx")
 	if err != nil {
 		panic(err)
 	}
