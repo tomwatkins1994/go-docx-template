@@ -11,6 +11,14 @@ This is a wrapper library around the [go-docx](https://github.com/fumiama/go-doc
 
 ## Usage
 
+### Installation
+
+```sh
+go get github.com/tomwatkins1994/go-docx-template@latest 
+```
+
+### Render a document 
+
 ```go
 package main
 
