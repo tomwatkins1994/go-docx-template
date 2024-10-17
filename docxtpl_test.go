@@ -99,7 +99,6 @@ func parseAndRender(t *testing.T, filename string, data interface{}) {
 	f, err := os.Create("test_templates/generated_" + filename)
 	if err != nil {
 		t.Fatalf("%v - Error creating document: %v", t.Name(), err)
-		panic(err)
 	}
 	_, err = doc.WriteTo(f)
 	if err != nil {
