@@ -3,6 +3,7 @@ package docxtpl
 import (
 	"bytes"
 	"encoding/xml"
+	"fmt"
 	"io"
 	"os"
 
@@ -32,12 +33,16 @@ func Parse(filename string) (*DocxTmpl, error) {
 	return &DocxTmpl{doc, filename}, nil
 }
 
-func (d *DocxTmpl) Render(data any) error {
+func (d *DocxTmpl) Render(data *interface{}) error {
 	// Ensure that there are no 'part tags' in the XML document
 	err := d.mergeTags()
 	if err != nil {
 		return err
 	}
+
+	// Process the template data
+	d.processData(data)
+	fmt.Printf("Processed data: %v", data)
 
 	// Get the document XML
 	documentXmlString, err := d.getDocumentXml()
