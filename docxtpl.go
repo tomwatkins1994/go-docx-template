@@ -3,7 +3,6 @@ package docxtpl
 import (
 	"bytes"
 	"encoding/xml"
-	"fmt"
 	"io"
 	"os"
 
@@ -45,7 +44,6 @@ func (d *DocxTmpl) Render(data interface{}) error {
 	if err != nil {
 		return err
 	}
-	fmt.Printf("Processed data: %v", proccessedData)
 
 	// Get the document XML
 	documentXmlString, err := d.getDocumentXml()

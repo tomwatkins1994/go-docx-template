@@ -2,6 +2,7 @@ package docxtpl
 
 import (
 	"fmt"
+	"os"
 	"reflect"
 )
 
@@ -11,23 +12,50 @@ func (d *DocxTmpl) processData(data interface{}) (map[string]interface{}, error)
 	if m, ok := data.(map[string]interface{}); ok {
 		mapData = m
 	} else {
-		mapData, err = convertStructToMap(data)
-		if err != nil {
+		if mapData, err = convertStructToMap(data); err != nil {
 			return nil, err
 		}
 	}
 
-	handleTagValues(&mapData)
+	if err = handleTagValues(&mapData); err != nil {
+		return nil, err
+	}
 
 	return mapData, nil
 }
 
-func handleTagValues(data *map[string]interface{}) {
-	for key := range *data {
-		if key == "Image" {
-			(*data)[key] = "Hello"
+func handleTagValues(data *map[string]interface{}) error {
+	for key, value := range *data {
+		if stringVal, ok := value.(string); ok {
+			// Check for files
+			if isFile, err := isFilePath(stringVal); err != nil {
+				return err
+			} else {
+				if isFile {
+					(*data)[key] = "Hello"
+				}
+			}
 		}
 	}
+
+	return nil
+}
+
+func isFilePath(path string) (bool, error) {
+	// Check if the path exists
+	if _, err := os.Stat(path); err != nil {
+		if os.IsNotExist(err) {
+			return false, nil
+		}
+		return false, err
+	}
+
+	// Check if it's a file
+	if info, err := os.Stat(path); err == nil {
+		return !info.IsDir(), nil // Return true if it's a file, false if it's a directory
+	}
+
+	return false, nil
 }
 
 func convertStructToMap(s interface{}) (map[string]interface{}, error) {
