@@ -63,6 +63,9 @@ func (d *DocxTmpl) Render(data interface{}) error {
 		return err
 	}
 
+	// Fix any issues in the XML
+	documentXmlString = fixXmlIssuesPostTagReplacement(documentXmlString)
+
 	// Unmarshal the modified XML and replace the document body with it
 	decoder := xml.NewDecoder(bytes.NewBufferString(documentXmlString))
 	for {

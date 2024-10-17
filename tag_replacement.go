@@ -2,8 +2,8 @@ package docxtpl
 
 import (
 	"bytes"
-	"html/template"
 	"log"
+	"text/template"
 )
 
 func replaceTagsInText(text string, data map[string]interface{}) (string, error) {

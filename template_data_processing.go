@@ -17,14 +17,14 @@ func (d *DocxTmpl) processData(data interface{}) (map[string]interface{}, error)
 		}
 	}
 
-	if err = handleTagValues(&mapData); err != nil {
+	if err = handleTagValues(d, &mapData); err != nil {
 		return nil, err
 	}
 
 	return mapData, nil
 }
 
-func handleTagValues(data *map[string]interface{}) error {
+func handleTagValues(d *DocxTmpl, data *map[string]interface{}) error {
 	for key, value := range *data {
 		if stringVal, ok := value.(string); ok {
 			// Check for files
@@ -32,7 +32,15 @@ func handleTagValues(data *map[string]interface{}) error {
 				return err
 			} else {
 				if isFile {
-					(*data)[key] = "Hello"
+					image, err := d.addImage(stringVal)
+					if err != nil {
+						return err
+					}
+					imageXml, err := image.getImageXml()
+					if err != nil {
+						return err
+					}
+					(*data)[key] = imageXml
 				}
 			}
 		}

@@ -33,3 +33,11 @@ func replaceTableRangeRows(xmlString string) (string, error) {
 
 	return newXmlString, nil
 }
+
+func fixXmlIssuesPostTagReplacement(xmlString string) string {
+	// Fix issues with drawings in text nodes
+	xmlString = strings.ReplaceAll(xmlString, "<w:t><w:drawing>", "<w:drawing>")
+	xmlString = strings.ReplaceAll(xmlString, "</w:drawing></w:t>", "</w:drawing>")
+
+	return xmlString
+}
