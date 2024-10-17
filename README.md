@@ -61,3 +61,7 @@ Examples of docx files can be found in the [tests](https://github.com/tomwatkins
 A lof of the heavy lifting such as XML parsing is done by the [go-docx](https://github.com/fumiama/go-docx) library by [fumiama](https://github.com/fumiama).
 
 This library was also heavily inspired by the excellent [python-docx-template](https://github.com/elapouya/python-docx-template) library for Python written by [elapouya](https://github.com/elapouya).
+
+## License
+
+AGPL-3.0. See [LICENSE](LICENSE)
