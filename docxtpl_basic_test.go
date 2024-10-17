@@ -11,7 +11,7 @@ func TestParseAndRender(t *testing.T) {
 	start := time.Now()
 	doc, err := Parse("test.docx")
 	if err != nil {
-		panic(err)
+		t.Fatalf("Parsing error: %v", err)
 	}
 	fmt.Printf("Parse: %v\n", time.Since(start))
 
@@ -53,7 +53,7 @@ func TestParseAndRender(t *testing.T) {
 	start = time.Now()
 	err = doc.Render(templateData)
 	if err != nil {
-		panic(err)
+		t.Fatalf("Rendering error: %v", err)
 	}
 	fmt.Printf("Render: %v\n", time.Since(start))
 
@@ -61,15 +61,17 @@ func TestParseAndRender(t *testing.T) {
 	start = time.Now()
 	f, err := os.Create("generated.docx")
 	if err != nil {
+		t.Fatalf("Error creating document: %v", err)
 		panic(err)
 	}
 	_, err = doc.WriteTo(f)
 	if err != nil {
-		panic(err)
+		t.Fatalf("Error writing to document: %v", err)
+
 	}
 	err = f.Close()
 	if err != nil {
-		panic(err)
+		t.Fatalf("Error closing created document: %v", err)
 	}
 	fmt.Printf("Save: %v\n", time.Since(start))
 }
