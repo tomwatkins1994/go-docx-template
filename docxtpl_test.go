@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-func TestRender(t *testing.T) {
+func TestParseAndRender(t *testing.T) {
 	start := time.Now()
 	doc, err := Parse("test.docx")
 	if err != nil {
