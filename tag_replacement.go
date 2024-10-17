@@ -6,7 +6,7 @@ import (
 	"log"
 )
 
-func replaceTagsInText(text string, data any) (string, error) {
+func replaceTagsInText(text string, data map[string]interface{}) (string, error) {
 	tmpl, err := template.New("").Parse(text)
 	if err != nil {
 		log.Fatalf("Error parsing template: %v", err)
