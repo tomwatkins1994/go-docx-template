@@ -88,7 +88,7 @@ func parseAndRender(t *testing.T, filename string, data interface{}) {
 
 	// Render the document
 	renderStart := time.Now()
-	err = doc.Render(&data)
+	err = doc.Render(data)
 	if err != nil {
 		t.Fatalf("%v - Rendering error: %v", t.Name(), err)
 	}

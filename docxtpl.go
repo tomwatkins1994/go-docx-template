@@ -33,7 +33,7 @@ func Parse(filename string) (*DocxTmpl, error) {
 	return &DocxTmpl{doc, filename}, nil
 }
 
-func (d *DocxTmpl) Render(data *interface{}) error {
+func (d *DocxTmpl) Render(data interface{}) error {
 	// Ensure that there are no 'part tags' in the XML document
 	err := d.mergeTags()
 	if err != nil {
@@ -41,8 +41,11 @@ func (d *DocxTmpl) Render(data *interface{}) error {
 	}
 
 	// Process the template data
-	d.processData(data)
-	fmt.Printf("Processed data: %v", data)
+	proccessedData, err := d.processData(data)
+	if err != nil {
+		return err
+	}
+	fmt.Printf("Processed data: %v", proccessedData)
 
 	// Get the document XML
 	documentXmlString, err := d.getDocumentXml()
@@ -57,7 +60,7 @@ func (d *DocxTmpl) Render(data *interface{}) error {
 	}
 
 	// Replace the tags in XML
-	documentXmlString, err = replaceTagsInText(documentXmlString, data)
+	documentXmlString, err = replaceTagsInText(documentXmlString, proccessedData)
 	if err != nil {
 		return err
 	}
