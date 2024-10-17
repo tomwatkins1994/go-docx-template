@@ -8,50 +8,70 @@ import (
 )
 
 func TestParseAndRender(t *testing.T) {
+	t.Run("Basic document", func(t *testing.T) {
+		data := struct {
+			ProjectNumber string
+			Client        string
+			Status        string
+		}{
+			ProjectNumber: "B-00001",
+			Client:        "TW Software",
+			Status:        "New",
+		}
+		parseAndRender(t, "test_basic.docx", data)
+	})
+
+	t.Run("Document with tables", func(t *testing.T) {
+		data := struct {
+			ProjectNumber string
+			Client        string
+			Status        string
+			CreatedBy     string
+			SignedOffBy   string
+			People        []struct {
+				Name   string
+				Gender string
+				Age    uint8
+			}
+		}{
+			ProjectNumber: "B-00001",
+			Client:        "TW Software",
+			Status:        "New",
+			CreatedBy:     "Tom Watkins",
+			SignedOffBy:   "Tom Watkins",
+			People: []struct {
+				Name   string
+				Gender string
+				Age    uint8
+			}{
+				{
+					Name:   "Tom Watkins",
+					Gender: "Male",
+					Age:    30,
+				},
+				{
+					Name:   "Evie Argyle",
+					Gender: "Female",
+					Age:    29,
+				},
+			},
+		}
+		parseAndRender(t, "test_with_tables.docx", data)
+	})
+}
+
+func parseAndRender(t *testing.T, filename string, data interface{}) {
+	// Parse the document
 	start := time.Now()
-	doc, err := Parse("test.docx")
+	doc, err := Parse(filename)
 	if err != nil {
 		t.Fatalf("Parsing error: %v", err)
 	}
 	fmt.Printf("Parse: %v\n", time.Since(start))
 
-	type TemplateData struct {
-		ProjectNumber string
-		Client        string
-		Status        string
-		CreatedBy     string
-		SignedOffBy   string
-		People        []struct {
-			Name   string
-			Gender string
-			Age    uint8
-		}
-	}
-	templateData := TemplateData{
-		ProjectNumber: "B-00001",
-		Client:        "TW Software",
-		Status:        "New",
-		CreatedBy:     "Tom Watkins",
-		SignedOffBy:   "Tom Watkins",
-		People: []struct {
-			Name   string
-			Gender string
-			Age    uint8
-		}{
-			{
-				Name:   "Tom Watkins",
-				Gender: "Male",
-				Age:    30,
-			},
-			{
-				Name:   "Evie Argyle",
-				Gender: "Female",
-				Age:    29,
-			},
-		},
-	}
+	// Render the document
 	start = time.Now()
-	err = doc.Render(templateData)
+	err = doc.Render(data)
 	if err != nil {
 		t.Fatalf("Rendering error: %v", err)
 	}
@@ -59,7 +79,7 @@ func TestParseAndRender(t *testing.T) {
 
 	// Create a new file for the output
 	start = time.Now()
-	f, err := os.Create("generated.docx")
+	f, err := os.Create("generated_" + filename)
 	if err != nil {
 		t.Fatalf("Error creating document: %v", err)
 		panic(err)
