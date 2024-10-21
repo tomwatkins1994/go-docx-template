@@ -11,7 +11,7 @@ func textContainsTags(text string) (bool, error) {
 }
 
 func textContainsIncompleteTags(text string) (bool, error) {
-	r, err := regexp.Compile("{{[^}]*(}$|$)|{$|^}")
+	r, err := regexp.Compile("{{[^}]*?(}$|$)|{$|^}")
 	if err != nil {
 		return false, err
 	}
