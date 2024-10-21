@@ -2,7 +2,7 @@ package docxtpl
 
 import "testing"
 
-func TestTagContainsText(t *testing.T) {
+func TestTextContainsTags(t *testing.T) {
 	t.Run("Single tag", func(t *testing.T) {
 		containsTags, err := textContainsTags("This text contains a tag: {{.Tag}}.")
 		if err != nil {
