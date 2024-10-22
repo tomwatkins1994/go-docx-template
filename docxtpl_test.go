@@ -114,6 +114,72 @@ func TestParseAndRender(t *testing.T) {
 		parseAndRender(t, "test_with_tables_and_images.docx", data)
 	})
 
+	t.Run("Document with image structs", func(t *testing.T) {
+		doc, err := Parse("test_templates/test_with_tables_and_images.docx")
+		if err != nil {
+			t.Fatalf("%v - Parsing error: %v", t.Name(), err)
+		}
+
+		testImage, err := doc.CreateInlineImage("test_templates/test_image.png")
+		if err != nil {
+			t.Fatalf("%v - Inline image error: %v", t.Name(), err)
+		}
+
+		data := struct {
+			ProjectNumber string
+			Client        string
+			Status        string
+			Image         *InlineImage
+			People        []struct {
+				Name           string
+				Gender         string
+				Age            uint8
+				ProfilePicture *InlineImage
+			}
+		}{
+			ProjectNumber: "B-00001",
+			Client:        "TW Software",
+			Status:        "New",
+			Image:         testImage,
+			People: []struct {
+				Name           string
+				Gender         string
+				Age            uint8
+				ProfilePicture *InlineImage
+			}{
+				{
+					Name:           "Tom Watkins",
+					Gender:         "Male",
+					Age:            30,
+					ProfilePicture: testImage,
+				},
+				{
+					Name:           "Evie Argyle",
+					Gender:         "Female",
+					Age:            29,
+					ProfilePicture: testImage,
+				},
+			},
+		}
+
+		err = doc.Render(data)
+		if err != nil {
+			t.Fatalf("%v - Rendering error: %v", t.Name(), err)
+		}
+
+		f, err := os.Create("test_templates/generated_test_with_image_structs.docx")
+		if err != nil {
+			t.Fatalf("%v - Error creating document: %v", t.Name(), err)
+		}
+		_, err = doc.WriteTo(f)
+		if err != nil {
+			t.Fatalf("%v - Error writing to document: %v", t.Name(), err)
+		}
+		err = f.Close()
+		if err != nil {
+			t.Fatalf("%v - Error closing created document: %v", t.Name(), err)
+		}
+	})
 }
 
 func parseAndRender(t *testing.T, filename string, data interface{}) {
