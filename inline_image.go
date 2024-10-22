@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"github.com/fumiama/go-docx"
+	"github.com/fumiama/imgsz"
 	"golang.org/x/image/draw"
 )
 
@@ -71,12 +72,39 @@ func (i *InlineImage) Resize(width int, height int) error {
 	return nil
 }
 
+func (i *InlineImage) getSize() (int64, int64, error) {
+	sz, _, err := imgsz.DecodeSize(bytes.NewReader(*i.data))
+	if err != nil {
+		return 0, 0, nil
+	}
+
+	_EMUS_PER_INCH := 914400
+
+	w, h := int64(sz.Width), int64(sz.Height)
+	w = (w / 72) * int64(_EMUS_PER_INCH)
+	h = (h / 72) * int64(_EMUS_PER_INCH)
+
+	return w, h, nil
+}
+
 func (i *InlineImage) addToDocument() (string, error) {
 	// Add the image to the document
 	paragraph := i.doc.AddParagraph()
 	run, err := paragraph.AddInlineDrawing(*i.data)
 	if err != nil {
 		return "", err
+	}
+
+	// Correctly size the image
+	w, h, err := i.getSize()
+	if err != nil {
+		return "", err
+	}
+	for _, child := range run.Children {
+		if drawing, ok := child.(*docx.Drawing); ok {
+			drawing.Inline.Extent.CX = w
+			drawing.Inline.Extent.CY = h
+		}
 	}
 
 	// Get the image XML
