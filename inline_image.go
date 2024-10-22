@@ -176,10 +176,7 @@ func (i *InlineImage) getSize() (int64, int64, error) {
 
 	_EMUS_PER_INCH := 914400
 
-	wDpi, hDpi, err := i.getResolution()
-	if err != nil {
-		return 0, 0, nil
-	}
+	wDpi, hDpi := i.getResolution()
 
 	w, h := int64(sz.Width), int64(sz.Height)
 	w = (w / wDpi) * int64(_EMUS_PER_INCH)
@@ -188,12 +185,12 @@ func (i *InlineImage) getSize() (int64, int64, error) {
 	return w, h, nil
 }
 
-func (i *InlineImage) getResolution() (int64, int64, error) {
-	defaultDpi := 72
+func (i *InlineImage) getResolution() (int64, int64) {
+	defaultDpi := int64(72)
 
 	exif, err := i.getExifData()
 	if err != nil {
-		return 0, 0, nil
+		return defaultDpi, defaultDpi
 	}
 
 	getResolution := func(tagName string) int64 {
@@ -202,15 +199,15 @@ func (i *InlineImage) getResolution() (int64, int64, error) {
 			if value, ok := resolutionTag.Value.(string); ok {
 				resolution, err := getResolutionFromString(value)
 				if err != nil || resolution == 0 {
-					return int64(defaultDpi)
+					return defaultDpi
 				}
 				return int64(resolution)
 			}
 		}
-		return int64(defaultDpi)
+		return defaultDpi
 	}
 
-	return getResolution("XResolution"), getResolution("YResolution"), nil
+	return getResolution("XResolution"), getResolution("YResolution")
 }
 
 func getResolutionFromString(resolution string) (int, error) {
