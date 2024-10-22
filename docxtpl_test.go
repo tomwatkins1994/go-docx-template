@@ -125,6 +125,11 @@ func TestParseAndRender(t *testing.T) {
 			t.Fatalf("%v - Inline image error: %v", t.Name(), err)
 		}
 
+		profileImage, err := doc.CreateInlineImage("test_templates/test_image.png")
+		if err != nil {
+			t.Fatalf("%v - Inline image error: %v", t.Name(), err)
+		}
+
 		data := struct {
 			ProjectNumber string
 			Client        string
@@ -151,13 +156,13 @@ func TestParseAndRender(t *testing.T) {
 					Name:           "Tom Watkins",
 					Gender:         "Male",
 					Age:            30,
-					ProfilePicture: testImage,
+					ProfilePicture: profileImage,
 				},
 				{
 					Name:           "Evie Argyle",
 					Gender:         "Female",
 					Age:            29,
-					ProfilePicture: testImage,
+					ProfilePicture: profileImage,
 				},
 			},
 		}
