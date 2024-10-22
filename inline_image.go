@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"image"
+	"image/jpeg"
 	"image/png"
 	"os"
 	"path"
@@ -106,23 +107,61 @@ func (i *InlineImage) getExifData() (map[string]imagemeta.TagInfo, error) {
 }
 
 func (i *InlineImage) Resize(width int, height int) error {
-	// Decode the current image
-	imgReader := bytes.NewReader(*i.data)
-	src, err := png.Decode(imgReader)
+	src, err := i.getImage()
 	if err != nil {
 		return err
 	}
 
 	// Resize
 	dst := image.NewRGBA(image.Rect(0, 0, width, height))
-	draw.NearestNeighbor.Scale(dst, dst.Rect, src, src.Bounds(), draw.Over, nil)
+	draw.NearestNeighbor.Scale(dst, dst.Rect, *src, (*src).Bounds(), draw.Over, nil)
 
-	// Encode the new image and replace the image data
-	var buf bytes.Buffer
-	err = png.Encode(&buf, dst)
+	err = i.replaceImage(dst)
 	if err != nil {
 		return err
 	}
+
+	return nil
+}
+
+func (i *InlineImage) getImage() (*image.Image, error) {
+	imgReader := bytes.NewReader(*i.data)
+
+	format, err := i.getImageFormat()
+	if err != nil {
+		return nil, err
+	}
+
+	var img image.Image
+
+	switch format {
+	case imagemeta.JPEG:
+		img, err = jpeg.Decode(imgReader)
+	case imagemeta.PNG:
+		img, err = png.Decode(imgReader)
+	}
+
+	return &img, err
+}
+
+func (i *InlineImage) replaceImage(rgba *image.RGBA) error {
+	var buf bytes.Buffer
+
+	format, err := i.getImageFormat()
+	if err != nil {
+		return err
+	}
+
+	switch format {
+	case imagemeta.JPEG:
+		err = jpeg.Encode(&buf, rgba, &jpeg.Options{Quality: 100})
+	case imagemeta.PNG:
+		err = png.Encode(&buf, rgba)
+	}
+	if err != nil {
+		return err
+	}
+
 	newImageData := buf.Bytes()
 	i.data = &newImageData
 
