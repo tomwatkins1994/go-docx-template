@@ -3,13 +3,16 @@ package docxtpl
 import (
 	"bytes"
 	"encoding/xml"
+	"errors"
 	"fmt"
 	"image"
 	"image/png"
 	"os"
 	"path"
+	"regexp"
 	"strings"
 
+	"github.com/bep/imagemeta"
 	"github.com/fumiama/go-docx"
 	"github.com/fumiama/imgsz"
 	"golang.org/x/image/draw"
@@ -46,6 +49,59 @@ func (d *DocxTmpl) CreateInlineImage(filepath string) (*InlineImage, error) {
 	ext := path.Ext(filepath)
 
 	return &InlineImage{d, &file, ext}, nil
+}
+
+func (i *InlineImage) getImageFormat() (imagemeta.ImageFormat, error) {
+	switch i.ext {
+	case ".jpg":
+		return imagemeta.JPEG, nil
+	case ".webp":
+		return imagemeta.WebP, nil
+	case ".png":
+		return imagemeta.PNG, nil
+	case ".tif", ".tiff":
+		return imagemeta.TIFF, nil
+	default:
+		return 0, errors.New("Unknown image format: " + i.ext)
+	}
+}
+
+func (i *InlineImage) getExifData() (map[string]imagemeta.TagInfo, error) {
+	var tags imagemeta.Tags
+	handleTag := func(ti imagemeta.TagInfo) error {
+		tags.Add(ti)
+		return nil
+	}
+
+	imageFormat, err := i.getImageFormat()
+	if err != nil {
+		return nil, err
+	}
+
+	shouldHandle := func(ti imagemeta.TagInfo) bool {
+		return true
+	}
+
+	knownWarnings := []*regexp.Regexp{}
+
+	warnf := func(format string, args ...any) {
+		s := fmt.Sprintf(format, args...)
+		for _, re := range knownWarnings {
+			if re.MatchString(s) {
+				return
+			}
+		}
+		panic(errors.New(s))
+	}
+
+	sources := imagemeta.EXIF
+
+	err = imagemeta.Decode(imagemeta.Options{R: bytes.NewReader(*i.data), ImageFormat: imageFormat, ShouldHandleTag: shouldHandle, HandleTag: handleTag, Warnf: warnf, Sources: sources})
+	if err != nil {
+		return nil, err
+	}
+
+	return tags.EXIF(), nil
 }
 
 func (i *InlineImage) Resize(width int, height int) error {
