@@ -13,7 +13,7 @@ type InlineImage struct {
 	run       *docx.Run
 }
 
-func (d *DocxTmpl) LinkImage(filepath string) (*InlineImage, error) {
+func (d *DocxTmpl) CreateInlineImage(filepath string) (*InlineImage, error) {
 	paragraph := d.AddParagraph()
 	run, err := paragraph.AddInlineDrawingFrom(filepath)
 	if err != nil {
