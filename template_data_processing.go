@@ -86,7 +86,19 @@ func convertStructToMap(s interface{}) (map[string]interface{}, error) {
 		value := val.Field(i)
 
 		// Store the field name and value in the map
-		result[field.Name] = value.Interface()
+		if value.Kind() == reflect.Slice {
+			newMapSlice := make([]map[string]interface{}, value.Len())
+			for i := 0; i < value.Len(); i++ {
+				newMap, err := convertStructToMap(value.Index(i).Interface())
+				if err != nil {
+					return nil, err
+				}
+				newMapSlice[i] = newMap
+			}
+			result[field.Name] = newMapSlice
+		} else {
+			result[field.Name] = value.Interface()
+		}
 	}
 
 	return result, nil
