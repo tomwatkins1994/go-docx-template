@@ -3,6 +3,7 @@ package docxtpl
 import (
 	"fmt"
 	"os"
+	"path"
 	"reflect"
 )
 
@@ -28,10 +29,10 @@ func handleTagValues(d *DocxTmpl, data *map[string]interface{}) error {
 	for key, value := range *data {
 		if stringVal, ok := value.(string); ok {
 			// Check for files
-			if isFile, err := isFilePath(stringVal); err != nil {
+			if isImage, err := isImageFilePath(stringVal); err != nil {
 				return err
 			} else {
-				if isFile {
+				if isImage {
 					image, err := d.addImage(stringVal)
 					if err != nil {
 						return err
@@ -53,9 +54,9 @@ func handleTagValues(d *DocxTmpl, data *map[string]interface{}) error {
 	return nil
 }
 
-func isFilePath(path string) (bool, error) {
+func isFilePath(filepath string) (bool, error) {
 	// Check if the path exists
-	if _, err := os.Stat(path); err != nil {
+	if _, err := os.Stat(filepath); err != nil {
 		if os.IsNotExist(err) {
 			return false, nil
 		}
@@ -63,11 +64,33 @@ func isFilePath(path string) (bool, error) {
 	}
 
 	// Check if it's a file
-	if info, err := os.Stat(path); err == nil {
+	if info, err := os.Stat(filepath); err == nil {
 		return !info.IsDir(), nil // Return true if it's a file, false if it's a directory
 	}
 
 	return false, nil
+}
+
+func isImageFilePath(filepath string) (bool, error) {
+	ext := path.Ext(filepath)
+	validExts := []string{".png", ".jpg", ".jpeg"}
+	isValid := false
+	for _, v := range validExts {
+		if ext == v {
+			isValid = true
+			break
+		}
+	}
+	if !isValid {
+		return false, nil
+	}
+
+	isFile, err := isFilePath(filepath)
+	if err != nil {
+		return false, err
+	}
+
+	return isFile, nil
 }
 
 func convertStructToMap(s interface{}) (map[string]interface{}, error) {
