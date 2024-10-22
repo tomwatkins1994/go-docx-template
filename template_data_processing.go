@@ -43,6 +43,10 @@ func handleTagValues(d *DocxTmpl, data *map[string]interface{}) error {
 					(*data)[key] = imageXml
 				}
 			}
+		} else if sliceValue, ok := value.([]map[string]interface{}); ok {
+			for _, val := range sliceValue {
+				handleTagValues(d, &val)
+			}
 		}
 	}
 
