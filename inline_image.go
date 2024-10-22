@@ -10,6 +10,7 @@ import (
 	"os"
 	"path"
 	"regexp"
+	"strconv"
 	"strings"
 
 	"github.com/bep/imagemeta"
@@ -136,11 +137,62 @@ func (i *InlineImage) getSize() (int64, int64, error) {
 
 	_EMUS_PER_INCH := 914400
 
+	wDpi, hDpi, err := i.getResolution()
+	if err != nil {
+		return 0, 0, nil
+	}
+
 	w, h := int64(sz.Width), int64(sz.Height)
-	w = (w / 72) * int64(_EMUS_PER_INCH)
-	h = (h / 72) * int64(_EMUS_PER_INCH)
+	w = (w / wDpi) * int64(_EMUS_PER_INCH)
+	h = (h / hDpi) * int64(_EMUS_PER_INCH)
 
 	return w, h, nil
+}
+
+func (i *InlineImage) getResolution() (int64, int64, error) {
+	defaultDpi := 72
+
+	exif, err := i.getExifData()
+	if err != nil {
+		return 0, 0, nil
+	}
+
+	getResolution := func(tagName string) int64 {
+		resolutionTag, exists := exif[tagName]
+		if exists {
+			if value, ok := resolutionTag.Value.(string); ok {
+				resolution, err := getResolutionFromString(value)
+				if err != nil || resolution == 0 {
+					return int64(defaultDpi)
+				}
+				return int64(resolution)
+			}
+		}
+		return int64(defaultDpi)
+	}
+
+	return getResolution("XResolution"), getResolution("YResolution"), nil
+}
+
+func getResolutionFromString(resolution string) (int, error) {
+	// Split the string by the slash
+	parts := strings.Split(resolution, "/")
+	if len(parts) != 2 {
+		return 0, nil
+	}
+
+	numerator, err := strconv.Atoi(parts[0])
+	if err != nil {
+		return 0, err
+	}
+	denominator, err := strconv.Atoi(parts[1])
+	if err != nil {
+		return 0, err
+	}
+
+	result := numerator / denominator
+
+	return result, nil
 }
 
 func (i *InlineImage) addToDocument() (string, error) {
