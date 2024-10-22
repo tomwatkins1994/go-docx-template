@@ -21,17 +21,19 @@ func TestParseAndRender(t *testing.T) {
 		parseAndRender(t, "test_basic.docx", data)
 	})
 
-	t.Run("Basic document with image", func(t *testing.T) {
+	t.Run("Basic document with images", func(t *testing.T) {
 		data := struct {
 			ProjectNumber string
 			Client        string
 			Status        string
-			Image         string
+			ImagePng      string
+			ImageJpg      string
 		}{
 			ProjectNumber: "B-00001",
 			Client:        "TW Software",
 			Status:        "New",
-			Image:         "test_templates/test_image.png",
+			ImagePng:      "test_templates/test_image.png",
+			ImageJpg:      "test_templates/test_image.jpg",
 		}
 		parseAndRender(t, "test_basic_with_images.docx", data)
 	})
