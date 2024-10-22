@@ -73,6 +73,47 @@ func TestParseAndRender(t *testing.T) {
 		}
 		parseAndRender(t, "test_with_tables.docx", data)
 	})
+
+	t.Run("Document with tables and images", func(t *testing.T) {
+		data := struct {
+			ProjectNumber string
+			Client        string
+			Status        string
+			Image         string
+			People        []struct {
+				Name           string
+				Gender         string
+				Age            uint8
+				ProfilePicture string
+			}
+		}{
+			ProjectNumber: "B-00001",
+			Client:        "TW Software",
+			Status:        "New",
+			Image:         "test_templates/test_image.png",
+			People: []struct {
+				Name           string
+				Gender         string
+				Age            uint8
+				ProfilePicture string
+			}{
+				{
+					Name:           "Tom Watkins",
+					Gender:         "Male",
+					Age:            30,
+					ProfilePicture: "test_templates/test_image.png",
+				},
+				{
+					Name:           "Evie Argyle",
+					Gender:         "Female",
+					Age:            29,
+					ProfilePicture: "test_templates/test_image.png",
+				},
+			},
+		}
+		parseAndRender(t, "test_with_tables_and_images.docx", data)
+	})
+
 }
 
 func parseAndRender(t *testing.T, filename string, data interface{}) {
