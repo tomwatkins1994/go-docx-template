@@ -3,6 +3,7 @@ package docxtpl
 import (
 	"fmt"
 	"os"
+	"path"
 	"reflect"
 )
 
@@ -28,30 +29,40 @@ func handleTagValues(d *DocxTmpl, data *map[string]interface{}) error {
 	for key, value := range *data {
 		if stringVal, ok := value.(string); ok {
 			// Check for files
-			if isFile, err := isFilePath(stringVal); err != nil {
+			if isImage, err := isImageFilePath(stringVal); err != nil {
 				return err
 			} else {
-				if isFile {
-					image, err := d.addImage(stringVal)
+				if isImage {
+					image, err := d.CreateInlineImage(stringVal)
 					if err != nil {
 						return err
 					}
-					imageXml, err := image.getImageXml()
+					imageXml, err := image.addToDocument()
 					if err != nil {
 						return err
 					}
 					(*data)[key] = imageXml
 				}
 			}
+		} else if sliceValue, ok := value.([]map[string]interface{}); ok {
+			for _, val := range sliceValue {
+				handleTagValues(d, &val)
+			}
+		} else if inlineImage, ok := value.(*InlineImage); ok {
+			imageXml, err := inlineImage.addToDocument()
+			if err != nil {
+				return err
+			}
+			(*data)[key] = imageXml
 		}
 	}
 
 	return nil
 }
 
-func isFilePath(path string) (bool, error) {
+func isFilePath(filepath string) (bool, error) {
 	// Check if the path exists
-	if _, err := os.Stat(path); err != nil {
+	if _, err := os.Stat(filepath); err != nil {
 		if os.IsNotExist(err) {
 			return false, nil
 		}
@@ -59,11 +70,33 @@ func isFilePath(path string) (bool, error) {
 	}
 
 	// Check if it's a file
-	if info, err := os.Stat(path); err == nil {
+	if info, err := os.Stat(filepath); err == nil {
 		return !info.IsDir(), nil // Return true if it's a file, false if it's a directory
 	}
 
 	return false, nil
+}
+
+func isImageFilePath(filepath string) (bool, error) {
+	ext := path.Ext(filepath)
+	validExts := []string{".png", ".jpg", ".jpeg"}
+	isValid := false
+	for _, v := range validExts {
+		if ext == v {
+			isValid = true
+			break
+		}
+	}
+	if !isValid {
+		return false, nil
+	}
+
+	isFile, err := isFilePath(filepath)
+	if err != nil {
+		return false, err
+	}
+
+	return isFile, nil
 }
 
 func convertStructToMap(s interface{}) (map[string]interface{}, error) {
@@ -86,7 +119,19 @@ func convertStructToMap(s interface{}) (map[string]interface{}, error) {
 		value := val.Field(i)
 
 		// Store the field name and value in the map
-		result[field.Name] = value.Interface()
+		if value.Kind() == reflect.Slice {
+			newMapSlice := make([]map[string]interface{}, value.Len())
+			for i := 0; i < value.Len(); i++ {
+				newMap, err := convertStructToMap(value.Index(i).Interface())
+				if err != nil {
+					return nil, err
+				}
+				newMapSlice[i] = newMap
+			}
+			result[field.Name] = newMapSlice
+		} else {
+			result[field.Name] = value.Interface()
+		}
 	}
 
 	return result, nil
