@@ -1,16 +1,23 @@
 package docxtpl
 
 import (
+	"bytes"
 	"encoding/xml"
 	"fmt"
+	"image"
+	"image/png"
+	"os"
+	"path"
 	"strings"
 
 	"github.com/fumiama/go-docx"
+	"golang.org/x/image/draw"
 )
 
 type InlineImage struct {
-	doc      *DocxTmpl
-	filepath string
+	doc  *DocxTmpl
+	data *[]byte
+	ext  string
 }
 
 type InlineImageError struct {
@@ -30,13 +37,44 @@ func (d *DocxTmpl) CreateInlineImage(filepath string) (*InlineImage, error) {
 		}
 	}
 
-	return &InlineImage{d, filepath}, nil
+	file, err := os.ReadFile(filepath)
+	if err != nil {
+		return nil, err
+	}
+
+	ext := path.Ext(filepath)
+
+	return &InlineImage{d, &file, ext}, nil
+}
+
+func (i *InlineImage) Resize(width int, height int) error {
+	// Decode the current image
+	imgReader := bytes.NewReader(*i.data)
+	src, err := png.Decode(imgReader)
+	if err != nil {
+		return err
+	}
+
+	// Resize
+	dst := image.NewRGBA(image.Rect(0, 0, width, height))
+	draw.NearestNeighbor.Scale(dst, dst.Rect, src, src.Bounds(), draw.Over, nil)
+
+	// Encode the new image and replace the image data
+	var buf bytes.Buffer
+	err = png.Encode(&buf, dst)
+	if err != nil {
+		return err
+	}
+	newImageData := buf.Bytes()
+	i.data = &newImageData
+
+	return nil
 }
 
 func (i *InlineImage) addToDocument() (string, error) {
 	// Add the image to the document
 	paragraph := i.doc.AddParagraph()
-	run, err := paragraph.AddInlineDrawingFrom(i.filepath)
+	run, err := paragraph.AddInlineDrawing(*i.data)
 	if err != nil {
 		return "", err
 	}
