@@ -129,7 +129,7 @@ func TestParseAndRender(t *testing.T) {
 		if err != nil {
 			t.Fatalf("%v - Inline image error: %v", t.Name(), err)
 		}
-		err = profileImage.Resize(200, 200)
+		err = profileImage.Resize(100, 100)
 		if err != nil {
 			t.Fatalf("%v - Resizing inline image error: %v", t.Name(), err)
 		}
