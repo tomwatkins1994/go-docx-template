@@ -2,6 +2,7 @@ package docxtpl
 
 import (
 	"encoding/xml"
+	"fmt"
 	"strings"
 
 	"github.com/fumiama/go-docx"
@@ -12,7 +13,23 @@ type InlineImage struct {
 	filepath string
 }
 
+type InlineImageError struct {
+	Message string
+}
+
+func (e *InlineImageError) Error() string {
+	return fmt.Sprintf("Image error: %v", e.Message)
+}
+
 func (d *DocxTmpl) CreateInlineImage(filepath string) (*InlineImage, error) {
+	if isImage, err := isImageFilePath(filepath); err != nil {
+		return nil, err
+	} else {
+		if !isImage {
+			return nil, &InlineImageError{"File is not a valid image"}
+		}
+	}
+
 	return &InlineImage{d, filepath}, nil
 }
 
