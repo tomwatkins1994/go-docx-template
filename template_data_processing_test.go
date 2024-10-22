@@ -6,8 +6,8 @@ import (
 )
 
 func TestIsFilePath(t *testing.T) {
-	t.Run("Existing image", func(t *testing.T) {
-		filepath := "test_templates/test_image.png"
+	t.Run("Existing file", func(t *testing.T) {
+		filepath := "test_templates/test_basic.docx"
 		exists, err := isFilePath(filepath)
 		if err != nil {
 			t.Fatalf("Error checking for file path: %v", err)
@@ -17,14 +17,38 @@ func TestIsFilePath(t *testing.T) {
 		}
 	})
 
-	t.Run("Non existent image", func(t *testing.T) {
-		filepath := "test_templates/not_exists.png"
+	t.Run("Non existent file", func(t *testing.T) {
+		filepath := "test_templates/not_exists.docx"
 		exists, err := isFilePath(filepath)
 		if err != nil {
 			t.Fatalf("Error checking for file path: %v", err)
 		}
 		if exists {
 			t.Fatalf("File should not exist: %v", filepath)
+		}
+	})
+}
+
+func TestIsImageFilePath(t *testing.T) {
+	t.Run("Existing image", func(t *testing.T) {
+		filepath := "test_templates/test_image.png"
+		exists, err := isImageFilePath(filepath)
+		if err != nil {
+			t.Fatalf("Error checking for file path: %v", err)
+		}
+		if exists == false {
+			t.Fatalf("File should exist and be flagged as an image: %v", filepath)
+		}
+	})
+
+	t.Run("File exists but not image", func(t *testing.T) {
+		filepath := "test_templates/test_basic.docx"
+		exists, err := isImageFilePath(filepath)
+		if err != nil {
+			t.Fatalf("Error checking for file path: %v", err)
+		}
+		if exists {
+			t.Fatalf("File should not be flagged as an image: %v", filepath)
 		}
 	})
 }
