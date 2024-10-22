@@ -104,6 +104,7 @@ func (i *InlineImage) addToDocument() (string, error) {
 		if drawing, ok := child.(*docx.Drawing); ok {
 			drawing.Inline.Extent.CX = w
 			drawing.Inline.Extent.CY = h
+			break
 		}
 	}
 
