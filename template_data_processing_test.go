@@ -27,3 +27,22 @@ func TestIsFilePath(t *testing.T) {
 		}
 	})
 }
+
+func TestConvertStructToMap(t *testing.T) {
+	t.Run("Basic struct", func(t *testing.T) {
+		data := struct {
+			ProjectNumber string
+			Client        string
+			Status        string
+		}{
+			ProjectNumber: "B-00001",
+			Client:        "TW Software",
+			Status:        "New",
+		}
+		_, err := convertStructToMap(data)
+		if err != nil {
+			t.Fatalf("Error converting basic struct: %v", err)
+		}
+	})
+
+}
