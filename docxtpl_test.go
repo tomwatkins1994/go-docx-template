@@ -31,7 +31,7 @@ func TestParseAndRender(t *testing.T) {
 			ProjectNumber: "B-00001",
 			Client:        "TW Software",
 			Status:        "New",
-			Image:         "test_templates/test_image.png",
+			Image:         "test_templates/test_image.jpg",
 		}
 		parseAndRender(t, "test_basic_with_images.docx", data)
 	})
@@ -101,13 +101,13 @@ func TestParseAndRender(t *testing.T) {
 					Name:           "Tom Watkins",
 					Gender:         "Male",
 					Age:            30,
-					ProfilePicture: "test_templates/test_image.png",
+					ProfilePicture: "test_templates/test_image.jpg",
 				},
 				{
 					Name:           "Evie Argyle",
 					Gender:         "Female",
 					Age:            29,
-					ProfilePicture: "test_templates/test_image.png",
+					ProfilePicture: "test_templates/test_image.jpg",
 				},
 			},
 		}
@@ -120,7 +120,7 @@ func TestParseAndRender(t *testing.T) {
 			t.Fatalf("%v - Parsing error: %v", t.Name(), err)
 		}
 
-		testImage, err := doc.CreateInlineImage("test_templates/test_image.png")
+		testImage, err := doc.CreateInlineImage("test_templates/test_image.jpg")
 		if err != nil {
 			t.Fatalf("%v - Inline image error: %v", t.Name(), err)
 		}
