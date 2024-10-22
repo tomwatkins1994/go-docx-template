@@ -37,7 +37,7 @@ func handleTagValues(d *DocxTmpl, data *map[string]interface{}) error {
 					if err != nil {
 						return err
 					}
-					imageXml, err := image.getImageXml()
+					imageXml, err := image.addToDocument()
 					if err != nil {
 						return err
 					}

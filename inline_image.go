@@ -8,23 +8,24 @@ import (
 )
 
 type InlineImage struct {
-	*DocxTmpl
-	paragraph *docx.Paragraph
-	run       *docx.Run
+	doc      *DocxTmpl
+	filepath string
 }
 
 func (d *DocxTmpl) CreateInlineImage(filepath string) (*InlineImage, error) {
-	paragraph := d.AddParagraph()
-	run, err := paragraph.AddInlineDrawingFrom(filepath)
-	if err != nil {
-		return nil, err
-	}
-
-	return &InlineImage{d, paragraph, run}, nil
+	return &InlineImage{d, filepath}, nil
 }
 
-func (i *InlineImage) getImageXml() (string, error) {
-	out, err := xml.Marshal(i.run)
+func (i *InlineImage) addToDocument() (string, error) {
+	// Add the image to the document
+	paragraph := i.doc.AddParagraph()
+	run, err := paragraph.AddInlineDrawingFrom(i.filepath)
+	if err != nil {
+		return "", err
+	}
+
+	// Get the image XML
+	out, err := xml.Marshal(run)
 	if err != nil {
 		return "", nil
 	}
@@ -38,18 +39,18 @@ func (i *InlineImage) getImageXml() (string, error) {
 		xmlString = xmlString[:lastIndex]
 	}
 
-	//Remove the paragraph from the word doc so we don't get the image twice
+	// Remove the paragraph from the word doc so we don't get the image twice
 	var newItems []interface{}
-	for _, item := range i.Document.Body.Items {
+	for _, item := range i.doc.Document.Body.Items {
 		switch o := item.(type) {
 		case *docx.Paragraph:
-			if o == i.paragraph {
+			if o == paragraph {
 				continue
 			}
 		}
 		newItems = append(newItems, item)
 	}
-	i.Document.Body.Items = newItems
+	i.doc.Document.Body.Items = newItems
 
 	return xmlString, err
 }
