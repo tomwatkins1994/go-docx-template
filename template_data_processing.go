@@ -48,6 +48,12 @@ func handleTagValues(d *DocxTmpl, data *map[string]interface{}) error {
 			for _, val := range sliceValue {
 				handleTagValues(d, &val)
 			}
+		} else if inlineImage, ok := value.(*InlineImage); ok {
+			imageXml, err := inlineImage.addToDocument()
+			if err != nil {
+				return err
+			}
+			(*data)[key] = imageXml
 		}
 	}
 
