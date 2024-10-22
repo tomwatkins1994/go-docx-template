@@ -33,7 +33,7 @@ func handleTagValues(d *DocxTmpl, data *map[string]interface{}) error {
 				return err
 			} else {
 				if isImage {
-					image, err := d.AddImage(stringVal)
+					image, err := d.LinkImage(stringVal)
 					if err != nil {
 						return err
 					}
