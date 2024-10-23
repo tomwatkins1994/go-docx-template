@@ -9,6 +9,7 @@ import (
 
 type ContentTypes struct {
 	XMLName   xml.Name   `xml:"Types"`
+	Xmlns     string     `xml:"xmlns,attr"`
 	Defaults  []Default  `xml:"Default"`
 	Overrides []Override `xml:"Override"`
 }
