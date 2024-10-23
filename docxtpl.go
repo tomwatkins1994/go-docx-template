@@ -11,7 +11,8 @@ import (
 
 type DocxTmpl struct {
 	*docx.Docx
-	filename string
+	filename     string
+	contentTypes *ContentTypes
 }
 
 func Parse(filename string) (*DocxTmpl, error) {
@@ -19,6 +20,7 @@ func Parse(filename string) (*DocxTmpl, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	fileinfo, err := readFile.Stat()
 	if err != nil {
 		return nil, err
@@ -29,7 +31,12 @@ func Parse(filename string) (*DocxTmpl, error) {
 		return nil, err
 	}
 
-	return &DocxTmpl{doc, filename}, nil
+	contentTypes, err := getContentTypes(readFile, size)
+	if err != nil {
+		return nil, err
+	}
+
+	return &DocxTmpl{doc, filename, contentTypes}, nil
 }
 
 func (d *DocxTmpl) Render(data interface{}) error {
