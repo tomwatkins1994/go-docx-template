@@ -55,7 +55,7 @@ func (d *DocxTmpl) CreateInlineImage(filepath string) (*InlineImage, error) {
 
 func (i *InlineImage) getImageFormat() (imagemeta.ImageFormat, error) {
 	switch i.ext {
-	case ".jpg":
+	case ".jpg", ".jpeg":
 		return imagemeta.JPEG, nil
 	case ".webp":
 		return imagemeta.WebP, nil
@@ -113,10 +113,11 @@ func (i *InlineImage) Resize(width int, height int) error {
 	}
 
 	// Resize
-	dst := image.NewRGBA(image.Rect(0, 0, width, height))
-	draw.NearestNeighbor.Scale(dst, dst.Rect, *src, (*src).Bounds(), draw.Over, nil)
+	rgba := image.NewRGBA(image.Rect(0, 0, width, height))
+	draw.NearestNeighbor.Scale(rgba, rgba.Rect, *src, (*src).Bounds(), draw.Over, nil)
+	var resizedImage image.Image = rgba
 
-	err = i.replaceImage(dst)
+	err = i.replaceImage(&resizedImage)
 	if err != nil {
 		return err
 	}
@@ -144,19 +145,18 @@ func (i *InlineImage) getImage() (*image.Image, error) {
 	return &img, err
 }
 
-func (i *InlineImage) replaceImage(rgba *image.RGBA) error {
-	var buf bytes.Buffer
-
+func (i *InlineImage) replaceImage(rgba *image.Image) error {
 	format, err := i.getImageFormat()
 	if err != nil {
 		return err
 	}
 
+	var buf bytes.Buffer
 	switch format {
 	case imagemeta.JPEG:
-		err = jpeg.Encode(&buf, rgba, &jpeg.Options{Quality: 100})
+		err = jpeg.Encode(&buf, *rgba, &jpeg.Options{Quality: 100})
 	case imagemeta.PNG:
-		err = png.Encode(&buf, rgba)
+		err = png.Encode(&buf, *rgba)
 	}
 	if err != nil {
 		return err
@@ -239,6 +239,10 @@ func (i *InlineImage) addToDocument() (string, error) {
 		return "", err
 	}
 
+	// Append the content type
+	i.doc.contentTypes.addContentType(&PNG_CONTENT_TYPE)
+	i.doc.contentTypes.addContentType(&JPG_CONTENT_TYPE)
+
 	// Correctly size the image
 	w, h, err := i.getSize()
 	if err != nil {
@@ -255,7 +259,7 @@ func (i *InlineImage) addToDocument() (string, error) {
 	// Get the image XML
 	out, err := xml.Marshal(run)
 	if err != nil {
-		return "", nil
+		return "", err
 	}
 
 	// Remove run tags as the tag should be in a run already
@@ -280,5 +284,5 @@ func (i *InlineImage) addToDocument() (string, error) {
 	}
 	i.doc.Document.Body.Items = newItems
 
-	return xmlString, err
+	return xmlString, nil
 }
