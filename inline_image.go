@@ -68,7 +68,7 @@ func (i *InlineImage) getImageFormat() (imagemeta.ImageFormat, error) {
 	}
 }
 
-func (i *InlineImage) getExifData() (map[string]imagemeta.TagInfo, error) {
+func (i *InlineImage) GetExifData() (map[string]imagemeta.TagInfo, error) {
 	var tags imagemeta.Tags
 	handleTag := func(ti imagemeta.TagInfo) error {
 		tags.Add(ti)
@@ -168,29 +168,29 @@ func (i *InlineImage) replaceImage(rgba *image.Image) error {
 	return nil
 }
 
-func (i *InlineImage) getSize() (int64, int64, error) {
+func (i *InlineImage) GetSize() (int64, int64, error) {
 	sz, _, err := imgsz.DecodeSize(bytes.NewReader(*i.data))
 	if err != nil {
 		return 0, 0, nil
 	}
 
-	_EMUS_PER_INCH := 914400
+	EMUS_PER_INCH := 914400
 
-	wDpi, hDpi := i.getResolution()
+	wDpi, hDpi := i.GetResolution()
 
 	w, h := int64(sz.Width), int64(sz.Height)
-	w = (w / wDpi) * int64(_EMUS_PER_INCH)
-	h = (h / hDpi) * int64(_EMUS_PER_INCH)
+	w = (w / wDpi) * int64(EMUS_PER_INCH)
+	h = (h / hDpi) * int64(EMUS_PER_INCH)
 
 	return w, h, nil
 }
 
-func (i *InlineImage) getResolution() (int64, int64) {
-	defaultDpi := int64(72)
+func (i *InlineImage) GetResolution() (int64, int64) {
+	DEFAULT_DPI := int64(72)
 
-	exif, err := i.getExifData()
+	exif, err := i.GetExifData()
 	if err != nil {
-		return defaultDpi, defaultDpi
+		return DEFAULT_DPI, DEFAULT_DPI
 	}
 
 	getResolution := func(tagName string) int64 {
@@ -199,12 +199,12 @@ func (i *InlineImage) getResolution() (int64, int64) {
 			if value, ok := resolutionTag.Value.(string); ok {
 				resolution, err := getResolutionFromString(value)
 				if err != nil || resolution == 0 {
-					return defaultDpi
+					return DEFAULT_DPI
 				}
 				return int64(resolution)
 			}
 		}
-		return defaultDpi
+		return DEFAULT_DPI
 	}
 
 	return getResolution("XResolution"), getResolution("YResolution")
@@ -253,7 +253,7 @@ func (i *InlineImage) addToDocument() (string, error) {
 	}
 
 	// Correctly size the image
-	w, h, err := i.getSize()
+	w, h, err := i.GetSize()
 	if err != nil {
 		return "", err
 	}
