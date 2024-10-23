@@ -74,5 +74,7 @@ func (ct *ContentTypes) marshalXml() (string, error) {
 		return "", err
 	}
 
-	return string(output), nil
+	xmlString := `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>` + "\n" + string(output)
+
+	return xmlString, nil
 }
