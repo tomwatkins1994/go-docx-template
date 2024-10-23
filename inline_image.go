@@ -186,11 +186,11 @@ func (i *InlineImage) getSize() (int64, int64, error) {
 }
 
 func (i *InlineImage) getResolution() (int64, int64) {
-	defaultDpi := int64(72)
+	DEFAULT_DPI := int64(72)
 
 	exif, err := i.GetExifData()
 	if err != nil {
-		return defaultDpi, defaultDpi
+		return DEFAULT_DPI, DEFAULT_DPI
 	}
 
 	getResolution := func(tagName string) int64 {
@@ -199,12 +199,12 @@ func (i *InlineImage) getResolution() (int64, int64) {
 			if value, ok := resolutionTag.Value.(string); ok {
 				resolution, err := getResolutionFromString(value)
 				if err != nil || resolution == 0 {
-					return defaultDpi
+					return DEFAULT_DPI
 				}
 				return int64(resolution)
 			}
 		}
-		return defaultDpi
+		return DEFAULT_DPI
 	}
 
 	return getResolution("XResolution"), getResolution("YResolution")
