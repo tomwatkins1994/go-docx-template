@@ -5,7 +5,6 @@ import (
 	"encoding/xml"
 	"errors"
 	"io"
-	"os"
 )
 
 type ContentTypes struct {
@@ -57,36 +56,6 @@ func getContentTypes(reader io.ReaderAt, size int64) (*ContentTypes, error) {
 	return nil, errors.New("no content types found")
 }
 
-func (d *DocxTmpl) addContentType(filePath string, ext string, contentType string) error {
-	// Read the existing Content Types file
-	data, err := os.ReadFile(filePath)
-	if err != nil {
-		return err
-	}
-
-	var ct ContentTypes
-	if err := xml.Unmarshal(data, &ct); err != nil {
-		return err
-	}
-
-	// Add new default content type
+func (ct *ContentTypes) addContentType(ext string, contentType string) {
 	ct.Defaults = append(ct.Defaults, Default{Extension: ext, ContentType: contentType})
-
-	// Marshal back to XML
-	output, err := xml.MarshalIndent(ct, "", "    ")
-	if err != nil {
-		return err
-	}
-
-	// Write back to file
-	return os.WriteFile(filePath, output, 0644)
 }
-
-// func main() {
-// 	// Update Content Types file
-// 	err := addContentType("[Content_Types].xml", "png", "image/png")
-// 	if err != nil {
-// 		panic(err)
-// 	}
-// 	// Repeat for other extensions as needed
-// }
