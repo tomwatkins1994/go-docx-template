@@ -247,6 +247,7 @@ func (i *InlineImage) addToDocument() (string, error) {
 	switch format {
 	case imagemeta.JPEG:
 		i.doc.contentTypes.addContentType(&JPG_CONTENT_TYPE)
+		i.doc.contentTypes.addContentType(&JPEG_CONTENT_TYPE)
 	case imagemeta.PNG:
 		i.doc.contentTypes.addContentType(&PNG_CONTENT_TYPE)
 	}

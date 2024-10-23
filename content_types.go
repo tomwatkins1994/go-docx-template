@@ -59,6 +59,7 @@ func getContentTypes(reader io.ReaderAt, size int64) (*ContentTypes, error) {
 
 var PNG_CONTENT_TYPE = Default{Extension: "png", ContentType: "image/png"}
 var JPG_CONTENT_TYPE = Default{Extension: "jpg", ContentType: "image/jpg"}
+var JPEG_CONTENT_TYPE = Default{Extension: "jpeg", ContentType: "image/jpeg"}
 
 func (ct *ContentTypes) addContentType(contentType *Default) {
 	for _, v := range ct.Defaults {
