@@ -168,7 +168,7 @@ func (i *InlineImage) replaceImage(rgba *image.Image) error {
 	return nil
 }
 
-func (i *InlineImage) getSize() (int64, int64, error) {
+func (i *InlineImage) GetSize() (int64, int64, error) {
 	sz, _, err := imgsz.DecodeSize(bytes.NewReader(*i.data))
 	if err != nil {
 		return 0, 0, nil
@@ -176,7 +176,7 @@ func (i *InlineImage) getSize() (int64, int64, error) {
 
 	EMUS_PER_INCH := 914400
 
-	wDpi, hDpi := i.getResolution()
+	wDpi, hDpi := i.GetResolution()
 
 	w, h := int64(sz.Width), int64(sz.Height)
 	w = (w / wDpi) * int64(EMUS_PER_INCH)
@@ -185,7 +185,7 @@ func (i *InlineImage) getSize() (int64, int64, error) {
 	return w, h, nil
 }
 
-func (i *InlineImage) getResolution() (int64, int64) {
+func (i *InlineImage) GetResolution() (int64, int64) {
 	DEFAULT_DPI := int64(72)
 
 	exif, err := i.GetExifData()
@@ -253,7 +253,7 @@ func (i *InlineImage) addToDocument() (string, error) {
 	}
 
 	// Correctly size the image
-	w, h, err := i.getSize()
+	w, h, err := i.GetSize()
 	if err != nil {
 		return "", err
 	}
