@@ -33,7 +33,7 @@ func TestParseAndRender(t *testing.T) {
 			Client:        "TW Software",
 			Status:        "New",
 			ImagePng:      "test_templates/test_image.png",
-			ImageJpg:      "test_templates/test_image.jpg",
+			ImageJpg:      "test_templates/test_image.png",
 		}
 		parseAndRender(t, "test_basic_with_images.docx", data)
 	})
@@ -127,7 +127,7 @@ func TestParseAndRender(t *testing.T) {
 			t.Fatalf("%v - Inline image error: %v", t.Name(), err)
 		}
 
-		profileImage, err := doc.CreateInlineImage("test_templates/test_image.png")
+		profileImage, err := doc.CreateInlineImage("test_templates/test_image.jpg")
 		if err != nil {
 			t.Fatalf("%v - Inline image error: %v", t.Name(), err)
 		}
