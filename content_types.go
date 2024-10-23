@@ -67,3 +67,12 @@ func (ct *ContentTypes) addContentType(contentType *Default) {
 	}
 	ct.Defaults = append(ct.Defaults, *contentType)
 }
+
+func (ct *ContentTypes) marshalXml() (string, error) {
+	output, err := xml.MarshalIndent(ct, "", "  ")
+	if err != nil {
+		return "", err
+	}
+
+	return string(output), nil
+}
