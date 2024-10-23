@@ -103,13 +103,13 @@ func TestParseAndRender(t *testing.T) {
 					Name:           "Tom Watkins",
 					Gender:         "Male",
 					Age:            30,
-					ProfilePicture: "test_templates/test_image.png",
+					ProfilePicture: "test_templates/test_image.jpg",
 				},
 				{
 					Name:           "Evie Argyle",
 					Gender:         "Female",
 					Age:            29,
-					ProfilePicture: "test_templates/test_image.png",
+					ProfilePicture: "test_templates/test_image.jpeg",
 				},
 			},
 		}
