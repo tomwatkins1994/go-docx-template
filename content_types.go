@@ -56,6 +56,14 @@ func getContentTypes(reader io.ReaderAt, size int64) (*ContentTypes, error) {
 	return nil, errors.New("no content types found")
 }
 
-func (ct *ContentTypes) addContentType(ext string, contentType string) {
-	ct.Defaults = append(ct.Defaults, Default{Extension: ext, ContentType: contentType})
+var PNG_CONTENT_TYPE = Default{Extension: "png", ContentType: "image/png"}
+var JPG_CONTENT_TYPE = Default{Extension: "jpg", ContentType: "image/jpg"}
+
+func (ct *ContentTypes) addContentType(contentType *Default) {
+	for _, v := range ct.Defaults {
+		if v == *contentType {
+			return
+		}
+	}
+	ct.Defaults = append(ct.Defaults, *contentType)
 }
