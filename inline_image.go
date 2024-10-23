@@ -174,13 +174,13 @@ func (i *InlineImage) getSize() (int64, int64, error) {
 		return 0, 0, nil
 	}
 
-	_EMUS_PER_INCH := 914400
+	EMUS_PER_INCH := 914400
 
 	wDpi, hDpi := i.getResolution()
 
 	w, h := int64(sz.Width), int64(sz.Height)
-	w = (w / wDpi) * int64(_EMUS_PER_INCH)
-	h = (h / hDpi) * int64(_EMUS_PER_INCH)
+	w = (w / wDpi) * int64(EMUS_PER_INCH)
+	h = (h / hDpi) * int64(EMUS_PER_INCH)
 
 	return w, h, nil
 }
