@@ -55,7 +55,7 @@ func (d *DocxTmpl) CreateInlineImage(filepath string) (*InlineImage, error) {
 
 func (i *InlineImage) getImageFormat() (imagemeta.ImageFormat, error) {
 	switch i.ext {
-	case ".jpg":
+	case ".jpg", ".jpeg":
 		return imagemeta.JPEG, nil
 	case ".webp":
 		return imagemeta.WebP, nil
@@ -68,7 +68,7 @@ func (i *InlineImage) getImageFormat() (imagemeta.ImageFormat, error) {
 	}
 }
 
-func (i *InlineImage) getExifData() (map[string]imagemeta.TagInfo, error) {
+func (i *InlineImage) GetExifData() (map[string]imagemeta.TagInfo, error) {
 	var tags imagemeta.Tags
 	handleTag := func(ti imagemeta.TagInfo) error {
 		tags.Add(ti)
@@ -113,10 +113,11 @@ func (i *InlineImage) Resize(width int, height int) error {
 	}
 
 	// Resize
-	dst := image.NewRGBA(image.Rect(0, 0, width, height))
-	draw.NearestNeighbor.Scale(dst, dst.Rect, *src, (*src).Bounds(), draw.Over, nil)
+	rgba := image.NewRGBA(image.Rect(0, 0, width, height))
+	draw.NearestNeighbor.Scale(rgba, rgba.Rect, *src, (*src).Bounds(), draw.Over, nil)
+	var resizedImage image.Image = rgba
 
-	err = i.replaceImage(dst)
+	err = i.replaceImage(&resizedImage)
 	if err != nil {
 		return err
 	}
@@ -144,19 +145,18 @@ func (i *InlineImage) getImage() (*image.Image, error) {
 	return &img, err
 }
 
-func (i *InlineImage) replaceImage(rgba *image.RGBA) error {
-	var buf bytes.Buffer
-
+func (i *InlineImage) replaceImage(rgba *image.Image) error {
 	format, err := i.getImageFormat()
 	if err != nil {
 		return err
 	}
 
+	var buf bytes.Buffer
 	switch format {
 	case imagemeta.JPEG:
-		err = jpeg.Encode(&buf, rgba, &jpeg.Options{Quality: 100})
+		err = jpeg.Encode(&buf, *rgba, &jpeg.Options{Quality: 100})
 	case imagemeta.PNG:
-		err = png.Encode(&buf, rgba)
+		err = png.Encode(&buf, *rgba)
 	}
 	if err != nil {
 		return err
@@ -168,32 +168,29 @@ func (i *InlineImage) replaceImage(rgba *image.RGBA) error {
 	return nil
 }
 
-func (i *InlineImage) getSize() (int64, int64, error) {
+func (i *InlineImage) GetSize() (int64, int64, error) {
 	sz, _, err := imgsz.DecodeSize(bytes.NewReader(*i.data))
 	if err != nil {
 		return 0, 0, nil
 	}
 
-	_EMUS_PER_INCH := 914400
+	EMUS_PER_INCH := 914400
 
-	wDpi, hDpi, err := i.getResolution()
-	if err != nil {
-		return 0, 0, nil
-	}
+	wDpi, hDpi := i.GetResolution()
 
 	w, h := int64(sz.Width), int64(sz.Height)
-	w = (w / wDpi) * int64(_EMUS_PER_INCH)
-	h = (h / hDpi) * int64(_EMUS_PER_INCH)
+	w = (w / wDpi) * int64(EMUS_PER_INCH)
+	h = (h / hDpi) * int64(EMUS_PER_INCH)
 
 	return w, h, nil
 }
 
-func (i *InlineImage) getResolution() (int64, int64, error) {
-	defaultDpi := 72
+func (i *InlineImage) GetResolution() (int64, int64) {
+	DEFAULT_DPI := int64(72)
 
-	exif, err := i.getExifData()
+	exif, err := i.GetExifData()
 	if err != nil {
-		return 0, 0, nil
+		return DEFAULT_DPI, DEFAULT_DPI
 	}
 
 	getResolution := func(tagName string) int64 {
@@ -202,15 +199,15 @@ func (i *InlineImage) getResolution() (int64, int64, error) {
 			if value, ok := resolutionTag.Value.(string); ok {
 				resolution, err := getResolutionFromString(value)
 				if err != nil || resolution == 0 {
-					return int64(defaultDpi)
+					return DEFAULT_DPI
 				}
 				return int64(resolution)
 			}
 		}
-		return int64(defaultDpi)
+		return DEFAULT_DPI
 	}
 
-	return getResolution("XResolution"), getResolution("YResolution"), nil
+	return getResolution("XResolution"), getResolution("YResolution")
 }
 
 func getResolutionFromString(resolution string) (int, error) {
@@ -242,8 +239,21 @@ func (i *InlineImage) addToDocument() (string, error) {
 		return "", err
 	}
 
+	// Append the content type
+	format, err := i.getImageFormat()
+	if err != nil {
+		return "", err
+	}
+	switch format {
+	case imagemeta.JPEG:
+		i.doc.contentTypes.addContentType(&JPG_CONTENT_TYPE)
+		i.doc.contentTypes.addContentType(&JPEG_CONTENT_TYPE)
+	case imagemeta.PNG:
+		i.doc.contentTypes.addContentType(&PNG_CONTENT_TYPE)
+	}
+
 	// Correctly size the image
-	w, h, err := i.getSize()
+	w, h, err := i.GetSize()
 	if err != nil {
 		return "", err
 	}
@@ -258,7 +268,7 @@ func (i *InlineImage) addToDocument() (string, error) {
 	// Get the image XML
 	out, err := xml.Marshal(run)
 	if err != nil {
-		return "", nil
+		return "", err
 	}
 
 	// Remove run tags as the tag should be in a run already
@@ -283,5 +293,5 @@ func (i *InlineImage) addToDocument() (string, error) {
 	}
 	i.doc.Document.Body.Items = newItems
 
-	return xmlString, err
+	return xmlString, nil
 }
