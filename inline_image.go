@@ -68,7 +68,7 @@ func (i *InlineImage) getImageFormat() (imagemeta.ImageFormat, error) {
 	}
 }
 
-func (i *InlineImage) getExifData() (map[string]imagemeta.TagInfo, error) {
+func (i *InlineImage) GetExifData() (map[string]imagemeta.TagInfo, error) {
 	var tags imagemeta.Tags
 	handleTag := func(ti imagemeta.TagInfo) error {
 		tags.Add(ti)
@@ -188,7 +188,7 @@ func (i *InlineImage) getSize() (int64, int64, error) {
 func (i *InlineImage) getResolution() (int64, int64) {
 	defaultDpi := int64(72)
 
-	exif, err := i.getExifData()
+	exif, err := i.GetExifData()
 	if err != nil {
 		return defaultDpi, defaultDpi
 	}
