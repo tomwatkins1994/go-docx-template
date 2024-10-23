@@ -240,8 +240,16 @@ func (i *InlineImage) addToDocument() (string, error) {
 	}
 
 	// Append the content type
-	i.doc.contentTypes.addContentType(&PNG_CONTENT_TYPE)
-	i.doc.contentTypes.addContentType(&JPG_CONTENT_TYPE)
+	format, err := i.getImageFormat()
+	if err != nil {
+		return "", err
+	}
+	switch format {
+	case imagemeta.JPEG:
+		i.doc.contentTypes.addContentType(&JPG_CONTENT_TYPE)
+	case imagemeta.PNG:
+		i.doc.contentTypes.addContentType(&PNG_CONTENT_TYPE)
+	}
 
 	// Correctly size the image
 	w, h, err := i.getSize()
