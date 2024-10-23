@@ -182,9 +182,9 @@ func TestParseAndRender(t *testing.T) {
 		if err != nil {
 			t.Fatalf("%v - Error creating document: %v", t.Name(), err)
 		}
-		_, err = doc.WriteTo(f)
+		err = doc.Save(f)
 		if err != nil {
-			t.Fatalf("%v - Error writing to document: %v", t.Name(), err)
+			t.Fatalf("%v - Error saving new document: %v", t.Name(), err)
 		}
 		err = f.Close()
 		if err != nil {
@@ -218,9 +218,9 @@ func parseAndRender(t *testing.T, filename string, data interface{}) {
 	if err != nil {
 		t.Fatalf("%v - Error creating document: %v", t.Name(), err)
 	}
-	_, err = doc.WriteTo(f)
+	err = doc.Save(f)
 	if err != nil {
-		t.Fatalf("%v - Error writing to document: %v", t.Name(), err)
+		t.Fatalf("%v - Error saving new document: %v", t.Name(), err)
 	}
 	err = f.Close()
 	if err != nil {
