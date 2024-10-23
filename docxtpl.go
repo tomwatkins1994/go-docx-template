@@ -1,6 +1,7 @@
 package docxtpl
 
 import (
+	"archive/zip"
 	"bytes"
 	"encoding/xml"
 	"io"
@@ -73,6 +74,13 @@ func (d *DocxTmpl) Render(data interface{}) error {
 	// Fix any issues in the XML
 	documentXmlString = fixXmlIssuesPostTagReplacement(documentXmlString)
 
+	// Get content types
+	// contentTypesXml, err := d.contentTypes.marshalXml()
+	// if err != nil {
+	// 	return err
+	// }
+	// fmt.Println(contentTypesXml)
+
 	// Unmarshal the modified XML and replace the document body with it
 	decoder := xml.NewDecoder(bytes.NewBufferString(documentXmlString))
 	for {
@@ -105,4 +113,57 @@ func (d *DocxTmpl) getDocumentXml() (string, error) {
 	}
 
 	return string(out), err
+}
+
+func (d *DocxTmpl) Save(writer io.Writer) error {
+	var buf bytes.Buffer
+	_, err := d.WriteTo(&buf)
+	if err != nil {
+		return err
+	}
+
+	reader := bytes.NewReader(buf.Bytes())
+	zipReader, err := zip.NewReader(reader, int64(buf.Len()))
+	if err != nil {
+		return err
+	}
+
+	generatedZip := zip.NewWriter(writer)
+
+	for _, f := range zipReader.File {
+		newFile, err := generatedZip.Create(f.Name)
+		if err != nil {
+			return err
+		}
+
+		// Override content types with out calculated types
+		// Copy across all other files
+		if f.Name == "[Content_Types].xml" {
+			contentTypesXml, err := d.contentTypes.marshalXml()
+			if err != nil {
+				return err
+			}
+
+			_, err = newFile.Write([]byte(contentTypesXml))
+			if err != nil {
+				return err
+			}
+		} else {
+			zf, err := f.Open()
+			if err != nil {
+				return err
+			}
+			defer zf.Close()
+
+			if _, err := io.Copy(newFile, zf); err != nil {
+				return err
+			}
+		}
+	}
+
+	if err := generatedZip.Close(); err != nil {
+		return err
+	}
+
+	return nil
 }
