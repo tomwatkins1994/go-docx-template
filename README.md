@@ -55,7 +55,7 @@ func main() {
   if err != nil {
     panic(err)
   }
-  _, err = doc.WriteTo(f)
+  err = doc.Save(f)
   if err != nil {
     panic(err)
   }

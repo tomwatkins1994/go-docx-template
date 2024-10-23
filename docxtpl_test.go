@@ -21,17 +21,19 @@ func TestParseAndRender(t *testing.T) {
 		parseAndRender(t, "test_basic.docx", data)
 	})
 
-	t.Run("Basic document with image", func(t *testing.T) {
+	t.Run("Basic document with images", func(t *testing.T) {
 		data := struct {
 			ProjectNumber string
 			Client        string
 			Status        string
-			Image         string
+			ImagePng      string
+			ImageJpg      string
 		}{
 			ProjectNumber: "B-00001",
 			Client:        "TW Software",
 			Status:        "New",
-			Image:         "test_templates/test_image.png",
+			ImagePng:      "test_templates/test_image.png",
+			ImageJpg:      "test_templates/test_image.png",
 		}
 		parseAndRender(t, "test_basic_with_images.docx", data)
 	})
@@ -101,13 +103,13 @@ func TestParseAndRender(t *testing.T) {
 					Name:           "Tom Watkins",
 					Gender:         "Male",
 					Age:            30,
-					ProfilePicture: "test_templates/test_image.png",
+					ProfilePicture: "test_templates/test_image.jpg",
 				},
 				{
 					Name:           "Evie Argyle",
 					Gender:         "Female",
 					Age:            29,
-					ProfilePicture: "test_templates/test_image.png",
+					ProfilePicture: "test_templates/test_image.jpeg",
 				},
 			},
 		}
@@ -125,7 +127,7 @@ func TestParseAndRender(t *testing.T) {
 			t.Fatalf("%v - Inline image error: %v", t.Name(), err)
 		}
 
-		profileImage, err := doc.CreateInlineImage("test_templates/test_image.png")
+		profileImage, err := doc.CreateInlineImage("test_templates/test_image.jpg")
 		if err != nil {
 			t.Fatalf("%v - Inline image error: %v", t.Name(), err)
 		}
@@ -180,9 +182,9 @@ func TestParseAndRender(t *testing.T) {
 		if err != nil {
 			t.Fatalf("%v - Error creating document: %v", t.Name(), err)
 		}
-		_, err = doc.WriteTo(f)
+		err = doc.Save(f)
 		if err != nil {
-			t.Fatalf("%v - Error writing to document: %v", t.Name(), err)
+			t.Fatalf("%v - Error saving new document: %v", t.Name(), err)
 		}
 		err = f.Close()
 		if err != nil {
@@ -216,9 +218,9 @@ func parseAndRender(t *testing.T, filename string, data interface{}) {
 	if err != nil {
 		t.Fatalf("%v - Error creating document: %v", t.Name(), err)
 	}
-	_, err = doc.WriteTo(f)
+	err = doc.Save(f)
 	if err != nil {
-		t.Fatalf("%v - Error writing to document: %v", t.Name(), err)
+		t.Fatalf("%v - Error saving new document: %v", t.Name(), err)
 	}
 	err = f.Close()
 	if err != nil {
