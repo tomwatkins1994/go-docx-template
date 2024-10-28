@@ -6,8 +6,8 @@ import (
 	"text/template"
 )
 
-func replaceTagsInText(text string, data map[string]interface{}) (string, error) {
-	tmpl, err := template.New("").Parse(text)
+func replaceTagsInText(text string, data map[string]interface{}, funcMap *template.FuncMap) (string, error) {
+	tmpl, err := template.New("").Funcs(*funcMap).Parse(text)
 	if err != nil {
 		log.Fatalf("Error parsing template: %v", err)
 		return "", err
