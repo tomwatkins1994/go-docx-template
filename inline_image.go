@@ -20,6 +20,11 @@ import (
 	"golang.org/x/image/draw"
 )
 
+const (
+	EMUS_PER_INCH = 914400
+	DEFAULT_DPI   = 72
+)
+
 type InlineImage struct {
 	doc  *DocxTmpl
 	data *[]byte
@@ -68,6 +73,7 @@ func (i *InlineImage) getImageFormat() (imagemeta.ImageFormat, error) {
 	}
 }
 
+// Return a map of EXIF data from the image.
 func (i *InlineImage) GetExifData() (map[string]imagemeta.TagInfo, error) {
 	var tags imagemeta.Tags
 	handleTag := func(ti imagemeta.TagInfo) error {
@@ -106,6 +112,7 @@ func (i *InlineImage) GetExifData() (map[string]imagemeta.TagInfo, error) {
 	return tags.EXIF(), nil
 }
 
+// Resize the image. Width and height should be pixel values.
 func (i *InlineImage) Resize(width int, height int) error {
 	src, err := i.getImage()
 	if err != nil {
@@ -168,26 +175,24 @@ func (i *InlineImage) replaceImage(rgba *image.Image) error {
 	return nil
 }
 
-func (i *InlineImage) GetSize() (int64, int64, error) {
+// Get the size of the image in pixels.
+func (i *InlineImage) GetSize() (w int64, h int64, err error) {
 	sz, _, err := imgsz.DecodeSize(bytes.NewReader(*i.data))
 	if err != nil {
 		return 0, 0, nil
 	}
 
-	EMUS_PER_INCH := 914400
-
 	wDpi, hDpi := i.GetResolution()
 
-	w, h := int64(sz.Width), int64(sz.Height)
-	w = (w / wDpi) * int64(EMUS_PER_INCH)
-	h = (h / hDpi) * int64(EMUS_PER_INCH)
+	w = (int64(sz.Width) / wDpi) * int64(EMUS_PER_INCH)
+	h = (int64(sz.Height) / hDpi) * int64(EMUS_PER_INCH)
 
 	return w, h, nil
 }
 
-func (i *InlineImage) GetResolution() (int64, int64) {
-	DEFAULT_DPI := int64(72)
-
+// Get the resolution (DPI) of the image.
+// It gets this from EXIF data and defaults to 72 if not found.
+func (i *InlineImage) GetResolution() (wDpi int64, hDpi int64) {
 	exif, err := i.GetExifData()
 	if err != nil {
 		return DEFAULT_DPI, DEFAULT_DPI
@@ -207,7 +212,9 @@ func (i *InlineImage) GetResolution() (int64, int64) {
 		return DEFAULT_DPI
 	}
 
-	return getResolution("XResolution"), getResolution("YResolution")
+	wDpi, hDpi = getResolution("XResolution"), getResolution("YResolution")
+
+	return wDpi, hDpi
 }
 
 func getResolutionFromString(resolution string) (int, error) {
@@ -231,7 +238,7 @@ func getResolutionFromString(resolution string) (int, error) {
 	return result, nil
 }
 
-func (i *InlineImage) addToDocument() (string, error) {
+func (i *InlineImage) addToDocument() (xmlString string, err error) {
 	// Add the image to the document
 	paragraph := i.doc.AddParagraph()
 	run, err := paragraph.AddInlineDrawing(*i.data)
@@ -272,7 +279,7 @@ func (i *InlineImage) addToDocument() (string, error) {
 	}
 
 	// Remove run tags as the tag should be in a run already
-	xmlString := string(out)
+	xmlString = string(out)
 	xmlString = strings.Replace(xmlString, "<w:r>", "", 1)
 	xmlString = strings.Replace(xmlString, "<w:rPr></w:rPr>", "", 1)
 	lastIndex := strings.LastIndex(xmlString, "</w:r")

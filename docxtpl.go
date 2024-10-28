@@ -12,34 +12,58 @@ import (
 
 type DocxTmpl struct {
 	*docx.Docx
-	filename     string
 	contentTypes *ContentTypes
 }
 
-func Parse(filename string) (*DocxTmpl, error) {
-	readFile, err := os.Open(filename)
+// Parse the document from a reader and store it in memory.
+// You can it invoke from a file.
+//
+//	reader, err := os.Open(FILE_PATH)
+//	if err != nil {
+//		panic(err)
+//	}
+//	fileinfo, err := reader.Stat()
+//	if err != nil {
+//		panic(err)
+//	}
+//	size := fileinfo.Size()
+//	doc, err := docxtpl.Parse(reader, int64(size))
+func Parse(reader io.ReaderAt, size int64) (*DocxTmpl, error) {
+	doc, err := docx.Parse(reader, size)
 	if err != nil {
 		return nil, err
 	}
 
-	fileinfo, err := readFile.Stat()
+	contentTypes, err := getContentTypes(reader, size)
+	if err != nil {
+		return nil, err
+	}
+
+	return &DocxTmpl{doc, contentTypes}, nil
+}
+
+// Parse the document from a filename and store it in memory.
+func ParseFromFilename(filename string) (*DocxTmpl, error) {
+	reader, err := os.Open(filename)
+	if err != nil {
+		return nil, err
+	}
+
+	fileinfo, err := reader.Stat()
 	if err != nil {
 		return nil, err
 	}
 	size := fileinfo.Size()
-	doc, err := docx.Parse(readFile, size)
+
+	doxtpl, err := Parse(reader, size)
 	if err != nil {
 		return nil, err
 	}
 
-	contentTypes, err := getContentTypes(readFile, size)
-	if err != nil {
-		return nil, err
-	}
-
-	return &DocxTmpl{doc, filename, contentTypes}, nil
+	return doxtpl, nil
 }
 
+// Replace the placeholders in the document with passed in data.
 func (d *DocxTmpl) Render(data interface{}) error {
 	// Ensure that there are no 'part tags' in the XML document
 	err := d.mergeTags()
@@ -73,13 +97,6 @@ func (d *DocxTmpl) Render(data interface{}) error {
 
 	// Fix any issues in the XML
 	documentXmlString = fixXmlIssuesPostTagReplacement(documentXmlString)
-
-	// Get content types
-	// contentTypesXml, err := d.contentTypes.marshalXml()
-	// if err != nil {
-	// 	return err
-	// }
-	// fmt.Println(contentTypesXml)
 
 	// Unmarshal the modified XML and replace the document body with it
 	decoder := xml.NewDecoder(bytes.NewBufferString(documentXmlString))
@@ -115,6 +132,21 @@ func (d *DocxTmpl) getDocumentXml() (string, error) {
 	return string(out), err
 }
 
+// Save the document to a writer.
+// This could be a new file.
+//
+//	f, err := os.Create(FILE_PATH)
+//	if err != nil {
+//		panic(err)
+//	}
+//	err = doc.Save(f)
+//	if err != nil {
+//		panic(err)
+//	}
+//	err = f.Close()
+//	if err != nil {
+//		panic(err)
+//	}
 func (d *DocxTmpl) Save(writer io.Writer) error {
 	var buf bytes.Buffer
 	_, err := d.WriteTo(&buf)

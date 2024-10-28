@@ -29,8 +29,9 @@ import (
 )
 
 func main() {
-  // Parse the document
-  doc, err := docxtpl.Parse("template.docx")
+  // Parse the document 
+  // If using a reader, use docxtpl.Parse instead
+  doc, err := docxtpl.ParseFromFilename("template.docx")
   if err != nil {
     panic(err)
   }
