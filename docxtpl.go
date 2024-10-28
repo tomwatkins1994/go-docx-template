@@ -4,8 +4,10 @@ import (
 	"archive/zip"
 	"bytes"
 	"encoding/xml"
+	"fmt"
 	"io"
 	"os"
+	"reflect"
 	"text/template"
 
 	"github.com/fumiama/go-docx"
@@ -65,6 +67,32 @@ func ParseFromFilename(filename string) (*DocxTmpl, error) {
 	}
 
 	return doxtpl, nil
+}
+
+func (d *DocxTmpl) RegisterFunction(name string, fn any) error {
+	// Check that fn is a function
+	v := reflect.ValueOf(fn)
+	if v.Kind() != reflect.Func {
+		return fmt.Errorf("value for " + name + " not a function")
+	}
+
+	// Check the function signature
+	typ := v.Type()
+	switch numOut := typ.NumOut(); {
+	case numOut == 1:
+		break
+	case numOut == 2 && typ.Out(1) == reflect.TypeFor[error]():
+		break
+	case numOut == 2:
+		return fmt.Errorf("invalid function signature for %s: second return value should be error; is %s", name, typ.Out(1))
+	default:
+		return fmt.Errorf("function %s has %d return values; should be 1 or 2", name, typ.NumOut())
+	}
+
+	// Add to the function map
+	(*d.funcMap)[name] = fn
+
+	return nil
 }
 
 // Replace the placeholders in the document with passed in data.
