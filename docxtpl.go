@@ -6,12 +6,14 @@ import (
 	"encoding/xml"
 	"io"
 	"os"
+	"text/template"
 
 	"github.com/fumiama/go-docx"
 )
 
 type DocxTmpl struct {
 	*docx.Docx
+	funcMap      *template.FuncMap
 	contentTypes *ContentTypes
 }
 
@@ -39,7 +41,9 @@ func Parse(reader io.ReaderAt, size int64) (*DocxTmpl, error) {
 		return nil, err
 	}
 
-	return &DocxTmpl{doc, contentTypes}, nil
+	funcMap := template.FuncMap{}
+
+	return &DocxTmpl{doc, &funcMap, contentTypes}, nil
 }
 
 // Parse the document from a filename and store it in memory.
@@ -90,7 +94,7 @@ func (d *DocxTmpl) Render(data interface{}) error {
 	}
 
 	// Replace the tags in XML
-	documentXmlString, err = replaceTagsInText(documentXmlString, proccessedData)
+	documentXmlString, err = replaceTagsInText(documentXmlString, proccessedData, d.funcMap)
 	if err != nil {
 		return err
 	}
