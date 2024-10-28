@@ -6,7 +6,6 @@ import (
 	"encoding/xml"
 	"io"
 	"os"
-	"strings"
 	"text/template"
 
 	"github.com/fumiama/go-docx"
@@ -16,11 +15,6 @@ type DocxTmpl struct {
 	*docx.Docx
 	funcMap      *template.FuncMap
 	contentTypes *ContentTypes
-}
-
-var defaultFuncMap = template.FuncMap{
-	"upper": strings.ToUpper,
-	"lower": strings.ToLower,
 }
 
 // Parse the document from a reader and store it in memory.
