@@ -4,7 +4,6 @@ import (
 	"regexp"
 	"strings"
 	"testing"
-	"text/template"
 )
 
 func TestBasicTemplate(t *testing.T) {
@@ -27,7 +26,7 @@ func TestBasicTemplate(t *testing.T) {
 	data := map[string]interface{}{
 		"Name": "Tom Watkins",
 	}
-	outputXml, err := replaceTagsInText(xmlString, data, &template.FuncMap{})
+	outputXml, err := replaceTagsInText(xmlString, data, &defaultFuncMap)
 	if err != nil {
 		t.Fatalf("Error in basic template %v", err)
 	}
@@ -93,7 +92,7 @@ func TestTableTemplate(t *testing.T) {
 			{"Name": "Evie Argyle"},
 		},
 	}
-	outputXml, err := replaceTagsInText(originalXml, data, &template.FuncMap{})
+	outputXml, err := replaceTagsInText(originalXml, data, &defaultFuncMap)
 	if err != nil {
 		t.Fatalf("Error in basic template %v", err)
 	}
