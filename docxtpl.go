@@ -16,6 +16,7 @@ type DocxTmpl struct {
 	contentTypes *ContentTypes
 }
 
+// Parse the document and store it in memory from a filename.
 func Parse(filename string) (*DocxTmpl, error) {
 	readFile, err := os.Open(filename)
 	if err != nil {
@@ -40,6 +41,7 @@ func Parse(filename string) (*DocxTmpl, error) {
 	return &DocxTmpl{doc, filename, contentTypes}, nil
 }
 
+// Replace the placeholders in the document with passed in data.
 func (d *DocxTmpl) Render(data interface{}) error {
 	// Ensure that there are no 'part tags' in the XML document
 	err := d.mergeTags()
@@ -73,13 +75,6 @@ func (d *DocxTmpl) Render(data interface{}) error {
 
 	// Fix any issues in the XML
 	documentXmlString = fixXmlIssuesPostTagReplacement(documentXmlString)
-
-	// Get content types
-	// contentTypesXml, err := d.contentTypes.marshalXml()
-	// if err != nil {
-	// 	return err
-	// }
-	// fmt.Println(contentTypesXml)
 
 	// Unmarshal the modified XML and replace the document body with it
 	decoder := xml.NewDecoder(bytes.NewBufferString(documentXmlString))
@@ -115,6 +110,7 @@ func (d *DocxTmpl) getDocumentXml() (string, error) {
 	return string(out), err
 }
 
+// Save the document to a writer.
 func (d *DocxTmpl) Save(writer io.Writer) error {
 	var buf bytes.Buffer
 	_, err := d.WriteTo(&buf)

@@ -73,6 +73,7 @@ func (i *InlineImage) getImageFormat() (imagemeta.ImageFormat, error) {
 	}
 }
 
+// Return a map of EXIF data from the image.
 func (i *InlineImage) GetExifData() (map[string]imagemeta.TagInfo, error) {
 	var tags imagemeta.Tags
 	handleTag := func(ti imagemeta.TagInfo) error {
@@ -111,6 +112,7 @@ func (i *InlineImage) GetExifData() (map[string]imagemeta.TagInfo, error) {
 	return tags.EXIF(), nil
 }
 
+// Resize the image. Width and height should be pixel values.
 func (i *InlineImage) Resize(width int, height int) error {
 	src, err := i.getImage()
 	if err != nil {
@@ -173,6 +175,7 @@ func (i *InlineImage) replaceImage(rgba *image.Image) error {
 	return nil
 }
 
+// Get the size of the image in pixels.
 func (i *InlineImage) GetSize() (w int64, h int64, err error) {
 	sz, _, err := imgsz.DecodeSize(bytes.NewReader(*i.data))
 	if err != nil {
@@ -187,6 +190,8 @@ func (i *InlineImage) GetSize() (w int64, h int64, err error) {
 	return w, h, nil
 }
 
+// Get the resolution (DPI) of the image.
+// It gets this from EXIF data and defaults to 72 if not found.
 func (i *InlineImage) GetResolution() (wDpi int64, hDpi int64) {
 	exif, err := i.GetExifData()
 	if err != nil {
