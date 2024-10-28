@@ -70,6 +70,10 @@ func ParseFromFilename(filename string) (*DocxTmpl, error) {
 }
 
 func (d *DocxTmpl) RegisterFunction(name string, fn any) error {
+	if !goodName(name) {
+		return fmt.Errorf("function name %q is not a valid identifier", name)
+	}
+
 	// Check that fn is a function
 	v := reflect.ValueOf(fn)
 	if v.Kind() != reflect.Func {
@@ -77,16 +81,9 @@ func (d *DocxTmpl) RegisterFunction(name string, fn any) error {
 	}
 
 	// Check the function signature
-	typ := v.Type()
-	switch numOut := typ.NumOut(); {
-	case numOut == 1:
-		break
-	case numOut == 2 && typ.Out(1) == reflect.TypeFor[error]():
-		break
-	case numOut == 2:
-		return fmt.Errorf("invalid function signature for %s: second return value should be error; is %s", name, typ.Out(1))
-	default:
-		return fmt.Errorf("function %s has %d return values; should be 1 or 2", name, typ.NumOut())
+	err := goodFunc(name, v.Type())
+	if err != nil {
+		return err
 	}
 
 	// Add to the function map
