@@ -191,6 +191,48 @@ func TestParseAndRender(t *testing.T) {
 			t.Fatalf("%v - Error closing created document: %v", t.Name(), err)
 		}
 	})
+
+	t.Run("Document with custom function", func(t *testing.T) {
+		doc, err := ParseFromFilename("test_templates/test_with_custom_function.docx")
+		if err != nil {
+			t.Fatalf("%v - Parsing error: %v", t.Name(), err)
+		}
+
+		err = doc.RegisterFunction("hello", func(text string) string {
+			return fmt.Sprintf("Hello %v", text)
+		})
+		if err != nil {
+			t.Fatalf("%v - Error registering function: %v", t.Name(), err)
+		}
+
+		data := struct {
+			ProjectNumber string
+			Client        string
+			Status        string
+		}{
+			ProjectNumber: "B-00001",
+			Client:        "TW Software",
+			Status:        "New",
+		}
+
+		err = doc.Render(data)
+		if err != nil {
+			t.Fatalf("%v - Rendering error: %v", t.Name(), err)
+		}
+
+		f, err := os.Create("test_templates/generated_test_with_custom_function.docx")
+		if err != nil {
+			t.Fatalf("%v - Error creating document: %v", t.Name(), err)
+		}
+		err = doc.Save(f)
+		if err != nil {
+			t.Fatalf("%v - Error saving new document: %v", t.Name(), err)
+		}
+		err = f.Close()
+		if err != nil {
+			t.Fatalf("%v - Error closing created document: %v", t.Name(), err)
+		}
+	})
 }
 
 func TestRegisterFunctions(t *testing.T) {
