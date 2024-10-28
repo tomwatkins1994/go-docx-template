@@ -111,6 +111,7 @@ func (i *InlineImage) GetExifData() (map[string]imagemeta.TagInfo, error) {
 	return tags.EXIF(), nil
 }
 
+// Resize the image. Width and height should be pixel values
 func (i *InlineImage) Resize(width int, height int) error {
 	src, err := i.getImage()
 	if err != nil {
