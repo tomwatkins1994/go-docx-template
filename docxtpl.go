@@ -21,7 +21,6 @@ type DocxTmpl struct {
 var defaultFuncMap = template.FuncMap{
 	"upper": strings.ToUpper,
 	"lower": strings.ToLower,
-	"title": strings.ToTitle,
 }
 
 // Parse the document from a reader and store it in memory.
