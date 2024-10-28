@@ -20,6 +20,11 @@ import (
 	"golang.org/x/image/draw"
 )
 
+const (
+	EMUS_PER_INCH = 914400
+	DEFAULT_DPI   = 72
+)
+
 type InlineImage struct {
 	doc  *DocxTmpl
 	data *[]byte
@@ -174,8 +179,6 @@ func (i *InlineImage) GetSize() (int64, int64, error) {
 		return 0, 0, nil
 	}
 
-	EMUS_PER_INCH := 914400
-
 	wDpi, hDpi := i.GetResolution()
 
 	w, h := int64(sz.Width), int64(sz.Height)
@@ -186,8 +189,6 @@ func (i *InlineImage) GetSize() (int64, int64, error) {
 }
 
 func (i *InlineImage) GetResolution() (int64, int64) {
-	DEFAULT_DPI := int64(72)
-
 	exif, err := i.GetExifData()
 	if err != nil {
 		return DEFAULT_DPI, DEFAULT_DPI
