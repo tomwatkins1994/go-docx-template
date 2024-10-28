@@ -16,7 +16,32 @@ type DocxTmpl struct {
 	contentTypes *ContentTypes
 }
 
-// Parse the document and store it in memory from a filename.
+// Parse the document from a filename and store it in memory.
+func ParseFromFilename(filename string) (*DocxTmpl, error) {
+	readFile, err := os.Open(filename)
+	if err != nil {
+		return nil, err
+	}
+
+	fileinfo, err := readFile.Stat()
+	if err != nil {
+		return nil, err
+	}
+	size := fileinfo.Size()
+	doc, err := docx.Parse(readFile, size)
+	if err != nil {
+		return nil, err
+	}
+
+	contentTypes, err := getContentTypes(readFile, size)
+	if err != nil {
+		return nil, err
+	}
+
+	return &DocxTmpl{doc, filename, contentTypes}, nil
+}
+
+// Parse the document from a filename and store it in memory.
 func Parse(filename string) (*DocxTmpl, error) {
 	readFile, err := os.Open(filename)
 	if err != nil {

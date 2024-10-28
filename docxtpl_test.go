@@ -117,7 +117,7 @@ func TestParseAndRender(t *testing.T) {
 	})
 
 	t.Run("Document with image structs", func(t *testing.T) {
-		doc, err := Parse("test_templates/test_with_tables_and_images.docx")
+		doc, err := ParseFromFilename("test_templates/test_with_tables_and_images.docx")
 		if err != nil {
 			t.Fatalf("%v - Parsing error: %v", t.Name(), err)
 		}
@@ -198,7 +198,7 @@ func parseAndRender(t *testing.T, filename string, data interface{}) {
 
 	// Parse the document
 	parseStart := time.Now()
-	doc, err := Parse("test_templates/" + filename)
+	doc, err := ParseFromFilename("test_templates/" + filename)
 	if err != nil {
 		t.Fatalf("%v - Parsing error: %v", t.Name(), err)
 	}
