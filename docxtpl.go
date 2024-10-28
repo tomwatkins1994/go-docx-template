@@ -16,6 +16,18 @@ type DocxTmpl struct {
 }
 
 // Parse the document from a reader and store it in memory.
+// You can it invoke from a file.
+//
+//	reader, err := os.Open(FILE_PATH)
+//	if err != nil {
+//		panic(err)
+//	}
+//	fileinfo, err := reader.Stat()
+//	if err != nil {
+//		panic(err)
+//	}
+//	size := fileinfo.Size()
+//	doc, err := docxtpl.Parse(reader, int64(size))
 func Parse(reader io.ReaderAt, size int64) (*DocxTmpl, error) {
 	doc, err := docx.Parse(reader, size)
 	if err != nil {
@@ -121,6 +133,20 @@ func (d *DocxTmpl) getDocumentXml() (string, error) {
 }
 
 // Save the document to a writer.
+// This could be a new file.
+//
+//	f, err := os.Create(FILE_PATH)
+//	if err != nil {
+//		panic(err)
+//	}
+//	err = doc.Save(f)
+//	if err != nil {
+//		panic(err)
+//	}
+//	err = f.Close()
+//	if err != nil {
+//		panic(err)
+//	}
 func (d *DocxTmpl) Save(writer io.Writer) error {
 	var buf bytes.Buffer
 	_, err := d.WriteTo(&buf)
