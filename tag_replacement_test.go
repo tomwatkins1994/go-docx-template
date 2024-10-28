@@ -66,6 +66,9 @@ func TestBasicTemplateWithFunctions(t *testing.T) {
 				</w:r> 
 				<w:r>  
 					<w:t>Author Name (Lower): {{lower .Name}}</w:t>  
+				</w:r> 
+				<w:r>  
+					<w:t>Author Name (Title): {{title .Name}}</w:t>  
 				</w:r>  
 			</w:fldSimple>  
 			</w:p>  
@@ -93,6 +96,9 @@ func TestBasicTemplateWithFunctions(t *testing.T) {
 				</w:r> 
 				<w:r>  
 					<w:t>Author Name (Lower): tom watkins</w:t>  
+				</w:r>  
+				<w:r>  
+					<w:t>Author Name (Title): Tom Watkins</w:t>  
 				</w:r>   
 			</w:fldSimple>  
 			</w:p>  
