@@ -25,7 +25,7 @@ func (d *DocxTmpl) RegisterFunction(name string, fn any) error {
 	// Check the function signature
 	err := goodFunc(fn)
 	if err != nil {
-		return fmt.Errorf("Error registering function (%s): %s", name, err.Error())
+		return fmt.Errorf("error registering function (%s): %s", name, err.Error())
 	}
 
 	// Add to the function map
