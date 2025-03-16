@@ -63,6 +63,35 @@ func TestGoodName(t *testing.T) {
 	}
 }
 
+func TestGoodFunc(t *testing.T) {
+	t.Run("Valid function", func(t *testing.T) {
+		err := goodFunc(func(text string) string {
+			return "hello"
+		})
+		if err != nil {
+			t.Fatalf("%v - should be valid: %v", t.Name(), err)
+		}
+	})
+
+	t.Run("Valid function with error", func(t *testing.T) {
+		err := goodFunc(func(text string) (string, error) {
+			return "hello", nil
+		})
+		if err != nil {
+			t.Fatalf("%v - should be valid: %v", t.Name(), err)
+		}
+	})
+
+	t.Run("Invalid function", func(t *testing.T) {
+		err := goodFunc(func(text string) {
+			// Do nothing here
+		})
+		if err == nil {
+			t.Fatalf("%v - did not return expected error: %v", t.Name(), err)
+		}
+	})
+}
+
 // Custom functions
 
 func TestTitle(t *testing.T) {
