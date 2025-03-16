@@ -66,9 +66,9 @@ func goodFunc(typ reflect.Type) error {
 	case numOut == 2 && typ.Out(1) == reflect.TypeFor[error]():
 		return nil
 	case numOut == 2:
-		return fmt.Errorf("Invalid function signature - second return value should be error; is %s", typ.Out(1))
+		return fmt.Errorf("invalid function signature - second return value should be error; is %s", typ.Out(1))
 	default:
-		return fmt.Errorf("Function has %d return values; should be 1 or 2", typ.NumOut())
+		return fmt.Errorf("function has %d return values; should be 1 or 2", typ.NumOut())
 	}
 }
 
