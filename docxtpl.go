@@ -4,10 +4,8 @@ import (
 	"archive/zip"
 	"bytes"
 	"encoding/xml"
-	"fmt"
 	"io"
 	"os"
-	"reflect"
 	"text/template"
 
 	"github.com/fumiama/go-docx"
@@ -67,29 +65,6 @@ func ParseFromFilename(filename string) (*DocxTmpl, error) {
 	}
 
 	return doxtpl, nil
-}
-
-func (d *DocxTmpl) RegisterFunction(name string, fn any) error {
-	if !goodName(name) {
-		return fmt.Errorf("function name %q is not a valid identifier", name)
-	}
-
-	// Check that fn is a function
-	v := reflect.ValueOf(fn)
-	if v.Kind() != reflect.Func {
-		return fmt.Errorf("value for " + name + " not a function")
-	}
-
-	// Check the function signature
-	err := goodFunc(name, v.Type())
-	if err != nil {
-		return err
-	}
-
-	// Add to the function map
-	(*d.funcMap)[name] = fn
-
-	return nil
 }
 
 // Replace the placeholders in the document with passed in data.
