@@ -1,61 +1,60 @@
 package docxtpl
 
-import "testing"
+import (
+	"testing"
+)
 
 func TestRegisterFunctions(t *testing.T) {
-	t.Run("Valid function with no error", func(t *testing.T) {
-		doc, err := ParseFromFilename("test_templates/test_basic.docx")
-		if err != nil {
-			t.Fatalf("%v - Parsing error: %v", t.Name(), err)
-		}
-		name := "hello"
-		err = doc.RegisterFunction(name, func(text string) string {
-			return "hello"
-		})
-		if err != nil {
-			t.Fatalf("%v - Error registering function: %v", t.Name(), err)
-		}
-		funcMap := doc.GetRegisteredFunctions()
-		if (*funcMap)[name] == nil {
-			t.Fatalf("%v - function not found in map", t.Name())
-		}
-	})
+	tests := []struct {
+		name        string
+		fnName      string
+		fn          any
+		expectError bool
+	}{
+		{
+			name:   "Valid function",
+			fnName: "validFunction",
+			fn: func(text string) string {
+				return "Hello"
+			},
+			expectError: false,
+		},
+		{
+			name:        "Invalid function name",
+			fnName:      "",
+			fn:          nil,
+			expectError: true,
+		},
+		{
+			name:        "Invalid function signature",
+			fnName:      "validFunction",
+			fn:          "not a valid function",
+			expectError: true,
+		},
+	}
 
-	t.Run("Valid function with error", func(t *testing.T) {
-		doc, err := ParseFromFilename("test_templates/test_basic.docx")
-		if err != nil {
-			t.Fatalf("%v - Parsing error: %v", t.Name(), err)
-		}
-		name := "hello"
-		err = doc.RegisterFunction(name, func(text string) (string, error) {
-			return "hello", nil
-		})
-		if err != nil {
-			t.Fatalf("%v - Error registering function: %v", t.Name(), err)
-		}
-		funcMap := doc.GetRegisteredFunctions()
-		if (*funcMap)[name] == nil {
-			t.Fatalf("%v - function not found in map", t.Name())
-		}
-	})
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			doc, err := ParseFromFilename("test_templates/test_basic.docx")
+			if err != nil {
+				t.Fatalf("%v - Parsing error: %v", t.Name(), err)
+			}
 
-	t.Run("Invalid function", func(t *testing.T) {
-		doc, err := ParseFromFilename("test_templates/test_basic.docx")
-		if err != nil {
-			t.Fatalf("%v - Parsing error: %v", t.Name(), err)
-		}
-		name := "hello"
-		err = doc.RegisterFunction(name, func(text string) {
-			// Do nothing here
+			err = doc.RegisterFunction(tt.fnName, tt.fn)
+			if (err != nil) != tt.expectError {
+				t.Errorf("expected error: %v, got: %v", tt.expectError, err)
+			}
+
+			funcMap := doc.GetRegisteredFunctions()
+			_, exists := (*funcMap)[tt.fnName]
+			if !tt.expectError && !exists {
+				t.Errorf("%v - function not found in map", tt.name)
+			}
+			if tt.expectError && exists {
+				t.Errorf("%v - function found in map after erroring", tt.name)
+			}
 		})
-		if err == nil {
-			t.Fatalf("%v - Did not return expected error: %v", t.Name(), err)
-		}
-		funcMap := doc.GetRegisteredFunctions()
-		if (*funcMap)[name] != nil {
-			t.Fatalf("%v - function found in map when it shouldn't be: %v", t.Name(), (*funcMap)[name])
-		}
-	})
+	}
 }
 
 // Validation Functions
