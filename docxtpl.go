@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"encoding/xml"
 	"io"
+	"maps"
 	"os"
 	"text/template"
 
@@ -41,7 +42,8 @@ func Parse(reader io.ReaderAt, size int64) (*DocxTmpl, error) {
 		return nil, err
 	}
 
-	funcMap := defaultFuncMap
+	funcMap := make(template.FuncMap)
+	maps.Copy(funcMap, defaultFuncMap)
 
 	return &DocxTmpl{doc, &funcMap, contentTypes}, nil
 }
