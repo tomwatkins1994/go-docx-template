@@ -29,9 +29,9 @@ func (d *DocxTmpl) RegisterFunction(name string, fn any) error {
 	}
 
 	// Check the function signature
-	err := goodFunc(name, v.Type())
+	err := goodFunc(v.Type())
 	if err != nil {
-		return err
+		return fmt.Errorf("Error registering function (%s): %s", name, err.Error())
 	}
 
 	// Add to the function map
@@ -58,7 +58,7 @@ func goodName(name string) bool {
 	return true
 }
 
-func goodFunc(name string, typ reflect.Type) error {
+func goodFunc(typ reflect.Type) error {
 	// We allow functions with 1 result or 2 results where the second is an error.
 	switch numOut := typ.NumOut(); {
 	case numOut == 1:
@@ -66,9 +66,9 @@ func goodFunc(name string, typ reflect.Type) error {
 	case numOut == 2 && typ.Out(1) == reflect.TypeFor[error]():
 		return nil
 	case numOut == 2:
-		return fmt.Errorf("invalid function signature for %s: second return value should be error; is %s", name, typ.Out(1))
+		return fmt.Errorf("Invalid function signature - second return value should be error; is %s", typ.Out(1))
 	default:
-		return fmt.Errorf("function %s has %d return values; should be 1 or 2", name, typ.NumOut())
+		return fmt.Errorf("Function has %d return values; should be 1 or 2", typ.NumOut())
 	}
 }
 
