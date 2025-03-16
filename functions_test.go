@@ -43,6 +43,28 @@ func TestRegisterFunctions(t *testing.T) {
 	})
 }
 
+// Validation Functions
+
+func TestGoodName(t *testing.T) {
+	if goodName("hello") == false {
+		t.Fatalf("Function names only containing letters should be allowed")
+	}
+	if goodName("hello1") == false {
+		t.Fatalf("Function names only containing letters and numbers should be allowed")
+	}
+	if goodName("my_function") == false {
+		t.Fatal("Function names containing symbols should not be allowed")
+	}
+	if goodName("") {
+		t.Fatal("Blank function names should not be allowed")
+	}
+	if goodName("1") {
+		t.Fatal("Function names not beginning with a letter should not be allowed")
+	}
+}
+
+// Custom functions
+
 func TestTitle(t *testing.T) {
 	titleCase := title("tom watkins")
 	if titleCase != "Tom Watkins" {
