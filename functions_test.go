@@ -65,13 +65,13 @@ func TestGoodName(t *testing.T) {
 	})
 
 	t.Run("Blank function names should not be allowed", func(t *testing.T) {
-		if goodName("") == false {
+		if goodName("") {
 			t.Fatal(t.Name())
 		}
 	})
 
 	t.Run("Function names not beginning with a letter should not be allowed", func(t *testing.T) {
-		if goodName("1") == false {
+		if goodName("1") {
 			t.Fatal(t.Name())
 		}
 	})
