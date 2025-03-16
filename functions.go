@@ -22,14 +22,8 @@ func (d *DocxTmpl) RegisterFunction(name string, fn any) error {
 		return fmt.Errorf("function name %q is not a valid identifier", name)
 	}
 
-	// Check that fn is a function
-	v := reflect.ValueOf(fn)
-	if v.Kind() != reflect.Func {
-		return fmt.Errorf("value for " + name + " not a function")
-	}
-
 	// Check the function signature
-	err := goodFunc(v.Type())
+	err := goodFunc(fn)
 	if err != nil {
 		return fmt.Errorf("Error registering function (%s): %s", name, err.Error())
 	}
@@ -58,8 +52,15 @@ func goodName(name string) bool {
 	return true
 }
 
-func goodFunc(typ reflect.Type) error {
+func goodFunc(fn any) error {
+	// Check that fn is a function
+	v := reflect.ValueOf(fn)
+	if v.Kind() != reflect.Func {
+		return fmt.Errorf("not a function")
+	}
+
 	// We allow functions with 1 result or 2 results where the second is an error.
+	typ := v.Type()
 	switch numOut := typ.NumOut(); {
 	case numOut == 1:
 		return nil
