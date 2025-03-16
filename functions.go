@@ -2,6 +2,7 @@ package docxtpl
 
 import (
 	"fmt"
+	"maps"
 	"reflect"
 	"strings"
 	"text/template"
@@ -32,6 +33,12 @@ func (d *DocxTmpl) RegisterFunction(name string, fn any) error {
 	(*d.funcMap)[name] = fn
 
 	return nil
+}
+
+func (d *DocxTmpl) GetRegisteredFunctions() *template.FuncMap {
+	copiedFuncMap := make(template.FuncMap)
+	maps.Copy(copiedFuncMap, *d.funcMap)
+	return &copiedFuncMap
 }
 
 // Validation functions
