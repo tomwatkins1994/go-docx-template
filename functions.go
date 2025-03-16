@@ -2,6 +2,7 @@ package docxtpl
 
 import (
 	"fmt"
+	"maps"
 	"reflect"
 	"strings"
 	"text/template"
@@ -15,6 +16,29 @@ var defaultFuncMap = template.FuncMap{
 	"upper": strings.ToUpper,
 	"lower": strings.ToLower,
 	"title": title,
+}
+
+func (d *DocxTmpl) RegisterFunction(name string, fn any) error {
+	if !goodName(name) {
+		return fmt.Errorf("function name %q is not a valid identifier", name)
+	}
+
+	// Check the function signature
+	err := goodFunc(fn)
+	if err != nil {
+		return fmt.Errorf("error registering function (%s): %s", name, err.Error())
+	}
+
+	// Add to the function map
+	(*d.funcMap)[name] = fn
+
+	return nil
+}
+
+func (d *DocxTmpl) GetRegisteredFunctions() *template.FuncMap {
+	copiedFuncMap := make(template.FuncMap)
+	maps.Copy(copiedFuncMap, *d.funcMap)
+	return &copiedFuncMap
 }
 
 // Validation functions
@@ -35,17 +59,24 @@ func goodName(name string) bool {
 	return true
 }
 
-func goodFunc(name string, typ reflect.Type) error {
+func goodFunc(fn any) error {
+	// Check that fn is a function
+	v := reflect.ValueOf(fn)
+	if v.Kind() != reflect.Func {
+		return fmt.Errorf("not a function")
+	}
+
 	// We allow functions with 1 result or 2 results where the second is an error.
+	typ := v.Type()
 	switch numOut := typ.NumOut(); {
 	case numOut == 1:
 		return nil
 	case numOut == 2 && typ.Out(1) == reflect.TypeFor[error]():
 		return nil
 	case numOut == 2:
-		return fmt.Errorf("invalid function signature for %s: second return value should be error; is %s", name, typ.Out(1))
+		return fmt.Errorf("invalid function signature - second return value should be error; is %s", typ.Out(1))
 	default:
-		return fmt.Errorf("function %s has %d return values; should be 1 or 2", name, typ.NumOut())
+		return fmt.Errorf("function has %d return values; should be 1 or 2", typ.NumOut())
 	}
 }
 
