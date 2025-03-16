@@ -46,21 +46,35 @@ func TestRegisterFunctions(t *testing.T) {
 // Validation Functions
 
 func TestGoodName(t *testing.T) {
-	if goodName("hello") == false {
-		t.Fatalf("Function names only containing letters should be allowed")
-	}
-	if goodName("hello1") == false {
-		t.Fatalf("Function names only containing letters and numbers should be allowed")
-	}
-	if goodName("my_function") == false {
-		t.Fatal("Function names containing symbols should not be allowed")
-	}
-	if goodName("") {
-		t.Fatal("Blank function names should not be allowed")
-	}
-	if goodName("1") {
-		t.Fatal("Function names not beginning with a letter should not be allowed")
-	}
+	t.Run("Function names only containing letters should be allowed", func(t *testing.T) {
+		if goodName("hello") == false {
+			t.Fatal(t.Name())
+		}
+	})
+
+	t.Run("Function names only containing letters and numbers should be allowed", func(t *testing.T) {
+		if goodName("hello1") == false {
+			t.Fatal(t.Name())
+		}
+	})
+
+	t.Run("Function names containing _ should be allowed", func(t *testing.T) {
+		if goodName("my_function") == false {
+			t.Fatal(t.Name())
+		}
+	})
+
+	t.Run("Blank function names should not be allowed", func(t *testing.T) {
+		if goodName("") == false {
+			t.Fatal(t.Name())
+		}
+	})
+
+	t.Run("Function names not beginning with a letter should not be allowed", func(t *testing.T) {
+		if goodName("1") == false {
+			t.Fatal(t.Name())
+		}
+	})
 }
 
 func TestGoodFunc(t *testing.T) {
