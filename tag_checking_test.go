@@ -32,10 +32,7 @@ func TestTextContainsTags(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result, err := textContainsTags(tt.text)
-			if err != nil {
-				t.Fatalf("Unexpected error checking for tags: %v", err)
-			}
+			result := textContainsTags(tt.text)
 			if result != tt.expectedResult {
 				t.Fatalf("%v - should return %v but returned %v", tt.text, tt.expectedResult, result)
 			}
@@ -73,10 +70,7 @@ func TestTextContainsIncompleteTags(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result, err := textContainsIncompleteTags(tt.text)
-			if err != nil {
-				t.Fatalf("Unexpected error checking for incomplete tags: %v", err)
-			}
+			result := textContainsIncompleteTags(tt.text)
 			if result != tt.expectedResult {
 				t.Fatalf("%v - should return %v but returned %v", tt.text, tt.expectedResult, result)
 			}
