@@ -2,35 +2,15 @@ package docxtpl
 
 import (
 	"regexp"
-	"sync"
 )
 
-var tagRegex *regexp.Regexp
-var tagOnce sync.Once
+var tagRegex = regexp.MustCompile("{{.*?}}")
+var incompleteTagRegex = regexp.MustCompile("{{[^}]*?(}$|$)|{$|^}")
 
-func textContainsTags(text string) (bool, error) {
-	var err error
-	tagOnce.Do(func() {
-		tagRegex, err = regexp.Compile("{{.*?}}")
-	})
-	if err != nil {
-		return false, err
-	}
-
-	return tagRegex.MatchString(text), err
+func textContainsTags(text string) bool {
+	return tagRegex.MatchString(text)
 }
 
-var incompleteTagRegex *regexp.Regexp
-var incompleteTagOnce sync.Once
-
-func textContainsIncompleteTags(text string) (bool, error) {
-	var err error
-	incompleteTagOnce.Do(func() {
-		incompleteTagRegex, err = regexp.Compile("{{[^}]*?(}$|$)|{$|^}")
-	})
-	if err != nil {
-		return false, err
-	}
-
-	return incompleteTagRegex.MatchString(text), err
+func textContainsIncompleteTags(text string) bool {
+	return incompleteTagRegex.MatchString(text)
 }

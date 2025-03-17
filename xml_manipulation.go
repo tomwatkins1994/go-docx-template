@@ -2,7 +2,6 @@ package docxtpl
 
 import (
 	"strings"
-	"sync"
 
 	"github.com/dlclark/regexp2"
 )
@@ -13,17 +12,9 @@ func prepareXmlForTagReplacement(xmlString string) (string, error) {
 	return newXmlString, err
 }
 
-var tableRangeRowRegex *regexp2.Regexp
-var tableRangeRowOnce sync.Once
+var tableRangeRowRegex = regexp2.MustCompile("<w:tr>(?:(?!<w:tr>).)*?({{range .*?}}|{{ range .*? }}|{{end}}|{{ end }})(?:(?!<w:tr>).)*?</w:tr>", 0)
 
 func replaceTableRangeRows(xmlString string) (string, error) {
-	var err error
-	tableRangeRowOnce.Do(func() {
-		tableRangeRowRegex, err = regexp2.Compile("<w:tr>(?:(?!<w:tr>).)*?({{range .*?}}|{{ range .*? }}|{{end}}|{{ end }})(?:(?!<w:tr>).)*?</w:tr>", 0)
-	})
-	if err != nil {
-		return "", err
-	}
 	tableRangeRowRegex.MatchTimeout = 500
 
 	newXmlString := xmlString
