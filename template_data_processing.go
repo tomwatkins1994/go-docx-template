@@ -7,10 +7,10 @@ import (
 	"reflect"
 )
 
-func (d *DocxTmpl) processData(data interface{}) (map[string]interface{}, error) {
+func (d *DocxTmpl) processData(data any) (map[string]any, error) {
 	var err error
-	mapData := make(map[string]interface{})
-	if m, ok := data.(map[string]interface{}); ok {
+	mapData := make(map[string]any)
+	if m, ok := data.(map[string]any); ok {
 		mapData = m
 	} else {
 		if mapData, err = convertStructToMap(data); err != nil {
@@ -25,7 +25,7 @@ func (d *DocxTmpl) processData(data interface{}) (map[string]interface{}, error)
 	return mapData, nil
 }
 
-func handleTagValues(d *DocxTmpl, data *map[string]interface{}) error {
+func handleTagValues(d *DocxTmpl, data *map[string]any) error {
 	for key, value := range *data {
 		if stringVal, ok := value.(string); ok {
 			// Check for files
@@ -44,7 +44,7 @@ func handleTagValues(d *DocxTmpl, data *map[string]interface{}) error {
 					(*data)[key] = imageXml
 				}
 			}
-		} else if sliceValue, ok := value.([]map[string]interface{}); ok {
+		} else if sliceValue, ok := value.([]map[string]any); ok {
 			for _, val := range sliceValue {
 				handleTagValues(d, &val)
 			}
