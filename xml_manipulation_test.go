@@ -59,3 +59,26 @@ func TestReplaceTableRangeRows(t *testing.T) {
 		})
 	}
 }
+
+func TestFixXmlIssuesPostTagReplacement(t *testing.T) {
+	tests := []struct {
+		name              string
+		inputXml          string
+		expectedOutputXml string
+	}{
+		{
+			name:              "Drawing tags",
+			inputXml:          "<w:t><w:drawing>...</w:drawing></w:t>",
+			expectedOutputXml: "<w:drawing>...</w:drawing>",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			outputXml := fixXmlIssuesPostTagReplacement(tt.inputXml)
+			if outputXml != tt.expectedOutputXml {
+				t.Fatalf("output XML string `%v` does not match expected `%v`", outputXml, tt.expectedOutputXml)
+			}
+		})
+	}
+}
