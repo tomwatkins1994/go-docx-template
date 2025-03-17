@@ -5,6 +5,7 @@ import (
 	"os"
 	"path"
 	"reflect"
+	"slices"
 )
 
 func (d *DocxTmpl) processData(data any) (map[string]any, error) {
@@ -80,13 +81,7 @@ func isFilePath(filepath string) (bool, error) {
 func isImageFilePath(filepath string) (bool, error) {
 	ext := path.Ext(filepath)
 	validExts := []string{".png", ".jpg", ".jpeg"}
-	isValid := false
-	for _, v := range validExts {
-		if ext == v {
-			isValid = true
-			break
-		}
-	}
+	isValid := slices.Contains(validExts, ext)
 	if !isValid {
 		return false, nil
 	}
