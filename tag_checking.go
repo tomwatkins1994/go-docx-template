@@ -31,5 +31,6 @@ func textContainsIncompleteTags(text string) (bool, error) {
 	if err != nil {
 		return false, err
 	}
+
 	return incompleteTagRegex.MatchString(text), err
 }
