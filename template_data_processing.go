@@ -5,12 +5,13 @@ import (
 	"os"
 	"path"
 	"reflect"
+	"slices"
 )
 
-func (d *DocxTmpl) processData(data interface{}) (map[string]interface{}, error) {
+func (d *DocxTmpl) processData(data any) (map[string]any, error) {
 	var err error
-	mapData := make(map[string]interface{})
-	if m, ok := data.(map[string]interface{}); ok {
+	mapData := make(map[string]any)
+	if m, ok := data.(map[string]any); ok {
 		mapData = m
 	} else {
 		if mapData, err = convertStructToMap(data); err != nil {
@@ -25,7 +26,7 @@ func (d *DocxTmpl) processData(data interface{}) (map[string]interface{}, error)
 	return mapData, nil
 }
 
-func handleTagValues(d *DocxTmpl, data *map[string]interface{}) error {
+func handleTagValues(d *DocxTmpl, data *map[string]any) error {
 	for key, value := range *data {
 		if stringVal, ok := value.(string); ok {
 			// Check for files
@@ -44,7 +45,7 @@ func handleTagValues(d *DocxTmpl, data *map[string]interface{}) error {
 					(*data)[key] = imageXml
 				}
 			}
-		} else if sliceValue, ok := value.([]map[string]interface{}); ok {
+		} else if sliceValue, ok := value.([]map[string]any); ok {
 			for _, val := range sliceValue {
 				handleTagValues(d, &val)
 			}
@@ -80,13 +81,7 @@ func isFilePath(filepath string) (bool, error) {
 func isImageFilePath(filepath string) (bool, error) {
 	ext := path.Ext(filepath)
 	validExts := []string{".png", ".jpg", ".jpeg"}
-	isValid := false
-	for _, v := range validExts {
-		if ext == v {
-			isValid = true
-			break
-		}
-	}
+	isValid := slices.Contains(validExts, ext)
 	if !isValid {
 		return false, nil
 	}
@@ -99,8 +94,8 @@ func isImageFilePath(filepath string) (bool, error) {
 	return isFile, nil
 }
 
-func convertStructToMap(s interface{}) (map[string]interface{}, error) {
-	result := make(map[string]interface{})
+func convertStructToMap(s any) (map[string]any, error) {
+	result := make(map[string]any)
 	val := reflect.ValueOf(s)
 
 	// Check if the input is a pointer and dereference it
@@ -114,19 +109,19 @@ func convertStructToMap(s interface{}) (map[string]interface{}, error) {
 	}
 
 	// Iterate over the struct fields
-	for i := 0; i < val.NumField(); i++ {
+	for i := range val.NumField() {
 		field := val.Type().Field(i)
 		value := val.Field(i)
 
 		// Store the field name and value in the map
 		if value.Kind() == reflect.Slice {
-			newMapSlice := make([]map[string]interface{}, value.Len())
-			for i := 0; i < value.Len(); i++ {
-				newMap, err := convertStructToMap(value.Index(i).Interface())
+			newMapSlice := make([]map[string]any, value.Len())
+			for j := range value.Len() {
+				newMap, err := convertStructToMap(value.Index(j).Interface())
 				if err != nil {
 					return nil, err
 				}
-				newMapSlice[i] = newMap
+				newMapSlice[j] = newMap
 			}
 			result[field.Name] = newMapSlice
 		} else {

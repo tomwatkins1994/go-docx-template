@@ -6,51 +6,75 @@ import (
 )
 
 func TestIsFilePath(t *testing.T) {
-	t.Run("Existing file", func(t *testing.T) {
-		filepath := "test_templates/test_basic.docx"
-		exists, err := isFilePath(filepath)
-		if err != nil {
-			t.Fatalf("Error checking for file path: %v", err)
-		}
-		if exists == false {
-			t.Fatalf("File should exist: %v", filepath)
-		}
-	})
+	tests := []struct {
+		name           string
+		filepath       string
+		expectedResult bool
+	}{
+		{
+			name:           "Existing file",
+			filepath:       "test_templates/test_image.png",
+			expectedResult: true,
+		},
+		{
+			name:           "Non existent file",
+			filepath:       "test_templates/not_exists.docx",
+			expectedResult: false,
+		},
+		{
+			name:           "Exists but is a folder",
+			filepath:       "test_templates",
+			expectedResult: false,
+		},
+	}
 
-	t.Run("Non existent file", func(t *testing.T) {
-		filepath := "test_templates/not_exists.docx"
-		exists, err := isFilePath(filepath)
-		if err != nil {
-			t.Fatalf("Error checking for file path: %v", err)
-		}
-		if exists {
-			t.Fatalf("File should not exist: %v", filepath)
-		}
-	})
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result, err := isFilePath(tt.filepath)
+			if err != nil {
+				t.Fatalf("Unexpected error checking for file path: %v", err)
+			}
+			if result != tt.expectedResult {
+				t.Fatalf("%v - should return %v but returned %v", tt.filepath, tt.expectedResult, result)
+			}
+		})
+	}
 }
 
 func TestIsImageFilePath(t *testing.T) {
-	t.Run("Existing image", func(t *testing.T) {
-		filepath := "test_templates/test_image.png"
-		exists, err := isImageFilePath(filepath)
-		if err != nil {
-			t.Fatalf("Error checking for file path: %v", err)
-		}
-		if exists == false {
-			t.Fatalf("File should exist and be flagged as an image: %v", filepath)
-		}
-	})
+	tests := []struct {
+		name           string
+		filepath       string
+		expectedResult bool
+	}{
+		{
+			name:           "Existing image",
+			filepath:       "test_templates/test_image.png",
+			expectedResult: true,
+		},
+		{
+			name:           "File exists but isn't ab image",
+			filepath:       "test_templates/test_basic.docx",
+			expectedResult: false,
+		},
+		{
+			name:           "Missing file extension",
+			filepath:       "test_templates/test_image",
+			expectedResult: false,
+		},
+	}
 
-	t.Run("File exists but not image", func(t *testing.T) {
-		filepath := "test_templates/test_basic.docx"
-		exists, err := isImageFilePath(filepath)
-		if err != nil {
-			t.Fatalf("Error checking for file path: %v", err)
-		}
-		if exists {
-			t.Fatalf("File should not be flagged as an image: %v", filepath)
-		}
-	})
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result, err := isImageFilePath(tt.filepath)
+			if err != nil {
+				t.Fatalf("Unexpected error checking for image file path: %v", err)
+			}
+			if result != tt.expectedResult {
+				t.Fatalf("%v - should return %v but returned %v", tt.filepath, tt.expectedResult, result)
+			}
+		})
+	}
 }
 
 func TestConvertStructToMap(t *testing.T) {
@@ -108,7 +132,7 @@ func TestConvertStructToMap(t *testing.T) {
 		for key, value := range mapData {
 			val := reflect.ValueOf(value)
 			if val.Kind() == reflect.Slice {
-				for i := 0; i < val.Len(); i++ {
+				for i := range val.Len() {
 					if val.Index(i).Kind() == reflect.Struct {
 						t.Fatalf("Found struct in data: %v %v", key, value)
 					}

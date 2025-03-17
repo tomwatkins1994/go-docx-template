@@ -1,124 +1,151 @@
 package docxtpl
 
-import "testing"
+import (
+	"testing"
+)
 
 func TestRegisterFunctions(t *testing.T) {
-	t.Run("Valid function with no error", func(t *testing.T) {
-		doc, err := ParseFromFilename("test_templates/test_basic.docx")
-		if err != nil {
-			t.Fatalf("%v - Parsing error: %v", t.Name(), err)
-		}
-		name := "hello"
-		err = doc.RegisterFunction(name, func(text string) string {
-			return "hello"
-		})
-		if err != nil {
-			t.Fatalf("%v - Error registering function: %v", t.Name(), err)
-		}
-		funcMap := doc.GetRegisteredFunctions()
-		if (*funcMap)[name] == nil {
-			t.Fatalf("%v - function not found in map", t.Name())
-		}
-	})
+	tests := []struct {
+		name        string
+		fnName      string
+		fn          any
+		expectError bool
+	}{
+		{
+			name:   "Valid function",
+			fnName: "validFunction",
+			fn: func(text string) string {
+				return "Hello"
+			},
+			expectError: false,
+		},
+		{
+			name:        "Invalid function name",
+			fnName:      "",
+			fn:          nil,
+			expectError: true,
+		},
+		{
+			name:        "Invalid function signature",
+			fnName:      "validFunction",
+			fn:          "not a valid function",
+			expectError: true,
+		},
+	}
 
-	t.Run("Valid function with error", func(t *testing.T) {
-		doc, err := ParseFromFilename("test_templates/test_basic.docx")
-		if err != nil {
-			t.Fatalf("%v - Parsing error: %v", t.Name(), err)
-		}
-		name := "hello"
-		err = doc.RegisterFunction(name, func(text string) (string, error) {
-			return "hello", nil
-		})
-		if err != nil {
-			t.Fatalf("%v - Error registering function: %v", t.Name(), err)
-		}
-		funcMap := doc.GetRegisteredFunctions()
-		if (*funcMap)[name] == nil {
-			t.Fatalf("%v - function not found in map", t.Name())
-		}
-	})
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			doc, err := ParseFromFilename("test_templates/test_basic.docx")
+			if err != nil {
+				t.Fatalf("%v - Parsing error: %v", t.Name(), err)
+			}
 
-	t.Run("Invalid function", func(t *testing.T) {
-		doc, err := ParseFromFilename("test_templates/test_basic.docx")
-		if err != nil {
-			t.Fatalf("%v - Parsing error: %v", t.Name(), err)
-		}
-		name := "hello"
-		err = doc.RegisterFunction(name, func(text string) {
-			// Do nothing here
+			err = doc.RegisterFunction(tt.fnName, tt.fn)
+			if (err != nil) != tt.expectError {
+				t.Errorf("expected error: %v, got: %v", tt.expectError, err)
+			}
+
+			funcMap := doc.GetRegisteredFunctions()
+			_, exists := (*funcMap)[tt.fnName]
+			if !tt.expectError && !exists {
+				t.Errorf("%v - function not found in map", tt.name)
+			}
+			if tt.expectError && exists {
+				t.Errorf("%v - function found in map after erroring", tt.name)
+			}
 		})
-		if err == nil {
-			t.Fatalf("%v - Did not return expected error: %v", t.Name(), err)
-		}
-		funcMap := doc.GetRegisteredFunctions()
-		if (*funcMap)[name] != nil {
-			t.Fatalf("%v - function found in map when it shouldn't be: %v", t.Name(), (*funcMap)[name])
-		}
-	})
+	}
 }
 
 // Validation Functions
 
 func TestGoodName(t *testing.T) {
-	t.Run("Function names only containing letters should be allowed", func(t *testing.T) {
-		if goodName("hello") == false {
-			t.Fatal(t.Name())
-		}
-	})
+	tests := []struct {
+		name           string
+		fnName         string
+		expectedResult bool
+	}{
+		{
+			name:           "Function names only containing letters should be allowed",
+			fnName:         "hello",
+			expectedResult: true,
+		},
+		{
+			name:           "Function names only containing letters and numbers should be allowed",
+			fnName:         "hello123",
+			expectedResult: true,
+		},
+		{
+			name:           "Function names containing _ should be allowed",
+			fnName:         "my_function",
+			expectedResult: true,
+		},
+		{
+			name:           "Blank function names should not be allowed",
+			fnName:         "",
+			expectedResult: false,
+		},
+		{
+			name:           "Function names not beginning with a letter should not be allowed",
+			fnName:         "1",
+			expectedResult: false,
+		},
+	}
 
-	t.Run("Function names only containing letters and numbers should be allowed", func(t *testing.T) {
-		if goodName("hello1") == false {
-			t.Fatal(t.Name())
-		}
-	})
-
-	t.Run("Function names containing _ should be allowed", func(t *testing.T) {
-		if goodName("my_function") == false {
-			t.Fatal(t.Name())
-		}
-	})
-
-	t.Run("Blank function names should not be allowed", func(t *testing.T) {
-		if goodName("") {
-			t.Fatal(t.Name())
-		}
-	})
-
-	t.Run("Function names not beginning with a letter should not be allowed", func(t *testing.T) {
-		if goodName("1") {
-			t.Fatal(t.Name())
-		}
-	})
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := goodName(tt.fnName)
+			if result != tt.expectedResult {
+				t.Fatalf("%v - should return %v but returned %v", tt.fnName, tt.expectedResult, result)
+			}
+		})
+	}
 }
 
 func TestGoodFunc(t *testing.T) {
-	t.Run("Valid function", func(t *testing.T) {
-		err := goodFunc(func(text string) string {
-			return "hello"
-		})
-		if err != nil {
-			t.Fatalf("%v - should be valid: %v", t.Name(), err)
-		}
-	})
+	tests := []struct {
+		name        string
+		fn          any
+		expectError bool
+	}{
+		{
+			name: "Valid function",
+			fn: func(text string) string {
+				return text
+			},
+			expectError: false,
+		},
+		{
+			name: "Valid function with error",
+			fn: func(text string) (string, error) {
+				return text, nil
+			},
+			expectError: false,
+		},
+		{
+			name: "Function with no return type",
+			fn: func(text string) {
+				// Function does nothing
+			},
+			expectError: true,
+		},
+		{
+			name: "Function with no input",
+			fn: func() string {
+				return "hello"
+			},
+			expectError: false,
+		},
+	}
 
-	t.Run("Valid function with error", func(t *testing.T) {
-		err := goodFunc(func(text string) (string, error) {
-			return "hello", nil
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := goodFunc(tt.fn)
+			if (err != nil) != tt.expectError {
+				t.Errorf("expected error: %v, got: %v", tt.expectError, err)
+			}
 		})
-		if err != nil {
-			t.Fatalf("%v - should be valid: %v", t.Name(), err)
-		}
-	})
-
-	t.Run("Invalid function", func(t *testing.T) {
-		err := goodFunc(func(text string) {
-			// Do nothing here
-		})
-		if err == nil {
-			t.Fatalf("%v - did not return expected error: %v", t.Name(), err)
-		}
-	})
+	}
 }
 
 // Custom functions
