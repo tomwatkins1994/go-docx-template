@@ -108,7 +108,7 @@ func TestConvertStructToMap(t *testing.T) {
 		for key, value := range mapData {
 			val := reflect.ValueOf(value)
 			if val.Kind() == reflect.Slice {
-				for i := 0; i < val.Len(); i++ {
+				for i := range val.Len() {
 					if val.Index(i).Kind() == reflect.Struct {
 						t.Fatalf("Found struct in data: %v %v", key, value)
 					}
