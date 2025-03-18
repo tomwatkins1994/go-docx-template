@@ -204,6 +204,14 @@ func TestTableTemplate(t *testing.T) {
 	}
 }
 
+func TestFailureToParse(t *testing.T) {
+	data := map[string]any{}
+	_, err := replaceTagsInText("{{", data, &defaultFuncMap)
+	if err == nil {
+		t.Fatalf("Error in basic template %v", err)
+	}
+}
+
 func removeXmlFormatting(originalXML string) string {
 	newXml := strings.ReplaceAll(originalXML, "\n", "")
 	newXml = strings.ReplaceAll(newXml, "\r", "")
