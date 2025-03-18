@@ -136,6 +136,13 @@ func TestGoodFunc(t *testing.T) {
 			},
 			expectError: false,
 		},
+		{
+			name: "Function where second return value is not an error",
+			fn: func() (string, string) {
+				return "hello", "world"
+			},
+			expectError: true,
+		},
 	}
 
 	for _, tt := range tests {
