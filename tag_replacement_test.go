@@ -145,7 +145,7 @@ func TestTableTemplate(t *testing.T) {
 	</w:document>`
 
 	data := map[string]any{
-		"People": []map[string]interface{}{
+		"People": []map[string]any{
 			{"Name": "Tom Watkins"},
 			{"Name": "Evie Argyle"},
 		},
