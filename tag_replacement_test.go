@@ -4,6 +4,7 @@ import (
 	"regexp"
 	"strings"
 	"testing"
+	"text/template"
 )
 
 func TestBasicTemplate(t *testing.T) {
@@ -162,10 +163,10 @@ func TestTableTemplate(t *testing.T) {
 				<w:tblPr>  
 					<w:tblW w:w="5000" w:type="pct"/>  
 					<w:tblBorders>  
-					<w:top w:val="single" w:sz="4" w:space="0" w:color="auto"/>  
-					<w:left w:val="single" w:sz="4" w:space="0" w:color="auto"/>  
-					<w:bottom w:val="single" w:sz="4" w:space="0" w:color="auto"/>  
-					<w:right w:val="single" w:sz="4" w:space="0" w:color="auto"/>  
+						<w:top w:val="single" w:sz="4" w:space="0" w:color="auto"/>  
+						<w:left w:val="single" w:sz="4" w:space="0" w:color="auto"/>  
+						<w:bottom w:val="single" w:sz="4" w:space="0" w:color="auto"/>  
+						<w:right w:val="single" w:sz="4" w:space="0" w:color="auto"/>  
 					</w:tblBorders>  
 				</w:tblPr>  
 				<w:tblGrid>  
@@ -208,7 +209,19 @@ func TestFailureToParse(t *testing.T) {
 	data := map[string]any{}
 	_, err := replaceTagsInText("{{", data, &defaultFuncMap)
 	if err == nil {
-		t.Fatalf("Error in basic template %v", err)
+		t.Fatalf("Expected error")
+	}
+}
+
+func TestFailureToExecute(t *testing.T) {
+	funcMap := &template.FuncMap{
+		"fail": func() string {
+			panic("forced function error")
+		},
+	}
+	result, err := replaceTagsInText("Function should cause an error: {{ fail }}", nil, funcMap)
+	if err == nil {
+		t.Fatalf("Expected error in: %v", result)
 	}
 }
 
