@@ -90,6 +90,11 @@ func TestGoodName(t *testing.T) {
 			fnName:         "1",
 			expectedResult: false,
 		},
+		{
+			name:           "Function names containing symbols should not be allowed",
+			fnName:         "hello!",
+			expectedResult: false,
+		},
 	}
 
 	for _, tt := range tests {
