@@ -23,7 +23,7 @@ func TestBasicTemplate(t *testing.T) {
 		</w:body>  
 	</w:document>`
 
-	data := map[string]interface{}{
+	data := map[string]any{
 		"Name": "Tom Watkins",
 	}
 	outputXml, err := replaceTagsInText(xmlString, data, &defaultFuncMap)
@@ -75,7 +75,7 @@ func TestBasicTemplateWithFunctions(t *testing.T) {
 		</w:body>  
 	</w:document>`
 
-	data := map[string]interface{}{
+	data := map[string]any{
 		"Name": "Tom watkins",
 	}
 	outputXml, err := replaceTagsInText(xmlString, data, &defaultFuncMap)
@@ -144,7 +144,7 @@ func TestTableTemplate(t *testing.T) {
 		</w:body>  
 	</w:document>`
 
-	data := map[string]interface{}{
+	data := map[string]any{
 		"People": []map[string]interface{}{
 			{"Name": "Tom Watkins"},
 			{"Name": "Evie Argyle"},
