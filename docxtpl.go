@@ -78,7 +78,7 @@ func (d *DocxTmpl) Render(data any) error {
 	}
 
 	// Process the template data
-	proccessedData, err := d.processData(data)
+	proccessedData, err := processData(data)
 	if err != nil {
 		return err
 	}

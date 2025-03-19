@@ -8,7 +8,7 @@ import (
 	"slices"
 )
 
-func (d *DocxTmpl) processData(data any) (map[string]any, error) {
+func processData(data any) (map[string]any, error) {
 	var err error
 	mapData := make(map[string]any)
 	if m, ok := data.(map[string]any); ok {
@@ -19,9 +19,9 @@ func (d *DocxTmpl) processData(data any) (map[string]any, error) {
 		}
 	}
 
-	if err = handleTagValues(d, &mapData); err != nil {
-		return nil, err
-	}
+	// if err = handleTagValues(d, &mapData); err != nil {
+	// 	return nil, err
+	// }
 
 	return mapData, nil
 }
