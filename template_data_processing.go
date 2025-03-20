@@ -21,11 +21,11 @@ func processData(d *DocxTmpl, data *any) (map[string]any, error) {
 					return err
 				} else {
 					if isImage {
-						image, err := d.CreateInlineImage(stringVal)
+						image, err := CreateInlineImage(stringVal)
 						if err != nil {
 							return err
 						}
-						imageXml, err := image.addToDocument()
+						imageXml, err := d.addInlineImage(image)
 						if err != nil {
 							return err
 						}
@@ -44,7 +44,7 @@ func processData(d *DocxTmpl, data *any) (map[string]any, error) {
 					}
 				}
 			} else if inlineImage, ok := value.(*InlineImage); ok {
-				imageXml, err := inlineImage.addToDocument()
+				imageXml, err := d.addInlineImage(inlineImage)
 				if err != nil {
 					return err
 				}

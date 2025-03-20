@@ -26,7 +26,6 @@ const (
 )
 
 type InlineImage struct {
-	doc  *DocxTmpl
 	data *[]byte
 	ext  string
 }
@@ -39,7 +38,7 @@ func (e *InlineImageError) Error() string {
 	return fmt.Sprintf("Image error: %v", e.Message)
 }
 
-func (d *DocxTmpl) CreateInlineImage(filepath string) (*InlineImage, error) {
+func CreateInlineImage(filepath string) (*InlineImage, error) {
 	if isImage, err := isImageFilePath(filepath); err != nil {
 		return nil, err
 	} else {
@@ -55,7 +54,7 @@ func (d *DocxTmpl) CreateInlineImage(filepath string) (*InlineImage, error) {
 
 	ext := path.Ext(filepath)
 
-	return &InlineImage{d, &file, ext}, nil
+	return &InlineImage{&file, ext}, nil
 }
 
 func (i *InlineImage) getImageFormat() (imagemeta.ImageFormat, error) {
@@ -238,9 +237,9 @@ func getResolutionFromString(resolution string) (int, error) {
 	return result, nil
 }
 
-func (i *InlineImage) addToDocument() (xmlString string, err error) {
+func (d *DocxTmpl) addInlineImage(i *InlineImage) (xmlString string, err error) {
 	// Add the image to the document
-	paragraph := i.doc.AddParagraph()
+	paragraph := d.AddParagraph()
 	run, err := paragraph.AddInlineDrawing(*i.data)
 	if err != nil {
 		return "", err
@@ -253,10 +252,10 @@ func (i *InlineImage) addToDocument() (xmlString string, err error) {
 	}
 	switch format {
 	case imagemeta.JPEG:
-		i.doc.contentTypes.addContentType(&JPG_CONTENT_TYPE)
-		i.doc.contentTypes.addContentType(&JPEG_CONTENT_TYPE)
+		d.contentTypes.addContentType(&JPG_CONTENT_TYPE)
+		d.contentTypes.addContentType(&JPEG_CONTENT_TYPE)
 	case imagemeta.PNG:
-		i.doc.contentTypes.addContentType(&PNG_CONTENT_TYPE)
+		d.contentTypes.addContentType(&PNG_CONTENT_TYPE)
 	}
 
 	// Correctly size the image
@@ -289,7 +288,7 @@ func (i *InlineImage) addToDocument() (xmlString string, err error) {
 
 	// Remove the paragraph from the word doc so we don't get the image twice
 	var newItems []interface{}
-	for _, item := range i.doc.Document.Body.Items {
+	for _, item := range d.Document.Body.Items {
 		switch o := item.(type) {
 		case *docx.Paragraph:
 			if o == paragraph {
@@ -298,7 +297,7 @@ func (i *InlineImage) addToDocument() (xmlString string, err error) {
 		}
 		newItems = append(newItems, item)
 	}
-	i.doc.Document.Body.Items = newItems
+	d.Document.Body.Items = newItems
 
 	return xmlString, nil
 }
