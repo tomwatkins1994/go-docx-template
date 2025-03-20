@@ -5,11 +5,11 @@ import (
 	"reflect"
 )
 
-func dataToMap(data any) (map[string]any, error) {
-	if m, ok := data.(map[string]any); ok {
+func dataToMap(data *any) (map[string]any, error) {
+	if m, ok := (*data).(map[string]any); ok {
 		return m, nil
 	} else {
-		if mapData, err := convertStructToMap(data); err != nil {
+		if mapData, err := convertStructToMap(*data); err != nil {
 			return nil, err
 		} else {
 			return mapData, nil
@@ -28,6 +28,7 @@ func convertStructToMap(s any) (map[string]any, error) {
 
 	// Ensure we have a struct type
 	if val.Kind() != reflect.Struct {
+		fmt.Printf("is error\n")
 		return nil, fmt.Errorf("expected a struct, got %s", val.Kind())
 	}
 
@@ -40,13 +41,22 @@ func convertStructToMap(s any) (map[string]any, error) {
 		if value.Kind() == reflect.Slice {
 			newMapSlice := make([]map[string]any, value.Len())
 			for j := range value.Len() {
-				newMap, err := convertStructToMap(value.Index(j).Interface())
-				if err != nil {
-					return nil, err
+				sliceValue := value.Index(j)
+				if sliceValue.Kind() == reflect.Struct {
+					newMap, err := convertStructToMap(sliceValue.Interface())
+					if err != nil {
+						return nil, err
+					}
+					newMapSlice[j] = newMap
 				}
-				newMapSlice[j] = newMap
 			}
 			result[field.Name] = newMapSlice
+		} else if value.Kind() == reflect.Struct {
+			newMap, err := convertStructToMap(value.Interface())
+			if err != nil {
+				return nil, err
+			}
+			result[field.Name] = newMap
 		} else {
 			result[field.Name] = value.Interface()
 		}
