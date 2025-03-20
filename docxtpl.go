@@ -78,7 +78,11 @@ func (d *DocxTmpl) Render(data any) error {
 	}
 
 	// Process the template data
-	proccessedData, err := dataToMap(data)
+	convertedData, err := dataToMap(data)
+	if err != nil {
+		return err
+	}
+	err = processTagValues(d, &convertedData)
 	if err != nil {
 		return err
 	}
@@ -96,7 +100,7 @@ func (d *DocxTmpl) Render(data any) error {
 	}
 
 	// Replace the tags in XML
-	documentXmlString, err = replaceTagsInText(documentXmlString, proccessedData, d.funcMap)
+	documentXmlString, err = replaceTagsInText(documentXmlString, convertedData, d.funcMap)
 	if err != nil {
 		return err
 	}

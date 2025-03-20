@@ -6,7 +6,7 @@ import (
 	"slices"
 )
 
-func handleTagValues(d *DocxTmpl, data *map[string]any) error {
+func processTagValues(d *DocxTmpl, data *map[string]any) error {
 	for key, value := range *data {
 		if stringVal, ok := value.(string); ok {
 			// Check for files
@@ -27,7 +27,7 @@ func handleTagValues(d *DocxTmpl, data *map[string]any) error {
 			}
 		} else if sliceValue, ok := value.([]map[string]any); ok {
 			for _, val := range sliceValue {
-				handleTagValues(d, &val)
+				processTagValues(d, &val)
 			}
 		} else if inlineImage, ok := value.(*InlineImage); ok {
 			imageXml, err := inlineImage.addToDocument()
