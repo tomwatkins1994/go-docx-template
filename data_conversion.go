@@ -15,10 +15,6 @@ func dataToMap(data any) (map[string]any, error) {
 			return mapData, nil
 		}
 	}
-
-	// if err = handleTagValues(d, &mapData); err != nil {
-	// 	return nil, err
-	// }
 }
 
 func convertStructToMap(s any) (map[string]any, error) {
