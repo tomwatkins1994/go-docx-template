@@ -6,7 +6,7 @@ import (
 	"slices"
 )
 
-func processData(d *DocxTmpl, data *any) (map[string]any, error) {
+func (d *DocxTmpl) processTemplateData(data *any) (map[string]any, error) {
 	convertedData, err := dataToMap(data)
 	if err != nil {
 		return nil, err
