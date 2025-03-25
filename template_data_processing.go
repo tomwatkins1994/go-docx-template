@@ -6,7 +6,7 @@ import (
 	"slices"
 )
 
-func processTemplateData(data *any) (map[string]any, error) {
+func (d *DocxTmpl) processTemplateData(data *any) (map[string]any, error) {
 	convertedData, err := dataToMap(data)
 	if err != nil {
 		return nil, err
@@ -22,6 +22,10 @@ func processTemplateData(data *any) (map[string]any, error) {
 				} else {
 					if isImage {
 						image, err := CreateInlineImage(stringVal)
+						if err != nil {
+							return err
+						}
+						err = d.addInlineImage(image)
 						if err != nil {
 							return err
 						}
@@ -45,6 +49,10 @@ func processTemplateData(data *any) (map[string]any, error) {
 				}
 			} else if inlineImage, ok := value.(*InlineImage); ok {
 				imageXml, err := inlineImage.getXml()
+				if err != nil {
+					return err
+				}
+				err = d.addInlineImage(inlineImage)
 				if err != nil {
 					return err
 				}
