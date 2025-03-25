@@ -1,8 +1,11 @@
 package docxtpl
 
 import (
+	"fmt"
 	"reflect"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestConvertStructToMap(t *testing.T) {
@@ -17,12 +20,12 @@ func TestConvertStructToMap(t *testing.T) {
 			Status:        "New",
 		}
 		_, err := convertStructToMap(data)
-		if err != nil {
-			t.Fatalf("Error converting basic struct: %v", err)
-		}
+		assert.Nil(t, err)
 	})
 
 	t.Run("Struct with nested data", func(t *testing.T) {
+		assert := assert.New(t)
+
 		data := struct {
 			ProjectNumber string
 			Client        string
@@ -54,16 +57,13 @@ func TestConvertStructToMap(t *testing.T) {
 			},
 		}
 		mapData, err := convertStructToMap(data)
-		if err != nil {
-			t.Fatalf("Error converting struct with nested data: %v", err)
-		}
+		assert.Nil(err)
+
 		for key, value := range mapData {
 			val := reflect.ValueOf(value)
 			if val.Kind() == reflect.Slice {
 				for i := range val.Len() {
-					if val.Index(i).Kind() == reflect.Struct {
-						t.Fatalf("Found struct in data: %v %v", key, value)
-					}
+					assert.NotEqual(val.Index(i).Kind(), reflect.Struct, fmt.Sprintf("Found struct in data: %v %v", key, value))
 				}
 			}
 		}
