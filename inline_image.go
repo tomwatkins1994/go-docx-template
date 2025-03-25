@@ -237,6 +237,8 @@ func getResolutionFromString(resolution string) (int, error) {
 	return result, nil
 }
 
+func (i *InlineImage) getContentType()
+
 func (d *DocxTmpl) addInlineImage(i *InlineImage) (xmlString string, err error) {
 	// Add the image to the document
 	paragraph := d.AddParagraph()
