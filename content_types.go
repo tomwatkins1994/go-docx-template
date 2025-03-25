@@ -5,6 +5,7 @@ import (
 	"encoding/xml"
 	"errors"
 	"io"
+	"slices"
 )
 
 type ContentTypes struct {
@@ -62,10 +63,8 @@ var JPG_CONTENT_TYPE = ContentType{Extension: "jpg", ContentType: "image/jpg"}
 var JPEG_CONTENT_TYPE = ContentType{Extension: "jpeg", ContentType: "image/jpeg"}
 
 func (ct *ContentTypes) addContentType(contentType *ContentType) {
-	for _, v := range ct.Defaults {
-		if v == *contentType {
-			return
-		}
+	if slices.Contains(ct.Defaults, *contentType) {
+		return
 	}
 	ct.Defaults = append(ct.Defaults, *contentType)
 }
