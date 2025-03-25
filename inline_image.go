@@ -301,3 +301,45 @@ func (d *DocxTmpl) addInlineImage(i *InlineImage) (xmlString string, err error) 
 
 	return xmlString, nil
 }
+
+func (i *InlineImage) getXml() (xmlString string, err error) {
+	// Create empty doc so we can use the built in methods
+	doc := docx.New().WithDefaultTheme()
+
+	// Add the image to the document
+	paragraph := doc.AddParagraph()
+	run, err := paragraph.AddInlineDrawing(*i.data)
+	if err != nil {
+		return "", err
+	}
+
+	// Correctly size the image
+	w, h, err := i.GetSize()
+	if err != nil {
+		return "", err
+	}
+	for _, child := range run.Children {
+		if drawing, ok := child.(*docx.Drawing); ok {
+			drawing.Inline.Extent.CX = w
+			drawing.Inline.Extent.CY = h
+			break
+		}
+	}
+
+	// Get the image XML
+	out, err := xml.Marshal(run)
+	if err != nil {
+		return "", err
+	}
+
+	// Remove run tags as the tag should be in a run already
+	xmlString = string(out)
+	xmlString = strings.Replace(xmlString, "<w:r>", "", 1)
+	xmlString = strings.Replace(xmlString, "<w:rPr></w:rPr>", "", 1)
+	lastIndex := strings.LastIndex(xmlString, "</w:r")
+	if lastIndex > -1 {
+		xmlString = xmlString[:lastIndex]
+	}
+
+	return xmlString, nil
+}

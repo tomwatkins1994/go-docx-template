@@ -6,14 +6,14 @@ import (
 	"slices"
 )
 
-func (d *DocxTmpl) processTemplateData(data *any) (map[string]any, error) {
+func processTemplateData(data *any) (map[string]any, error) {
 	convertedData, err := dataToMap(data)
 	if err != nil {
 		return nil, err
 	}
 
-	var processTagValues func(d *DocxTmpl, data *map[string]any) error
-	processTagValues = func(d *DocxTmpl, data *map[string]any) error {
+	var processTagValues func(data *map[string]any) error
+	processTagValues = func(data *map[string]any) error {
 		for key, value := range *data {
 			if stringVal, ok := value.(string); ok {
 				// Check for files
@@ -25,7 +25,7 @@ func (d *DocxTmpl) processTemplateData(data *any) (map[string]any, error) {
 						if err != nil {
 							return err
 						}
-						imageXml, err := d.addInlineImage(image)
+						imageXml, err := image.getXml()
 						if err != nil {
 							return err
 						}
@@ -33,18 +33,18 @@ func (d *DocxTmpl) processTemplateData(data *any) (map[string]any, error) {
 					}
 				}
 			} else if nestedMap, ok := value.(map[string]any); ok {
-				if err := processTagValues(d, &nestedMap); err != nil {
+				if err := processTagValues(&nestedMap); err != nil {
 					return err
 				}
 				(*data)[key] = nestedMap
 			} else if sliceValue, ok := value.([]map[string]any); ok {
 				for i := range sliceValue {
-					if err := processTagValues(d, &sliceValue[i]); err != nil {
+					if err := processTagValues(&sliceValue[i]); err != nil {
 						return err
 					}
 				}
 			} else if inlineImage, ok := value.(*InlineImage); ok {
-				imageXml, err := d.addInlineImage(inlineImage)
+				imageXml, err := inlineImage.getXml()
 				if err != nil {
 					return err
 				}
@@ -55,7 +55,7 @@ func (d *DocxTmpl) processTemplateData(data *any) (map[string]any, error) {
 		return nil
 	}
 
-	err = processTagValues(d, &convertedData)
+	err = processTagValues(&convertedData)
 	if err != nil {
 		return nil, err
 	}
