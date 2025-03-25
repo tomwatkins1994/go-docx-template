@@ -253,15 +253,21 @@ func (i *InlineImage) getContentTypes() ([]*ContentType, error) {
 	return []*ContentType{}, nil
 }
 
-func (i *InlineImage) getXml() (xmlString string, err error) {
-	// Create empty doc so we can use the built in methods
-	doc := docx.New().WithDefaultTheme()
-
+func (d *DocxTmpl) addInlineImage(i *InlineImage) (xmlString string, err error) {
 	// Add the image to the document
-	paragraph := doc.AddParagraph()
+	paragraph := d.AddParagraph()
 	run, err := paragraph.AddInlineDrawing(*i.data)
 	if err != nil {
 		return "", err
+	}
+
+	// Append the content types
+	contentTypes, err := i.getContentTypes()
+	if err != nil {
+		return "", err
+	}
+	for _, contentType := range contentTypes {
+		d.contentTypes.addContentType(contentType)
 	}
 
 	// Correctly size the image
@@ -292,18 +298,18 @@ func (i *InlineImage) getXml() (xmlString string, err error) {
 		xmlString = xmlString[:lastIndex]
 	}
 
+	// Remove the paragraph from the word doc so we don't get the image twice
+	var newItems []interface{}
+	for _, item := range d.Document.Body.Items {
+		switch o := item.(type) {
+		case *docx.Paragraph:
+			if o == paragraph {
+				continue
+			}
+		}
+		newItems = append(newItems, item)
+	}
+	d.Document.Body.Items = newItems
+
 	return xmlString, nil
-}
-
-func (d *DocxTmpl) addInlineImage(i *InlineImage) error {
-	// Append the content types
-	contentTypes, err := i.getContentTypes()
-	if err != nil {
-		return err
-	}
-	for _, contentType := range contentTypes {
-		d.contentTypes.addContentType(contentType)
-	}
-
-	return nil
 }
