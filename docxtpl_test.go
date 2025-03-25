@@ -5,6 +5,8 @@ import (
 	"os"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestParseAndRender(t *testing.T) {
@@ -117,24 +119,19 @@ func TestParseAndRender(t *testing.T) {
 	})
 
 	t.Run("Document with image structs", func(t *testing.T) {
+		assert := assert.New(t)
+
 		doc, err := ParseFromFilename("test_templates/test_with_tables_and_images.docx")
-		if err != nil {
-			t.Fatalf("%v - Parsing error: %v", t.Name(), err)
-		}
+		assert.Nil(err)
 
 		testImage, err := CreateInlineImage("test_templates/test_image.png")
-		if err != nil {
-			t.Fatalf("%v - Inline image error: %v", t.Name(), err)
-		}
+		assert.Nil(err)
 
 		profileImage, err := CreateInlineImage("test_templates/test_image.jpg")
-		if err != nil {
-			t.Fatalf("%v - Inline image error: %v", t.Name(), err)
-		}
+		assert.Nil(err)
+
 		err = profileImage.Resize(100, 100)
-		if err != nil {
-			t.Fatalf("%v - Resizing inline image error: %v", t.Name(), err)
-		}
+		assert.Nil(err)
 
 		data := struct {
 			ProjectNumber string
@@ -174,36 +171,28 @@ func TestParseAndRender(t *testing.T) {
 		}
 
 		err = doc.Render(data)
-		if err != nil {
-			t.Fatalf("%v - Rendering error: %v", t.Name(), err)
-		}
+		assert.Nil(err)
 
 		f, err := os.Create("test_templates/generated_test_with_image_structs.docx")
-		if err != nil {
-			t.Fatalf("%v - Error creating document: %v", t.Name(), err)
-		}
+		assert.Nil(err)
+
 		err = doc.Save(f)
-		if err != nil {
-			t.Fatalf("%v - Error saving new document: %v", t.Name(), err)
-		}
+		assert.Nil(err)
+
 		err = f.Close()
-		if err != nil {
-			t.Fatalf("%v - Error closing created document: %v", t.Name(), err)
-		}
+		assert.Nil(err)
 	})
 
 	t.Run("Document with custom function", func(t *testing.T) {
+		assert := assert.New(t)
+
 		doc, err := ParseFromFilename("test_templates/test_with_custom_function.docx")
-		if err != nil {
-			t.Fatalf("%v - Parsing error: %v", t.Name(), err)
-		}
+		assert.Nil(err)
 
 		err = doc.RegisterFunction("hello", func(text string) string {
 			return fmt.Sprintf("Hello %v", text)
 		})
-		if err != nil {
-			t.Fatalf("%v - Error registering function: %v", t.Name(), err)
-		}
+		assert.Nil(err)
 
 		data := struct {
 			ProjectNumber string
@@ -216,58 +205,44 @@ func TestParseAndRender(t *testing.T) {
 		}
 
 		err = doc.Render(data)
-		if err != nil {
-			t.Fatalf("%v - Rendering error: %v", t.Name(), err)
-		}
+		assert.Nil(err)
 
 		f, err := os.Create("test_templates/generated_test_with_custom_function.docx")
-		if err != nil {
-			t.Fatalf("%v - Error creating document: %v", t.Name(), err)
-		}
+		assert.Nil(err)
+
 		err = doc.Save(f)
-		if err != nil {
-			t.Fatalf("%v - Error saving new document: %v", t.Name(), err)
-		}
+		assert.Nil(err)
+
 		err = f.Close()
-		if err != nil {
-			t.Fatalf("%v - Error closing created document: %v", t.Name(), err)
-		}
+		assert.Nil(err)
 	})
 }
 
-func parseAndRender(t *testing.T, filename string, data interface{}) {
+func parseAndRender(t *testing.T, filename string, data any) {
+	assert := assert.New(t)
+
 	start := time.Now()
 
 	// Parse the document
 	parseStart := time.Now()
 	doc, err := ParseFromFilename("test_templates/" + filename)
-	if err != nil {
-		t.Fatalf("%v - Parsing error: %v", t.Name(), err)
-	}
+	assert.Nil(err, "Parsing error")
 	fmt.Printf("%v - Parse: %v\n", t.Name(), time.Since(parseStart))
 
 	// Render the document
 	renderStart := time.Now()
 	err = doc.Render(data)
-	if err != nil {
-		t.Fatalf("%v - Rendering error: %v", t.Name(), err)
-	}
+	assert.Nil(err, "Rendering error")
 	fmt.Printf("%v - Render: %v\n", t.Name(), time.Since(renderStart))
 
 	// Create a new file for the output
 	saveStart := time.Now()
 	f, err := os.Create("test_templates/generated_" + filename)
-	if err != nil {
-		t.Fatalf("%v - Error creating document: %v", t.Name(), err)
-	}
+	assert.Nil(err, "Error creating document")
 	err = doc.Save(f)
-	if err != nil {
-		t.Fatalf("%v - Error saving new document: %v", t.Name(), err)
-	}
+	assert.Nil(err, "Error sacing document")
 	err = f.Close()
-	if err != nil {
-		t.Fatalf("%v - Error closing created document: %v", t.Name(), err)
-	}
+	assert.Nil(err, "Error closing document")
 	fmt.Printf("%v - Save: %v\n", t.Name(), time.Since(saveStart))
 
 	// Log the overall time taken

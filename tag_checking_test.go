@@ -1,6 +1,10 @@
 package docxtpl
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+)
 
 func TestTextContainsTags(t *testing.T) {
 	tests := []struct {
@@ -33,9 +37,7 @@ func TestTextContainsTags(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			result := textContainsTags(tt.text)
-			if result != tt.expectedResult {
-				t.Fatalf("%v - should return %v but returned %v", tt.text, tt.expectedResult, result)
-			}
+			assert.Equal(t, result, tt.expectedResult)
 		})
 	}
 }
@@ -71,9 +73,7 @@ func TestTextContainsIncompleteTags(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			result := textContainsIncompleteTags(tt.text)
-			if result != tt.expectedResult {
-				t.Fatalf("%v - should return %v but returned %v", tt.text, tt.expectedResult, result)
-			}
+			assert.Equal(t, result, tt.expectedResult)
 		})
 	}
 }

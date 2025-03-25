@@ -2,6 +2,8 @@ package docxtpl
 
 import (
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestReplaceTableRangeRows(t *testing.T) {
@@ -49,13 +51,11 @@ func TestReplaceTableRangeRows(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			assert := assert.New(t)
+
 			outputXml, err := replaceTableRangeRows(tt.inputXml)
-			if err != nil {
-				t.Fatalf("Unexptected error: %v", err)
-			}
-			if outputXml != tt.expectedOutputXml {
-				t.Fatalf("output XML string `%v` does not match expected `%v`", outputXml, tt.expectedOutputXml)
-			}
+			assert.Nil(err)
+			assert.Equal(outputXml, tt.expectedOutputXml)
 		})
 	}
 }
@@ -76,9 +76,7 @@ func TestFixXmlIssuesPostTagReplacement(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			outputXml := fixXmlIssuesPostTagReplacement(tt.inputXml)
-			if outputXml != tt.expectedOutputXml {
-				t.Fatalf("output XML string `%v` does not match expected `%v`", outputXml, tt.expectedOutputXml)
-			}
+			assert.Equal(t, outputXml, tt.expectedOutputXml)
 		})
 	}
 }

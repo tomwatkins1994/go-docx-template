@@ -2,6 +2,8 @@ package docxtpl
 
 import (
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestRegisterFunctions(t *testing.T) {
@@ -35,23 +37,21 @@ func TestRegisterFunctions(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			assert := assert.New(t)
+
 			doc, err := ParseFromFilename("test_templates/test_basic.docx")
-			if err != nil {
-				t.Fatalf("%v - Parsing error: %v", t.Name(), err)
-			}
+			assert.Nil(err)
 
 			err = doc.RegisterFunction(tt.fnName, tt.fn)
-			if (err != nil) != tt.expectError {
-				t.Errorf("expected error: %v, got: %v", tt.expectError, err)
-			}
+			assert.Equal((err != nil), tt.expectError)
 
 			funcMap := doc.GetRegisteredFunctions()
-			_, exists := (*funcMap)[tt.fnName]
-			if !tt.expectError && !exists {
-				t.Errorf("%v - function not found in map", tt.name)
+			_, foundInFunctionMap := (*funcMap)[tt.fnName]
+			if !tt.expectError {
+				assert.True(foundInFunctionMap)
 			}
-			if tt.expectError && exists {
-				t.Errorf("%v - function found in map after erroring", tt.name)
+			if tt.expectError {
+				assert.False(foundInFunctionMap)
 			}
 		})
 	}
@@ -99,10 +99,10 @@ func TestGoodName(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			assert := assert.New(t)
+
 			result := goodName(tt.fnName)
-			if result != tt.expectedResult {
-				t.Fatalf("%v - should return %v but returned %v", tt.fnName, tt.expectedResult, result)
-			}
+			assert.Equal(result, tt.expectedResult)
 		})
 	}
 }
@@ -152,10 +152,10 @@ func TestGoodFunc(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			assert := assert.New(t)
+
 			err := goodFunc(tt.fn)
-			if (err != nil) != tt.expectError {
-				t.Errorf("expected error: %v, got: %v", tt.expectError, err)
-			}
+			assert.Equal((err != nil), tt.expectError)
 		})
 	}
 }

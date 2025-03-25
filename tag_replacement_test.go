@@ -5,6 +5,8 @@ import (
 	"strings"
 	"testing"
 	"text/template"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestReplaceTagsInText(t *testing.T) {
@@ -218,13 +220,11 @@ func TestReplaceTagsInText(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			assert := assert.New(t)
+
 			outputXml, err := replaceTagsInText(tt.inputXml, tt.data, tt.funcMap)
-			if (err != nil) != tt.expectError {
-				t.Fatalf("expected error: %v, got: %v", tt.expectError, err)
-			}
-			if removeXmlFormatting(outputXml) != removeXmlFormatting(tt.expectedOutputXml) {
-				t.Fatalf("expected %v but got %v", tt.expectedOutputXml, outputXml)
-			}
+			assert.Equal((err != nil), tt.expectError)
+			assert.Equal(removeXmlFormatting(outputXml), removeXmlFormatting(tt.expectedOutputXml))
 		})
 	}
 }
