@@ -1,64 +1,66 @@
 package docxtpl
 
 import (
-	"fmt"
 	"os"
 	"path"
-	"reflect"
 	"slices"
 )
 
-func (d *DocxTmpl) processData(data any) (map[string]any, error) {
-	var err error
-	mapData := make(map[string]any)
-	if m, ok := data.(map[string]any); ok {
-		mapData = m
-	} else {
-		if mapData, err = convertStructToMap(data); err != nil {
-			return nil, err
-		}
-	}
-
-	if err = handleTagValues(d, &mapData); err != nil {
+func (d *DocxTmpl) processTemplateData(data *any) (map[string]any, error) {
+	convertedData, err := dataToMap(data)
+	if err != nil {
 		return nil, err
 	}
 
-	return mapData, nil
-}
-
-func handleTagValues(d *DocxTmpl, data *map[string]any) error {
-	for key, value := range *data {
-		if stringVal, ok := value.(string); ok {
-			// Check for files
-			if isImage, err := isImageFilePath(stringVal); err != nil {
-				return err
-			} else {
-				if isImage {
-					image, err := d.CreateInlineImage(stringVal)
-					if err != nil {
-						return err
+	var processTagValues func(data *map[string]any) error
+	processTagValues = func(data *map[string]any) error {
+		for key, value := range *data {
+			if stringVal, ok := value.(string); ok {
+				// Check for files
+				if isImage, err := isImageFilePath(stringVal); err != nil {
+					return err
+				} else {
+					if isImage {
+						image, err := CreateInlineImage(stringVal)
+						if err != nil {
+							return err
+						}
+						imageXml, err := d.addInlineImage(image)
+						if err != nil {
+							return err
+						}
+						(*data)[key] = imageXml
 					}
-					imageXml, err := image.addToDocument()
-					if err != nil {
-						return err
-					}
-					(*data)[key] = imageXml
 				}
+			} else if nestedMap, ok := value.(map[string]any); ok {
+				if err := processTagValues(&nestedMap); err != nil {
+					return err
+				}
+				(*data)[key] = nestedMap
+			} else if sliceValue, ok := value.([]map[string]any); ok {
+				for i := range sliceValue {
+					if err := processTagValues(&sliceValue[i]); err != nil {
+						return err
+					}
+				}
+			} else if inlineImage, ok := value.(*InlineImage); ok {
+				imageXml, err := d.addInlineImage(inlineImage)
+				if err != nil {
+					return err
+				}
+				(*data)[key] = imageXml
 			}
-		} else if sliceValue, ok := value.([]map[string]any); ok {
-			for _, val := range sliceValue {
-				handleTagValues(d, &val)
-			}
-		} else if inlineImage, ok := value.(*InlineImage); ok {
-			imageXml, err := inlineImage.addToDocument()
-			if err != nil {
-				return err
-			}
-			(*data)[key] = imageXml
 		}
+
+		return nil
 	}
 
-	return nil
+	err = processTagValues(&convertedData)
+	if err != nil {
+		return nil, err
+	}
+
+	return convertedData, nil
 }
 
 func isFilePath(filepath string) (bool, error) {
@@ -92,42 +94,4 @@ func isImageFilePath(filepath string) (bool, error) {
 	}
 
 	return isFile, nil
-}
-
-func convertStructToMap(s any) (map[string]any, error) {
-	result := make(map[string]any)
-	val := reflect.ValueOf(s)
-
-	// Check if the input is a pointer and dereference it
-	if val.Kind() == reflect.Ptr {
-		val = val.Elem()
-	}
-
-	// Ensure we have a struct type
-	if val.Kind() != reflect.Struct {
-		return nil, fmt.Errorf("expected a struct, got %s", val.Kind())
-	}
-
-	// Iterate over the struct fields
-	for i := range val.NumField() {
-		field := val.Type().Field(i)
-		value := val.Field(i)
-
-		// Store the field name and value in the map
-		if value.Kind() == reflect.Slice {
-			newMapSlice := make([]map[string]any, value.Len())
-			for j := range value.Len() {
-				newMap, err := convertStructToMap(value.Index(j).Interface())
-				if err != nil {
-					return nil, err
-				}
-				newMapSlice[j] = newMap
-			}
-			result[field.Name] = newMapSlice
-		} else {
-			result[field.Name] = value.Interface()
-		}
-	}
-
-	return result, nil
 }

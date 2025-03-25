@@ -5,16 +5,17 @@ import (
 	"encoding/xml"
 	"errors"
 	"io"
+	"slices"
 )
 
 type ContentTypes struct {
-	XMLName   xml.Name   `xml:"Types"`
-	Xmlns     string     `xml:"xmlns,attr"`
-	Defaults  []Default  `xml:"Default"`
-	Overrides []Override `xml:"Override"`
+	XMLName   xml.Name      `xml:"Types"`
+	Xmlns     string        `xml:"xmlns,attr"`
+	Defaults  []ContentType `xml:"Default"`
+	Overrides []Override    `xml:"Override"`
 }
 
-type Default struct {
+type ContentType struct {
 	Extension   string `xml:"Extension,attr"`
 	ContentType string `xml:"ContentType,attr"`
 }
@@ -57,15 +58,13 @@ func getContentTypes(reader io.ReaderAt, size int64) (*ContentTypes, error) {
 	return nil, errors.New("no content types found")
 }
 
-var PNG_CONTENT_TYPE = Default{Extension: "png", ContentType: "image/png"}
-var JPG_CONTENT_TYPE = Default{Extension: "jpg", ContentType: "image/jpg"}
-var JPEG_CONTENT_TYPE = Default{Extension: "jpeg", ContentType: "image/jpeg"}
+var PNG_CONTENT_TYPE = ContentType{Extension: "png", ContentType: "image/png"}
+var JPG_CONTENT_TYPE = ContentType{Extension: "jpg", ContentType: "image/jpg"}
+var JPEG_CONTENT_TYPE = ContentType{Extension: "jpeg", ContentType: "image/jpeg"}
 
-func (ct *ContentTypes) addContentType(contentType *Default) {
-	for _, v := range ct.Defaults {
-		if v == *contentType {
-			return
-		}
+func (ct *ContentTypes) addContentType(contentType *ContentType) {
+	if slices.Contains(ct.Defaults, *contentType) {
+		return
 	}
 	ct.Defaults = append(ct.Defaults, *contentType)
 }

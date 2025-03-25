@@ -122,12 +122,12 @@ func TestParseAndRender(t *testing.T) {
 			t.Fatalf("%v - Parsing error: %v", t.Name(), err)
 		}
 
-		testImage, err := doc.CreateInlineImage("test_templates/test_image.png")
+		testImage, err := CreateInlineImage("test_templates/test_image.png")
 		if err != nil {
 			t.Fatalf("%v - Inline image error: %v", t.Name(), err)
 		}
 
-		profileImage, err := doc.CreateInlineImage("test_templates/test_image.jpg")
+		profileImage, err := CreateInlineImage("test_templates/test_image.jpg")
 		if err != nil {
 			t.Fatalf("%v - Inline image error: %v", t.Name(), err)
 		}

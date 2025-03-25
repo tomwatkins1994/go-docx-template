@@ -70,7 +70,7 @@ func ParseFromFilename(filename string) (*DocxTmpl, error) {
 }
 
 // Replace the placeholders in the document with passed in data.
-func (d *DocxTmpl) Render(data interface{}) error {
+func (d *DocxTmpl) Render(data any) error {
 	// Ensure that there are no 'part tags' in the XML document
 	err := d.mergeTags()
 	if err != nil {
@@ -78,7 +78,7 @@ func (d *DocxTmpl) Render(data interface{}) error {
 	}
 
 	// Process the template data
-	proccessedData, err := d.processData(data)
+	processedData, err := d.processTemplateData(&data)
 	if err != nil {
 		return err
 	}
@@ -96,7 +96,7 @@ func (d *DocxTmpl) Render(data interface{}) error {
 	}
 
 	// Replace the tags in XML
-	documentXmlString, err = replaceTagsInText(documentXmlString, proccessedData, d.funcMap)
+	documentXmlString, err = replaceTagsInText(documentXmlString, processedData, d.funcMap)
 	if err != nil {
 		return err
 	}
