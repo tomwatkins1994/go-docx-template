@@ -2,6 +2,8 @@ package docxtpl
 
 import (
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestIsFilePath(t *testing.T) {
@@ -29,13 +31,11 @@ func TestIsFilePath(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			assert := assert.New(t)
+
 			result, err := isFilePath(tt.filepath)
-			if err != nil {
-				t.Fatalf("Unexpected error checking for file path: %v", err)
-			}
-			if result != tt.expectedResult {
-				t.Fatalf("%v - should return %v but returned %v", tt.filepath, tt.expectedResult, result)
-			}
+			assert.Nil(err)
+			assert.Equal(result, tt.expectedResult)
 		})
 	}
 }
@@ -65,13 +65,11 @@ func TestIsImageFilePath(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			assert := assert.New(t)
+
 			result, err := isImageFilePath(tt.filepath)
-			if err != nil {
-				t.Fatalf("Unexpected error checking for image file path: %v", err)
-			}
-			if result != tt.expectedResult {
-				t.Fatalf("%v - should return %v but returned %v", tt.filepath, tt.expectedResult, result)
-			}
+			assert.Nil(err)
+			assert.Equal(result, tt.expectedResult)
 		})
 	}
 }
