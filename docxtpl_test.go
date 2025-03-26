@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 type test struct {
@@ -16,8 +17,6 @@ type test struct {
 	data           any
 	fns            map[string]any
 }
-
-var myMap = make(map[string]int)
 
 func getTests() ([]test, error) {
 	testImage, err := CreateInlineImage("test_templates/test_image.png")
@@ -204,7 +203,7 @@ func getTests() ([]test, error) {
 
 func TestParseAndRender(t *testing.T) {
 	tests, err := getTests()
-	assert.Nil(t, err)
+	require.Nil(t, err)
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -227,43 +226,55 @@ func TestParseAndRender(t *testing.T) {
 			}
 			f, err := os.Create("test_templates/generated_" + outputFilename)
 			assert.Nil(err, "Error creating document")
-
 			err = doc.Save(f)
-			assert.Nil(err, "Error sacing document")
-
+			assert.Nil(err, "Error saving document")
 			err = f.Close()
 			assert.Nil(err, "Error closing document")
 		})
 	}
 }
 
-func parseAndRender(t *testing.T, filename string, data any) {
-	assert := assert.New(t)
+func BenchmarkParseAndRender(b *testing.B) {
+	tests, err := getTests()
+	require.Nil(b, err)
+	b.ResetTimer()
 
-	start := time.Now()
+	for _, tt := range tests {
+		b.Run(tt.name, func(b *testing.B) {
+			require := require.New(b)
+			start := time.Now()
 
-	// Parse the document
-	parseStart := time.Now()
-	doc, err := ParseFromFilename("test_templates/" + filename)
-	assert.Nil(err, "Parsing error")
-	fmt.Printf("%v - Parse: %v\n", t.Name(), time.Since(parseStart))
+			parseStart := time.Now()
+			doc, err := ParseFromFilename("test_templates/" + tt.filename)
+			require.Nil(err, "Parsing error")
+			b.Logf("Parse: %v\n", time.Since(parseStart))
 
-	// Render the document
-	renderStart := time.Now()
-	err = doc.Render(data)
-	assert.Nil(err, "Rendering error")
-	fmt.Printf("%v - Render: %v\n", t.Name(), time.Since(renderStart))
+			functionsStart := time.Now()
+			for fnName, fn := range tt.fns {
+				err = doc.RegisterFunction(fnName, fn)
+				require.Nil(err)
+			}
+			b.Logf("Register custom functions: %v\n", time.Since(functionsStart))
 
-	// Create a new file for the output
-	saveStart := time.Now()
-	f, err := os.Create("test_templates/generated_" + filename)
-	assert.Nil(err, "Error creating document")
-	err = doc.Save(f)
-	assert.Nil(err, "Error sacing document")
-	err = f.Close()
-	assert.Nil(err, "Error closing document")
-	fmt.Printf("%v - Save: %v\n", t.Name(), time.Since(saveStart))
+			renderStart := time.Now()
+			err = doc.Render(tt.data)
+			require.Nil(err, "Rendering error")
+			b.Logf("Render: %v\n", time.Since(renderStart))
 
-	// Log the overall time taken
-	fmt.Printf("%v - Total: %v\n", t.Name(), time.Since(start))
+			saveStart := time.Now()
+			outputFilename := tt.filename
+			if len(tt.outputFilename) > 0 {
+				outputFilename = tt.outputFilename
+			}
+			f, err := os.Create("test_templates/generated_" + outputFilename)
+			require.Nil(err, "Error creating document")
+			err = doc.Save(f)
+			require.Nil(err, "Error saving document")
+			err = f.Close()
+			require.Nil(err, "Error closing document")
+			b.Logf("Save: %v\n", time.Since(saveStart))
+
+			b.Logf("Total: %v\n", time.Since(start))
+		})
+	}
 }
