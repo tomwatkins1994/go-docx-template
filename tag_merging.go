@@ -10,7 +10,6 @@ func mergeTags(items []any) {
 	var wg sync.WaitGroup
 
 	for _, item := range items {
-		item := item
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
@@ -64,7 +63,6 @@ func mergeTagsInTable(table *docx.Table) {
 	for _, row := range table.TableRows {
 		for _, cell := range row.TableCells {
 			for _, paragraph := range cell.Paragraphs {
-				paragraph := paragraph
 				wg.Add(1)
 				go func() {
 					defer wg.Done()
