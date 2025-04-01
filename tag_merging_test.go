@@ -17,15 +17,44 @@ func TestMergeTagsInParagraph(t *testing.T) {
 		endText := docx.Text{
 			Text: "}}",
 		}
-		r := docx.Run{
+		p := docx.Paragraph{
 			Children: []any{
-				&startText,
-				&endText,
+				&docx.Run{
+					Children: []any{
+						&startText,
+						&endText,
+					},
+				},
 			},
+		}
+
+		mergeTagsInParagraph(&p)
+
+		assert.Equal(startText.Text, "")
+		assert.Equal(endText.Text, "{{ .tag }}")
+	})
+
+	t.Run("Tags in text nodes in different runs should get merged", func(t *testing.T) {
+		assert := assert.New(t)
+
+		startText := docx.Text{
+			Text: "{{ .tag ",
+		}
+		endText := docx.Text{
+			Text: "}}",
 		}
 		p := docx.Paragraph{
 			Children: []any{
-				&r,
+				&docx.Run{
+					Children: []any{
+						&startText,
+					},
+				},
+				&docx.Run{
+					Children: []any{
+						&endText,
+					},
+				},
 			},
 		}
 
