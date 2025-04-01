@@ -64,3 +64,42 @@ func TestMergeTagsInParagraph(t *testing.T) {
 		assert.Equal(endText.Text, "{{ .tag }}")
 	})
 }
+
+func TestMergeTagsInTable(t *testing.T) {
+	assert := assert.New(t)
+
+	startText := docx.Text{
+		Text: "{{ .tag ",
+	}
+	endText := docx.Text{
+		Text: "}}",
+	}
+	p := docx.Paragraph{
+		Children: []any{
+			&docx.Run{
+				Children: []any{
+					&startText,
+					&endText,
+				},
+			},
+		},
+	}
+	tbl := docx.Table{
+		TableRows: []*docx.WTableRow{
+			{
+				TableCells: []*docx.WTableCell{
+					{
+						Paragraphs: []*docx.Paragraph{
+							&p,
+						},
+					},
+				},
+			},
+		},
+	}
+
+	mergeTagsInTable(&tbl)
+
+	assert.Equal(startText.Text, "")
+	assert.Equal(endText.Text, "{{ .tag }}")
+}
