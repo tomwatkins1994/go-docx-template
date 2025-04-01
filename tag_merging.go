@@ -6,9 +6,8 @@ import (
 	"github.com/fumiama/go-docx"
 )
 
-func (d *DocxTmpl) mergeTags() error {
+func (d *DocxTmpl) mergeTags() {
 	var wg sync.WaitGroup
-	errCh := make(chan error)
 
 	for _, item := range d.Document.Body.Items {
 		item := item
@@ -16,34 +15,19 @@ func (d *DocxTmpl) mergeTags() error {
 		go func() {
 			defer wg.Done()
 
-			var err error
 			switch i := item.(type) {
 			case *docx.Paragraph:
-				err = mergeTagsInParagraph(i)
+				mergeTagsInParagraph(i)
 			case *docx.Table:
-				err = mergeTagsInTable(i)
-			}
-			if err != nil {
-				errCh <- err
+				mergeTagsInTable(i)
 			}
 		}()
 	}
 
-	go func() {
-		wg.Wait()
-		close(errCh)
-	}()
-
-	for err := range errCh {
-		if err != nil {
-			return err
-		}
-	}
-
-	return nil
+	wg.Wait()
 }
 
-func mergeTagsInParagraph(paragraph *docx.Paragraph) error {
+func mergeTagsInParagraph(paragraph *docx.Paragraph) {
 	currentText := ""
 	inIncompleteTag := false
 	for _, pChild := range paragraph.Children {
@@ -72,13 +56,10 @@ func mergeTagsInParagraph(paragraph *docx.Paragraph) error {
 			}
 		}
 	}
-
-	return nil
 }
 
-func mergeTagsInTable(table *docx.Table) error {
+func mergeTagsInTable(table *docx.Table) {
 	var wg sync.WaitGroup
-	errCh := make(chan error)
 
 	for _, row := range table.TableRows {
 		for _, cell := range row.TableCells {
@@ -87,25 +68,11 @@ func mergeTagsInTable(table *docx.Table) error {
 				wg.Add(1)
 				go func() {
 					defer wg.Done()
-					err := mergeTagsInParagraph(paragraph)
-					if err != nil {
-						errCh <- err
-					}
+					mergeTagsInParagraph(paragraph)
 				}()
 			}
 		}
 	}
 
-	go func() {
-		wg.Wait()
-		close(errCh)
-	}()
-
-	for err := range errCh {
-		if err != nil {
-			return err
-		}
-	}
-
-	return nil
+	wg.Wait()
 }
