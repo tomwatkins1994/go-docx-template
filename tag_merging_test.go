@@ -130,10 +130,16 @@ func TestMergeTagsInParagraph(t *testing.T) {
 func TestMergeTagsInTable(t *testing.T) {
 	assert := assert.New(t)
 
-	startText := docx.Text{
-		Text: "{{ .tag ",
+	p1StartText := docx.Text{
+		Text: "{{ .tag1 ",
 	}
-	endText := docx.Text{
+	p1EndText := docx.Text{
+		Text: "}}",
+	}
+	p2StartText := docx.Text{
+		Text: "{{ .tag2 ",
+	}
+	p2EndText := docx.Text{
 		Text: "}}",
 	}
 	tbl := docx.Table{
@@ -146,8 +152,18 @@ func TestMergeTagsInTable(t *testing.T) {
 								Children: []any{
 									&docx.Run{
 										Children: []any{
-											&startText,
-											&endText,
+											&p1StartText,
+											&p1EndText,
+										},
+									},
+								},
+							},
+							{
+								Children: []any{
+									&docx.Run{
+										Children: []any{
+											&p2StartText,
+											&p2EndText,
 										},
 									},
 								},
@@ -161,6 +177,8 @@ func TestMergeTagsInTable(t *testing.T) {
 
 	mergeTagsInTable(&tbl)
 
-	assert.Equal(startText.Text, "")
-	assert.Equal(endText.Text, "{{ .tag }}")
+	assert.Equal(p1StartText.Text, "")
+	assert.Equal(p1EndText.Text, "{{ .tag1 }}")
+	assert.Equal(p2StartText.Text, "")
+	assert.Equal(p2EndText.Text, "{{ .tag2 }}")
 }
