@@ -72,7 +72,7 @@ func ParseFromFilename(filename string) (*DocxTmpl, error) {
 // Replace the placeholders in the document with passed in data.
 func (d *DocxTmpl) Render(data any) error {
 	// Ensure that there are no 'part tags' in the XML document
-	d.mergeTags()
+	mergeTags(d.Document.Body.Items)
 
 	// Process the template data
 	processedData, err := d.processTemplateData(&data)

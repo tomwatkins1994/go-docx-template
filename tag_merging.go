@@ -6,10 +6,10 @@ import (
 	"github.com/fumiama/go-docx"
 )
 
-func (d *DocxTmpl) mergeTags() {
+func mergeTags(items []any) {
 	var wg sync.WaitGroup
 
-	for _, item := range d.Document.Body.Items {
+	for _, item := range items {
 		item := item
 		wg.Add(1)
 		go func() {
