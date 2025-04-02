@@ -89,4 +89,18 @@ func TestConvertStructToMap(t *testing.T) {
 			}
 		}
 	})
+
+	t.Run("Pointer to a struct", func(t *testing.T) {
+		data := struct {
+			ProjectNumber string
+			Client        string
+			Status        string
+		}{
+			ProjectNumber: "B-00001",
+			Client:        "TW Software",
+			Status:        "New",
+		}
+		_, err := convertStructToMap(&data)
+		assert.Nil(t, err)
+	})
 }
