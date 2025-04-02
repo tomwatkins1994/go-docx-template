@@ -1,8 +1,6 @@
 package docxtpl
 
 import (
-	"fmt"
-	"reflect"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -31,6 +29,8 @@ func TestDataToMap(t *testing.T) {
 
 func TestConvertStructToMap(t *testing.T) {
 	t.Run("Basic struct", func(t *testing.T) {
+		assert := assert.New(t)
+
 		data := struct {
 			ProjectNumber string
 			Client        string
@@ -40,8 +40,13 @@ func TestConvertStructToMap(t *testing.T) {
 			Client:        "TW Software",
 			Status:        "New",
 		}
-		_, err := convertStructToMap(data)
-		assert.Nil(t, err)
+		outputMap, err := convertStructToMap(data)
+		assert.Equal(map[string]any{
+			"ProjectNumber": "B-00001",
+			"Client":        "TW Software",
+			"Status":        "New",
+		}, outputMap)
+		assert.Nil(err)
 	})
 
 	t.Run("Struct with nested structs and slices", func(t *testing.T) {
@@ -88,21 +93,34 @@ func TestConvertStructToMap(t *testing.T) {
 				},
 			},
 		}
-		mapData, err := convertStructToMap(data)
+		outputMap, err := convertStructToMap(data)
+		assert.Equal(map[string]any{
+			"ProjectNumber": "B-00001",
+			"Client":        "TW Software",
+			"Status":        "New",
+			"ExtraFields": map[string]any{
+				"Field1": "Value 1",
+				"Field2": "Value 2",
+			},
+			"People": []map[string]any{
+				{
+					"Name":   "Tom Watkins",
+					"Gender": "Male",
+					"Age":    uint8(30),
+				},
+				{
+					"Name":   "Evie Argyle",
+					"Gender": "Female",
+					"Age":    uint8(29),
+				},
+			},
+		}, outputMap)
 		assert.Nil(err)
-
-		for key, value := range mapData {
-			val := reflect.ValueOf(value)
-			assert.NotEqual(val.Kind(), reflect.Struct, fmt.Sprintf("Found struct in data: %v %v", key, value))
-			if val.Kind() == reflect.Slice {
-				for i := range val.Len() {
-					assert.NotEqual(val.Index(i).Kind(), reflect.Struct, fmt.Sprintf("Found struct in data: %v %v", key, value))
-				}
-			}
-		}
 	})
 
 	t.Run("Pointer to a struct", func(t *testing.T) {
+		assert := assert.New(t)
+
 		data := struct {
 			ProjectNumber string
 			Client        string
@@ -112,8 +130,13 @@ func TestConvertStructToMap(t *testing.T) {
 			Client:        "TW Software",
 			Status:        "New",
 		}
-		_, err := convertStructToMap(&data)
-		assert.Nil(t, err)
+		outputMap, err := convertStructToMap(&data)
+		assert.Equal(map[string]any{
+			"ProjectNumber": "B-00001",
+			"Client":        "TW Software",
+			"Status":        "New",
+		}, outputMap)
+		assert.Nil(err)
 	})
 
 	t.Run("Passing in a non struct value should return error", func(t *testing.T) {
