@@ -2,3 +2,5 @@ generated_*.docx
 ~*.docx
 *.
 cover.out
+coverage.out
+coverage.html
