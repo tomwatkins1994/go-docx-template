@@ -27,3 +27,6 @@ coverage:
 clean:
 	@rm -f $(COVERAGE_FILE) $(COVERAGE_HTML)
 	@echo "Cleaned up coverage files."
+
+benchmark:
+	@go test -bench=Benchmark* -benchtime=1x
