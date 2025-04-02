@@ -216,7 +216,7 @@ func getResolutionFromString(resolution string) (int, error) {
 	// Split the string by the slash
 	parts := strings.Split(resolution, "/")
 	if len(parts) != 2 {
-		return 0, nil
+		return 0, errors.New("more than one slash found in image resolution string")
 	}
 
 	numerator, err := strconv.Atoi(parts[0])

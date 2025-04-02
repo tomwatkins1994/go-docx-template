@@ -64,3 +64,41 @@ func TestGetImageFormat(t *testing.T) {
 		assert.NotNil(err)
 	})
 }
+
+func TestGetResolutionFromString(t *testing.T) {
+	t.Run("Get resolution from string", func(t *testing.T) {
+		assert := assert.New(t)
+
+		resolutionString := "10/2"
+		resolution, err := getResolutionFromString(resolutionString)
+		assert.Equal(resolution, 5)
+		assert.Nil(err)
+	})
+
+	t.Run("More than one slash returns error", func(t *testing.T) {
+		assert := assert.New(t)
+
+		resolutionString := "10/2/1"
+		resolution, err := getResolutionFromString(resolutionString)
+		assert.Equal(resolution, 0)
+		assert.NotNil(err)
+	})
+
+	t.Run("When numerator is not int, return error", func(t *testing.T) {
+		assert := assert.New(t)
+
+		resolutionString := "ten/2"
+		resolution, err := getResolutionFromString(resolutionString)
+		assert.Equal(resolution, 0)
+		assert.NotNil(err)
+	})
+
+	t.Run("When denominator is not int, return error", func(t *testing.T) {
+		assert := assert.New(t)
+
+		resolutionString := "10/two"
+		resolution, err := getResolutionFromString(resolutionString)
+		assert.Equal(resolution, 0)
+		assert.NotNil(err)
+	})
+}
