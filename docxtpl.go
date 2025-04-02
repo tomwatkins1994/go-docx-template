@@ -75,7 +75,7 @@ func (d *DocxTmpl) Render(data any) error {
 	mergeTags(d.Document.Body.Items)
 
 	// Process the template data
-	processedData, err := d.processTemplateData(&data)
+	processedData, err := d.processTemplateData(data)
 	if err != nil {
 		return err
 	}
