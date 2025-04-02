@@ -61,12 +61,8 @@ func (i *InlineImage) getImageFormat() (imagemeta.ImageFormat, error) {
 	switch i.ext {
 	case ".jpg", ".jpeg":
 		return imagemeta.JPEG, nil
-	case ".webp":
-		return imagemeta.WebP, nil
 	case ".png":
 		return imagemeta.PNG, nil
-	case ".tif", ".tiff":
-		return imagemeta.TIFF, nil
 	default:
 		return 0, errors.New("Unknown image format: " + i.ext)
 	}
