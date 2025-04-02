@@ -5,16 +5,16 @@ import (
 	"reflect"
 )
 
-func dataToMap(data *any) (map[string]any, error) {
-	if m, ok := (*data).(map[string]any); ok {
-		return m, nil
-	} else {
-		if mapData, err := convertStructToMap(*data); err != nil {
-			return nil, err
-		} else {
-			return mapData, nil
-		}
+func dataToMap(data any) (map[string]any, error) {
+	if data == nil {
+		return nil, fmt.Errorf("data is nil")
 	}
+
+	if m, ok := data.(map[string]any); ok {
+		return m, nil
+	}
+
+	return convertStructToMap(data)
 }
 
 func convertStructToMap(s any) (map[string]any, error) {
