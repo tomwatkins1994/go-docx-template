@@ -8,6 +8,27 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestDataToMap(t *testing.T) {
+	t.Run("Passing in nil should return an error", func(t *testing.T) {
+		assert := assert.New(t)
+
+		outputMap, err := dataToMap(nil)
+		assert.Nil(outputMap)
+		assert.NotNil(err)
+	})
+
+	t.Run("Passing in a map should return the map back", func(t *testing.T) {
+		assert := assert.New(t)
+
+		inputMap := map[string]any{
+			"test": 1,
+		}
+		outputMap, err := dataToMap(inputMap)
+		assert.Equal(outputMap, inputMap)
+		assert.Nil(err)
+	})
+}
+
 func TestConvertStructToMap(t *testing.T) {
 	t.Run("Basic struct", func(t *testing.T) {
 		data := struct {
