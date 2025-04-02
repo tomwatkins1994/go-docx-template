@@ -6,7 +6,7 @@ test:
 	@echo "Running tests..."
 	@go test $(TEST_DIR)
 
-coverage:
+test-coverage:
 	@echo "Running tests with coverage..."
 	@go test -coverprofile=$(COVERAGE_FILE) $(TEST_DIR)
 	@echo "Generating HTML coverage report..."
@@ -24,7 +24,7 @@ coverage:
 		echo "Could not detect how to open the coverage report."; \
 	fi
 	
-clean:
+test-clean:
 	@rm -f $(COVERAGE_FILE) $(COVERAGE_HTML)
 	@echo "Cleaned up coverage files."
 
