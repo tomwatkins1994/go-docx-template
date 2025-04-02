@@ -18,6 +18,10 @@ func dataToMap(data any) (map[string]any, error) {
 }
 
 func convertStructToMap(s any) (map[string]any, error) {
+	if s == nil {
+		return nil, fmt.Errorf("input struct is nil")
+	}
+
 	result := make(map[string]any)
 	val := reflect.ValueOf(s)
 
