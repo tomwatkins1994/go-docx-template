@@ -13,6 +13,7 @@ func TestCreateInlineImage(t *testing.T) {
 		image, err := CreateInlineImage("test_image.txt")
 		assert.Nil(image)
 		assert.IsType(&InlineImageError{Message: "File is not a valid image"}, err)
+		assert.Equal(err.Error(), "Image error: File is not a valid image")
 	})
 
 	t.Run("Should return error if not a image doesn't exist", func(t *testing.T) {
@@ -21,5 +22,6 @@ func TestCreateInlineImage(t *testing.T) {
 		image, err := CreateInlineImage("image_not_exists.png")
 		assert.Nil(image)
 		assert.IsType(&InlineImageError{Message: "File is not a valid image"}, err)
+		assert.Equal(err.Error(), "Image error: File is not a valid image")
 	})
 }
