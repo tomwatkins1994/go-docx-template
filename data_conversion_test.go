@@ -117,7 +117,18 @@ func TestConvertStructToMap(t *testing.T) {
 	})
 
 	t.Run("Passing in a non struct value should return error", func(t *testing.T) {
-		_, err := convertStructToMap("string")
+		assert := assert.New(t)
+
+		outputMap, err := convertStructToMap("string")
+		assert.Nil(outputMap)
 		assert.NotNil(t, err)
+	})
+
+	t.Run("Passing in nil should return an error", func(t *testing.T) {
+		assert := assert.New(t)
+
+		outputMap, err := convertStructToMap(nil)
+		assert.Nil(outputMap)
+		assert.NotNil(err)
 	})
 }
