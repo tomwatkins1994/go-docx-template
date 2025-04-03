@@ -61,12 +61,8 @@ func (i *InlineImage) getImageFormat() (imagemeta.ImageFormat, error) {
 	switch i.ext {
 	case ".jpg", ".jpeg":
 		return imagemeta.JPEG, nil
-	case ".webp":
-		return imagemeta.WebP, nil
 	case ".png":
 		return imagemeta.PNG, nil
-	case ".tif", ".tiff":
-		return imagemeta.TIFF, nil
 	default:
 		return 0, errors.New("Unknown image format: " + i.ext)
 	}
@@ -132,14 +128,13 @@ func (i *InlineImage) Resize(width int, height int) error {
 }
 
 func (i *InlineImage) getImage() (*image.Image, error) {
-	imgReader := bytes.NewReader(*i.data)
-
 	format, err := i.getImageFormat()
 	if err != nil {
 		return nil, err
 	}
 
 	var img image.Image
+	imgReader := bytes.NewReader(*i.data)
 
 	switch format {
 	case imagemeta.JPEG:
@@ -174,7 +169,7 @@ func (i *InlineImage) replaceImage(rgba *image.Image) error {
 	return nil
 }
 
-// Get the size of the image in pixels.
+// Get the size of the image in EMUs.
 func (i *InlineImage) GetSize() (w int64, h int64, err error) {
 	sz, _, err := imgsz.DecodeSize(bytes.NewReader(*i.data))
 	if err != nil {
@@ -183,21 +178,21 @@ func (i *InlineImage) GetSize() (w int64, h int64, err error) {
 
 	wDpi, hDpi := i.GetResolution()
 
-	w = (int64(sz.Width) / wDpi) * int64(EMUS_PER_INCH)
-	h = (int64(sz.Height) / hDpi) * int64(EMUS_PER_INCH)
+	w = int64(sz.Width/wDpi) * int64(EMUS_PER_INCH)
+	h = int64(sz.Height/hDpi) * int64(EMUS_PER_INCH)
 
 	return w, h, nil
 }
 
 // Get the resolution (DPI) of the image.
 // It gets this from EXIF data and defaults to 72 if not found.
-func (i *InlineImage) GetResolution() (wDpi int64, hDpi int64) {
+func (i *InlineImage) GetResolution() (wDpi int, hDpi int) {
 	exif, err := i.GetExifData()
 	if err != nil {
 		return DEFAULT_DPI, DEFAULT_DPI
 	}
 
-	getResolution := func(tagName string) int64 {
+	getResolution := func(tagName string) int {
 		resolutionTag, exists := exif[tagName]
 		if exists {
 			if value, ok := resolutionTag.Value.(string); ok {
@@ -205,7 +200,7 @@ func (i *InlineImage) GetResolution() (wDpi int64, hDpi int64) {
 				if err != nil || resolution == 0 {
 					return DEFAULT_DPI
 				}
-				return int64(resolution)
+				return resolution
 			}
 		}
 		return DEFAULT_DPI
@@ -220,7 +215,7 @@ func getResolutionFromString(resolution string) (int, error) {
 	// Split the string by the slash
 	parts := strings.Split(resolution, "/")
 	if len(parts) != 2 {
-		return 0, nil
+		return 0, errors.New("more than one slash found in image resolution string")
 	}
 
 	numerator, err := strconv.Atoi(parts[0])
