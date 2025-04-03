@@ -178,21 +178,21 @@ func (i *InlineImage) GetSize() (w int64, h int64, err error) {
 
 	wDpi, hDpi := i.GetResolution()
 
-	w = (int64(sz.Width) / wDpi) * int64(EMUS_PER_INCH)
-	h = (int64(sz.Height) / hDpi) * int64(EMUS_PER_INCH)
+	w = int64(sz.Width/wDpi) * int64(EMUS_PER_INCH)
+	h = int64(sz.Height/hDpi) * int64(EMUS_PER_INCH)
 
 	return w, h, nil
 }
 
 // Get the resolution (DPI) of the image.
 // It gets this from EXIF data and defaults to 72 if not found.
-func (i *InlineImage) GetResolution() (wDpi int64, hDpi int64) {
+func (i *InlineImage) GetResolution() (wDpi int, hDpi int) {
 	exif, err := i.GetExifData()
 	if err != nil {
 		return DEFAULT_DPI, DEFAULT_DPI
 	}
 
-	getResolution := func(tagName string) int64 {
+	getResolution := func(tagName string) int {
 		resolutionTag, exists := exif[tagName]
 		if exists {
 			if value, ok := resolutionTag.Value.(string); ok {
@@ -200,7 +200,7 @@ func (i *InlineImage) GetResolution() (wDpi int64, hDpi int64) {
 				if err != nil || resolution == 0 {
 					return DEFAULT_DPI
 				}
-				return int64(resolution)
+				return resolution
 			}
 		}
 		return DEFAULT_DPI
