@@ -169,6 +169,18 @@ func TestReplaceImage(t *testing.T) {
 	})
 }
 
+func TestGetResolution(t *testing.T) {
+	require := require.New(t)
+	assert := assert.New(t)
+
+	inlineImage, err := CreateInlineImage("test_templates/test_image.jpg")
+	require.Nil(err)
+
+	wDpi, hDpi := inlineImage.GetResolution()
+	assert.Greater(wDpi, 0)
+	assert.Greater(hDpi, 0)
+}
+
 func TestGetResolutionFromString(t *testing.T) {
 	t.Run("Get resolution from string", func(t *testing.T) {
 		assert := assert.New(t)
