@@ -169,6 +169,19 @@ func TestReplaceImage(t *testing.T) {
 	})
 }
 
+func TestGetSize(t *testing.T) {
+	require := require.New(t)
+	assert := assert.New(t)
+
+	inlineImage, err := CreateInlineImage("test_templates/test_image.jpg")
+	require.Nil(err)
+
+	w, h, err := inlineImage.GetSize()
+	assert.Nil(err)
+	assert.Greater(w, int64(0))
+	assert.Greater(h, int64(0))
+}
+
 func TestGetResolution(t *testing.T) {
 	require := require.New(t)
 	assert := assert.New(t)
