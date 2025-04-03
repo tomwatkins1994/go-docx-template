@@ -5,6 +5,7 @@ import (
 
 	"github.com/bep/imagemeta"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestCreateInlineImage(t *testing.T) {
@@ -72,6 +73,29 @@ func TestGetImageFormat(t *testing.T) {
 		assert.Equal(format, imagemeta.ImageFormat(0))
 		assert.NotNil(err)
 	})
+}
+
+func TestResize(t *testing.T) {
+	require := require.New(t)
+	assert := assert.New(t)
+
+	inlineImage, err := CreateInlineImage("test_templates/test_image.jpg")
+	require.Nil(err)
+
+	originalWEmu, originalHEmu, err := inlineImage.GetSize()
+	assert.Nil(err)
+
+	wDpi, hDpi := inlineImage.GetResolution()
+	newWidthPx := int(originalWEmu/EMUS_PER_INCH) * wDpi * 2
+	newHeightPx := int(originalHEmu/EMUS_PER_INCH) * hDpi * 2
+
+	err = inlineImage.Resize(newWidthPx, newHeightPx)
+	assert.Nil(err)
+
+	w, h, err := inlineImage.GetSize()
+	assert.Nil(err)
+	assert.Equal(w, originalWEmu*2)
+	assert.Equal(h, originalHEmu*2)
 }
 
 func TestGetImage(t *testing.T) {
