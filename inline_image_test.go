@@ -1,6 +1,7 @@
 package docxtpl
 
 import (
+	"image"
 	"testing"
 
 	"github.com/bep/imagemeta"
@@ -75,6 +76,18 @@ func TestGetImageFormat(t *testing.T) {
 	})
 }
 
+func TestGetExifData(t *testing.T) {
+	assert := assert.New(t)
+	require := require.New(t)
+
+	img, err := CreateInlineImage("test_templates/test_image.jpg")
+	require.Nil(err)
+
+	exifData, err := img.GetExifData()
+	assert.Nil(err)
+	assert.Greater(len(exifData), 0)
+}
+
 func TestResize(t *testing.T) {
 	require := require.New(t)
 	assert := assert.New(t)
@@ -83,7 +96,7 @@ func TestResize(t *testing.T) {
 	require.Nil(err)
 
 	originalWEmu, originalHEmu, err := inlineImage.GetSize()
-	assert.Nil(err)
+	require.Nil(err)
 
 	wDpi, hDpi := inlineImage.GetResolution()
 	newWidthPx := int(originalWEmu/EMUS_PER_INCH) * wDpi * 2
@@ -127,6 +140,32 @@ func TestGetImage(t *testing.T) {
 		inlineImage := &InlineImage{ext: ".txt"}
 		_, err := inlineImage.getImage()
 		assert.NotNil(err)
+	})
+}
+
+func TestReplaceImage(t *testing.T) {
+	t.Run("Replace a jpeg image", func(t *testing.T) {
+		assert := assert.New(t)
+
+		inlineImage, err := CreateInlineImage("test_templates/test_image.jpg")
+		assert.Nil(err)
+
+		rgba := image.NewRGBA(image.Rect(0, 0, 100, 100))
+		var resizedImage image.Image = rgba
+		err = inlineImage.replaceImage(&resizedImage)
+		assert.Nil(err)
+	})
+
+	t.Run("Replace a png image", func(t *testing.T) {
+		assert := assert.New(t)
+
+		inlineImage, err := CreateInlineImage("test_templates/test_image.png")
+		assert.Nil(err)
+
+		rgba := image.NewRGBA(image.Rect(0, 0, 100, 100))
+		var resizedImage image.Image = rgba
+		err = inlineImage.replaceImage(&resizedImage)
+		assert.Nil(err)
 	})
 }
 
