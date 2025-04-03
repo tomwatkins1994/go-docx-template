@@ -231,3 +231,30 @@ func TestGetResolutionFromString(t *testing.T) {
 		assert.NotNil(err)
 	})
 }
+
+func TestContentTypes(t *testing.T) {
+	t.Run("Get content types for a jpeg image", func(t *testing.T) {
+		require := require.New(t)
+		assert := assert.New(t)
+
+		inlineImage, err := CreateInlineImage("test_templates/test_image.jpg")
+		require.Nil(err)
+
+		contentTypes, err := inlineImage.getContentTypes()
+		assert.Nil(err)
+		assert.Equal(contentTypes[0], &JPG_CONTENT_TYPE)
+		assert.Equal(contentTypes[1], &JPEG_CONTENT_TYPE)
+	})
+
+	t.Run("Get content types for a png image", func(t *testing.T) {
+		require := require.New(t)
+		assert := assert.New(t)
+
+		inlineImage, err := CreateInlineImage("test_templates/test_image.png")
+		require.Nil(err)
+
+		contentTypes, err := inlineImage.getContentTypes()
+		assert.Nil(err)
+		assert.Equal(contentTypes[0], &PNG_CONTENT_TYPE)
+	})
+}
