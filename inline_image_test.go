@@ -8,6 +8,15 @@ import (
 )
 
 func TestCreateInlineImage(t *testing.T) {
+	t.Run("Should return an image for a valid filepath", func(t *testing.T) {
+		assert := assert.New(t)
+
+		img, err := CreateInlineImage("test_templates/test_image.jpg")
+		assert.Nil(err)
+		assert.NotNil(img.data)
+		assert.Equal(img.ext, ".jpg")
+	})
+
 	t.Run("Should return error if not a valid image filename", func(t *testing.T) {
 		assert := assert.New(t)
 
@@ -61,6 +70,38 @@ func TestGetImageFormat(t *testing.T) {
 		img := &InlineImage{ext: ".txt"}
 		format, err := img.getImageFormat()
 		assert.Equal(format, imagemeta.ImageFormat(0))
+		assert.NotNil(err)
+	})
+}
+
+func TestGetImage(t *testing.T) {
+	t.Run("Get a jpeg image", func(t *testing.T) {
+		assert := assert.New(t)
+
+		inlineImage, err := CreateInlineImage("test_templates/test_image.jpg")
+		assert.Nil(err)
+
+		img, err := inlineImage.getImage()
+		assert.Nil(err)
+		assert.NotNil(img)
+	})
+
+	t.Run("Get a png image", func(t *testing.T) {
+		assert := assert.New(t)
+
+		inlineImage, err := CreateInlineImage("test_templates/test_image.png")
+		assert.Nil(err)
+
+		img, err := inlineImage.getImage()
+		assert.Nil(err)
+		assert.NotNil(img)
+	})
+
+	t.Run("Return an error for an invalid image", func(t *testing.T) {
+		assert := assert.New(t)
+
+		inlineImage := &InlineImage{ext: ".txt"}
+		_, err := inlineImage.getImage()
 		assert.NotNil(err)
 	})
 }

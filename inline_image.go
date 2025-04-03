@@ -128,14 +128,13 @@ func (i *InlineImage) Resize(width int, height int) error {
 }
 
 func (i *InlineImage) getImage() (*image.Image, error) {
-	imgReader := bytes.NewReader(*i.data)
-
 	format, err := i.getImageFormat()
 	if err != nil {
 		return nil, err
 	}
 
 	var img image.Image
+	imgReader := bytes.NewReader(*i.data)
 
 	switch format {
 	case imagemeta.JPEG:
