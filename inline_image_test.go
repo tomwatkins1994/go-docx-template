@@ -258,3 +258,18 @@ func TestContentTypes(t *testing.T) {
 		assert.Equal(contentTypes[0], &PNG_CONTENT_TYPE)
 	})
 }
+
+func TestAddInlineImage(t *testing.T) {
+	require := require.New(t)
+	assert := assert.New(t)
+
+	doc, err := ParseFromFilename("test_templates/test_basic.docx")
+	require.Nil(err, "Parsing error")
+
+	inlineImage, err := CreateInlineImage("test_templates/test_image.jpg")
+	require.Nil(err)
+
+	imageXml, err := doc.addInlineImage(inlineImage)
+	assert.Nil(err)
+	assert.Greater(len(imageXml), 0)
+}
