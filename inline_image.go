@@ -169,7 +169,7 @@ func (i *InlineImage) replaceImage(rgba *image.Image) error {
 	return nil
 }
 
-// Get the size of the image in pixels.
+// Get the size of the image in EMUs.
 func (i *InlineImage) GetSize() (w int64, h int64, err error) {
 	sz, _, err := imgsz.DecodeSize(bytes.NewReader(*i.data))
 	if err != nil {
