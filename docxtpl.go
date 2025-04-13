@@ -72,6 +72,29 @@ func ParseFromFilename(filename string) (*DocxTmpl, error) {
 }
 
 // Replace the placeholders in the document with passed in data.
+// Data can be a struct or map
+//
+//	data := struct {
+//		FirstName     string
+//		LastName      string
+//		Gender        string
+//	}{
+//		FirstName: "Tom",
+//		LastName:  "Watkins",
+//		Gender:    "Male",
+//	}
+//
+// err = doc.Render(data)
+//
+// # OR
+//
+//	data := map[string]any{
+//		"ProjectNumber": "B-00001",
+//		"Client":        "TW Software",
+//		"Status":        "New",
+//	}
+//
+// err = doc.Render(data)
 func (d *DocxTmpl) Render(data any) error {
 	// Ensure that there are no 'part tags' in the XML document
 	mergeTags(d.Document.Body.Items)
