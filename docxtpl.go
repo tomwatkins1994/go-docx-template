@@ -21,7 +21,7 @@ type DocxTmpl struct {
 // Parse the document from a reader and store it in memory.
 // You can it invoke from a file.
 //
-//	reader, err := os.Open(FILE_PATH)
+//	reader, err := os.Open("path_to_doc.docx")
 //	if err != nil {
 //		panic(err)
 //	}
@@ -49,6 +49,8 @@ func Parse(reader io.ReaderAt, size int64) (*DocxTmpl, error) {
 }
 
 // Parse the document from a filename and store it in memory.
+//
+//	doc, err := docxtpl.ParseFromFilename("path_to_doc.docx")
 func ParseFromFilename(filename string) (*DocxTmpl, error) {
 	reader, err := os.Open(filename)
 	if err != nil {
@@ -70,6 +72,29 @@ func ParseFromFilename(filename string) (*DocxTmpl, error) {
 }
 
 // Replace the placeholders in the document with passed in data.
+// Data can be a struct or map
+//
+//	data := struct {
+//		FirstName     string
+//		LastName      string
+//		Gender        string
+//	}{
+//		FirstName: "Tom",
+//		LastName:  "Watkins",
+//		Gender:    "Male",
+//	}
+//
+// err = doc.Render(data)
+//
+// # OR
+//
+//	data := map[string]any{
+//		"ProjectNumber": "B-00001",
+//		"Client":        "TW Software",
+//		"Status":        "New",
+//	}
+//
+// err = doc.Render(data)
 func (d *DocxTmpl) Render(data any) error {
 	// Ensure that there are no 'part tags' in the XML document
 	mergeTags(d.Document.Body.Items)
@@ -124,15 +149,6 @@ func (d *DocxTmpl) Render(data any) error {
 	}
 
 	return nil
-}
-
-func (d *DocxTmpl) getDocumentXml() (string, error) {
-	out, err := xml.Marshal(d.Document.Body)
-	if err != nil {
-		return "", nil
-	}
-
-	return string(out), err
 }
 
 // Save the document to a writer.

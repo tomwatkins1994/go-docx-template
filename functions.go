@@ -18,6 +18,11 @@ var defaultFuncMap = template.FuncMap{
 	"title": title,
 }
 
+// Register a function which can then be used within your template
+//
+//	d.RegisterFunction("sayHello", func(text string) string {
+//		return "Hello " + text
+//	})
 func (d *DocxTmpl) RegisterFunction(name string, fn any) error {
 	if !goodName(name) {
 		return fmt.Errorf("function name %q is not a valid identifier", name)
@@ -35,6 +40,7 @@ func (d *DocxTmpl) RegisterFunction(name string, fn any) error {
 	return nil
 }
 
+// Get a pointer to the documents function map. This will include built-in functions.
 func (d *DocxTmpl) GetRegisteredFunctions() *template.FuncMap {
 	copiedFuncMap := make(template.FuncMap)
 	maps.Copy(copiedFuncMap, *d.funcMap)

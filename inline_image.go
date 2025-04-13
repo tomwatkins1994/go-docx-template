@@ -27,7 +27,7 @@ const (
 
 type InlineImage struct {
 	data *[]byte
-	ext  string
+	Ext  string
 }
 
 type InlineImageError struct {
@@ -38,6 +38,10 @@ func (e *InlineImageError) Error() string {
 	return fmt.Sprintf("Image error: %v", e.Message)
 }
 
+// Take a filenane for an image and return a pointer to an InlineImage struct.
+// Images can be Jpegs (.jpg or .jpeg) or PNGs
+//
+//	img, err := CreateInlineImage("example_img.png")
 func CreateInlineImage(filepath string) (*InlineImage, error) {
 	if isImage, err := isImageFilePath(filepath); err != nil {
 		return nil, err
@@ -58,13 +62,13 @@ func CreateInlineImage(filepath string) (*InlineImage, error) {
 }
 
 func (i *InlineImage) getImageFormat() (imagemeta.ImageFormat, error) {
-	switch i.ext {
+	switch i.Ext {
 	case ".jpg", ".jpeg":
 		return imagemeta.JPEG, nil
 	case ".png":
 		return imagemeta.PNG, nil
 	default:
-		return 0, errors.New("Unknown image format: " + i.ext)
+		return 0, errors.New("Unknown image format: " + i.Ext)
 	}
 }
 
