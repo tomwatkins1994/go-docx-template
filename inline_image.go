@@ -38,6 +38,10 @@ func (e *InlineImageError) Error() string {
 	return fmt.Sprintf("Image error: %v", e.Message)
 }
 
+// Take a filenane for an image and return a pointer to an InlineImage struct.
+// Images can be Jpegs (.jpg or .jpeg) or PNGs
+//
+//	img, err := CreateInlineImage("example_img.png")
 func CreateInlineImage(filepath string) (*InlineImage, error) {
 	if isImage, err := isImageFilePath(filepath); err != nil {
 		return nil, err
