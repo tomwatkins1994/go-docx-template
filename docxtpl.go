@@ -21,7 +21,7 @@ type DocxTmpl struct {
 // Parse the document from a reader and store it in memory.
 // You can it invoke from a file.
 //
-//	reader, err := os.Open(FILE_PATH)
+//	reader, err := os.Open("path_to_doc.docx")
 //	if err != nil {
 //		panic(err)
 //	}
@@ -49,6 +49,8 @@ func Parse(reader io.ReaderAt, size int64) (*DocxTmpl, error) {
 }
 
 // Parse the document from a filename and store it in memory.
+//
+//	doc, err := docxtpl.ParseFromFilename("path_to_doc.docx")
 func ParseFromFilename(filename string) (*DocxTmpl, error) {
 	reader, err := os.Open(filename)
 	if err != nil {
