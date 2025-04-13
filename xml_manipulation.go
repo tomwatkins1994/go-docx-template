@@ -1,10 +1,20 @@
 package docxtpl
 
 import (
+	"encoding/xml"
 	"strings"
 
 	"github.com/dlclark/regexp2"
 )
+
+func (d *DocxTmpl) getDocumentXml() (string, error) {
+	out, err := xml.Marshal(d.Document.Body)
+	if err != nil {
+		return "", nil
+	}
+
+	return string(out), err
+}
 
 func prepareXmlForTagReplacement(xmlString string) (string, error) {
 	newXmlString, err := replaceTableRangeRows(xmlString)

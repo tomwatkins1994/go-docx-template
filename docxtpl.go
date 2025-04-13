@@ -151,15 +151,6 @@ func (d *DocxTmpl) Render(data any) error {
 	return nil
 }
 
-func (d *DocxTmpl) getDocumentXml() (string, error) {
-	out, err := xml.Marshal(d.Document.Body)
-	if err != nil {
-		return "", nil
-	}
-
-	return string(out), err
-}
-
 // Save the document to a writer.
 // This could be a new file.
 //
