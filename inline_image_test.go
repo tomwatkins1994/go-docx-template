@@ -16,7 +16,7 @@ func TestCreateInlineImage(t *testing.T) {
 		img, err := CreateInlineImage("test_templates/test_image.jpg")
 		assert.Nil(err)
 		assert.NotNil(img.data)
-		assert.Equal(img.ext, ".jpg")
+		assert.Equal(img.Ext, ".jpg")
 	})
 
 	t.Run("Should return error if not a valid image filename", func(t *testing.T) {
@@ -42,7 +42,7 @@ func TestGetImageFormat(t *testing.T) {
 	t.Run("JPG should return format", func(t *testing.T) {
 		assert := assert.New(t)
 
-		img := &InlineImage{ext: ".jpg"}
+		img := &InlineImage{Ext: ".jpg"}
 		format, err := img.getImageFormat()
 		assert.Equal(format, imagemeta.JPEG)
 		assert.Nil(err)
@@ -51,7 +51,7 @@ func TestGetImageFormat(t *testing.T) {
 	t.Run("JPEG should return format", func(t *testing.T) {
 		assert := assert.New(t)
 
-		img := &InlineImage{ext: ".jpeg"}
+		img := &InlineImage{Ext: ".jpeg"}
 		format, err := img.getImageFormat()
 		assert.Equal(format, imagemeta.JPEG)
 		assert.Nil(err)
@@ -60,7 +60,7 @@ func TestGetImageFormat(t *testing.T) {
 	t.Run("PNG should return format", func(t *testing.T) {
 		assert := assert.New(t)
 
-		img := &InlineImage{ext: ".png"}
+		img := &InlineImage{Ext: ".png"}
 		format, err := img.getImageFormat()
 		assert.Equal(format, imagemeta.PNG)
 		assert.Nil(err)
@@ -69,7 +69,7 @@ func TestGetImageFormat(t *testing.T) {
 	t.Run("Not image extension should return error", func(t *testing.T) {
 		assert := assert.New(t)
 
-		img := &InlineImage{ext: ".txt"}
+		img := &InlineImage{Ext: ".txt"}
 		format, err := img.getImageFormat()
 		assert.Equal(format, imagemeta.ImageFormat(0))
 		assert.NotNil(err)
@@ -137,7 +137,7 @@ func TestGetImage(t *testing.T) {
 	t.Run("Return an error for an invalid image", func(t *testing.T) {
 		assert := assert.New(t)
 
-		inlineImage := &InlineImage{ext: ".txt"}
+		inlineImage := &InlineImage{Ext: ".txt"}
 		_, err := inlineImage.getImage()
 		assert.NotNil(err)
 	})
