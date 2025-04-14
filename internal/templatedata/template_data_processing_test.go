@@ -1,4 +1,4 @@
-package docxtpl
+package templatedata
 
 import (
 	"testing"
@@ -33,7 +33,7 @@ func TestIsFilePath(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			assert := assert.New(t)
 
-			result, err := isFilePath(tt.filepath)
+			result, err := IsFilePath(tt.filepath)
 			assert.Nil(err)
 			assert.Equal(result, tt.expectedResult)
 		})
@@ -67,7 +67,7 @@ func TestIsImageFilePath(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			assert := assert.New(t)
 
-			result, err := isImageFilePath(tt.filepath)
+			result, err := IsImageFilePath(tt.filepath)
 			assert.Nil(err)
 			assert.Equal(result, tt.expectedResult)
 		})

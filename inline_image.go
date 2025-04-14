@@ -18,6 +18,7 @@ import (
 	"github.com/fumiama/go-docx"
 	"github.com/fumiama/imgsz"
 	"github.com/tomwatkins1994/go-docx-template/internal/contenttypes"
+	"github.com/tomwatkins1994/go-docx-template/internal/templatedata"
 	"golang.org/x/image/draw"
 )
 
@@ -44,7 +45,7 @@ func (e *InlineImageError) Error() string {
 //
 //	img, err := CreateInlineImage("example_img.png")
 func CreateInlineImage(filepath string) (*InlineImage, error) {
-	if isImage, err := isImageFilePath(filepath); err != nil {
+	if isImage, err := templatedata.IsImageFilePath(filepath); err != nil {
 		return nil, err
 	} else {
 		if !isImage {

@@ -1,4 +1,4 @@
-package docxtpl
+package templatedata
 
 import (
 	"testing"
@@ -10,7 +10,7 @@ func TestDataToMap(t *testing.T) {
 	t.Run("Passing in nil should return an error", func(t *testing.T) {
 		assert := assert.New(t)
 
-		outputMap, err := dataToMap(nil)
+		outputMap, err := DataToMap(nil)
 		assert.Nil(outputMap)
 		assert.NotNil(err)
 	})
@@ -21,7 +21,7 @@ func TestDataToMap(t *testing.T) {
 		inputMap := map[string]any{
 			"test": 1,
 		}
-		outputMap, err := dataToMap(inputMap)
+		outputMap, err := DataToMap(inputMap)
 		assert.Equal(outputMap, inputMap)
 		assert.Nil(err)
 	})
