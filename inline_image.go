@@ -17,7 +17,7 @@ import (
 	"github.com/bep/imagemeta"
 	"github.com/fumiama/go-docx"
 	"github.com/fumiama/imgsz"
-	"github.com/tomwatkins1994/go-docx-template/internal"
+	"github.com/tomwatkins1994/go-docx-template/internal/content_types"
 	"golang.org/x/image/draw"
 )
 
@@ -237,7 +237,7 @@ func getResolutionFromString(resolution string) (int, error) {
 	return result, nil
 }
 
-func (i *InlineImage) getContentTypes() ([]*internal.ContentType, error) {
+func (i *InlineImage) getContentTypes() ([]*content_types.ContentType, error) {
 	format, err := i.getImageFormat()
 	if err != nil {
 		return nil, err
@@ -245,12 +245,12 @@ func (i *InlineImage) getContentTypes() ([]*internal.ContentType, error) {
 
 	switch format {
 	case imagemeta.JPEG:
-		return []*internal.ContentType{&internal.JPG_CONTENT_TYPE, &internal.JPEG_CONTENT_TYPE}, nil
+		return []*content_types.ContentType{&content_types.JPG_CONTENT_TYPE, &content_types.JPEG_CONTENT_TYPE}, nil
 	case imagemeta.PNG:
-		return []*internal.ContentType{&internal.PNG_CONTENT_TYPE}, nil
+		return []*content_types.ContentType{&content_types.PNG_CONTENT_TYPE}, nil
 	}
 
-	return []*internal.ContentType{}, nil
+	return []*content_types.ContentType{}, nil
 }
 
 func (d *DocxTmpl) addInlineImage(i *InlineImage) (xmlString string, err error) {

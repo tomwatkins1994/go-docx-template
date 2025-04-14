@@ -10,7 +10,7 @@ import (
 	"text/template"
 
 	"github.com/fumiama/go-docx"
-	"github.com/tomwatkins1994/go-docx-template/internal"
+	"github.com/tomwatkins1994/go-docx-template/internal/content_types"
 	"github.com/tomwatkins1994/go-docx-template/internal/functions"
 	"github.com/tomwatkins1994/go-docx-template/internal/tags"
 )
@@ -18,7 +18,7 @@ import (
 type DocxTmpl struct {
 	*docx.Docx
 	funcMap      template.FuncMap
-	contentTypes *internal.ContentTypes
+	contentTypes *content_types.ContentTypes
 }
 
 // Parse the document from a reader and store it in memory.
@@ -40,7 +40,7 @@ func Parse(reader io.ReaderAt, size int64) (*DocxTmpl, error) {
 		return nil, err
 	}
 
-	contentTypes, err := internal.GetContentTypes(reader, size)
+	contentTypes, err := content_types.GetContentTypes(reader, size)
 	if err != nil {
 		return nil, err
 	}

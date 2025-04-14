@@ -1,4 +1,4 @@
-package internal
+package content_types
 
 import (
 	"archive/zip"
