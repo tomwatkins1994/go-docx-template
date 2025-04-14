@@ -14,17 +14,17 @@ func TestIsFilePath(t *testing.T) {
 	}{
 		{
 			name:           "Existing file",
-			filepath:       "test_templates/test_image.png",
+			filepath:       "../../test_templates/test_image.png",
 			expectedResult: true,
 		},
 		{
 			name:           "Non existent file",
-			filepath:       "test_templates/not_exists.docx",
+			filepath:       "../../test_templates/not_exists.docx",
 			expectedResult: false,
 		},
 		{
 			name:           "Exists but is a folder",
-			filepath:       "test_templates",
+			filepath:       "../../test_templates",
 			expectedResult: false,
 		},
 	}
@@ -48,12 +48,12 @@ func TestIsImageFilePath(t *testing.T) {
 	}{
 		{
 			name:           "Existing image",
-			filepath:       "test_templates/test_image.png",
+			filepath:       "../../test_templates/test_image.png",
 			expectedResult: true,
 		},
 		{
 			name:           "File exists but isn't ab image",
-			filepath:       "test_templates/test_basic.docx",
+			filepath:       "../../test_templates/test_basic.docx",
 			expectedResult: false,
 		},
 		{
