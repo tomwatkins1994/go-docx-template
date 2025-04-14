@@ -3,9 +3,9 @@ package docxtpl
 import (
 	"fmt"
 	"maps"
-	"reflect"
 	"text/template"
-	"unicode"
+
+	"github.com/tomwatkins1994/go-docx-template/internal/functions"
 )
 
 // Register a function which can then be used within your template
@@ -14,12 +14,12 @@ import (
 //		return "Hello " + text
 //	})
 func (d *DocxTmpl) RegisterFunction(name string, fn any) error {
-	if !goodName(name) {
+	if !functions.FunctionNameValid(name) {
 		return fmt.Errorf("function name %q is not a valid identifier", name)
 	}
 
 	// Check the function signature
-	err := goodFunc(fn)
+	err := functions.FunctionValid(fn)
 	if err != nil {
 		return fmt.Errorf("error registering function (%s): %s", name, err.Error())
 	}
@@ -35,43 +35,4 @@ func (d *DocxTmpl) GetRegisteredFunctions() *template.FuncMap {
 	copiedFuncMap := make(template.FuncMap)
 	maps.Copy(copiedFuncMap, d.funcMap)
 	return &copiedFuncMap
-}
-
-// Validation functions
-
-func goodName(name string) bool {
-	if name == "" {
-		return false
-	}
-	for i, r := range name {
-		switch {
-		case r == '_':
-		case i == 0 && !unicode.IsLetter(r):
-			return false
-		case !unicode.IsLetter(r) && !unicode.IsDigit(r):
-			return false
-		}
-	}
-	return true
-}
-
-func goodFunc(fn any) error {
-	// Check that fn is a function
-	v := reflect.ValueOf(fn)
-	if v.Kind() != reflect.Func {
-		return fmt.Errorf("not a function")
-	}
-
-	// We allow functions with 1 result or 2 results where the second is an error.
-	typ := v.Type()
-	switch numOut := typ.NumOut(); {
-	case numOut == 1:
-		return nil
-	case numOut == 2 && typ.Out(1) == reflect.TypeFor[error]():
-		return nil
-	case numOut == 2:
-		return fmt.Errorf("invalid function signature - second return value should be error; is %s", typ.Out(1))
-	default:
-		return fmt.Errorf("function has %d return values; should be 1 or 2", typ.NumOut())
-	}
 }
