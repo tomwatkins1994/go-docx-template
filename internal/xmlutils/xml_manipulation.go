@@ -1,22 +1,12 @@
-package docxtpl
+package xmlutils
 
 import (
-	"encoding/xml"
 	"strings"
 
 	"github.com/dlclark/regexp2"
 )
 
-func (d *DocxTmpl) getDocumentXml() (string, error) {
-	out, err := xml.Marshal(d.Document.Body)
-	if err != nil {
-		return "", nil
-	}
-
-	return string(out), err
-}
-
-func prepareXmlForTagReplacement(xmlString string) (string, error) {
+func PrepareXmlForTagReplacement(xmlString string) (string, error) {
 	newXmlString, err := replaceTableRangeRows(xmlString)
 
 	return newXmlString, err
@@ -42,7 +32,7 @@ func replaceTableRangeRows(xmlString string) (string, error) {
 	return newXmlString, nil
 }
 
-func fixXmlIssuesPostTagReplacement(xmlString string) string {
+func FixXmlIssuesPostTagReplacement(xmlString string) string {
 	// Fix issues with drawings in text nodes
 	xmlString = strings.ReplaceAll(xmlString, "<w:t><w:drawing>", "<w:drawing>")
 	xmlString = strings.ReplaceAll(xmlString, "</w:drawing></w:t>", "</w:drawing>")

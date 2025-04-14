@@ -114,20 +114,11 @@ func (d *DocxTmpl) Render(data any) error {
 		return err
 	}
 
-	// Prepare the XML for tag replacement
-	documentXmlString, err = prepareXmlForTagReplacement(documentXmlString)
-	if err != nil {
-		return err
-	}
-
 	// Replace the tags in XML
 	documentXmlString, err = tags.ReplaceTagsInText(documentXmlString, processedData, d.funcMap)
 	if err != nil {
 		return err
 	}
-
-	// Fix any issues in the XML
-	documentXmlString = fixXmlIssuesPostTagReplacement(documentXmlString)
 
 	// Unmarshal the modified XML and replace the document body with it
 	decoder := xml.NewDecoder(bytes.NewBufferString(documentXmlString))
@@ -220,4 +211,13 @@ func (d *DocxTmpl) Save(writer io.Writer) error {
 	}
 
 	return nil
+}
+
+func (d *DocxTmpl) getDocumentXml() (string, error) {
+	out, err := xml.Marshal(d.Document.Body)
+	if err != nil {
+		return "", nil
+	}
+
+	return string(out), err
 }
