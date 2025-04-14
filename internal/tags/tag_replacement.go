@@ -1,4 +1,4 @@
-package docxtpl
+package tags
 
 import (
 	"bytes"
@@ -6,10 +6,10 @@ import (
 	"text/template"
 )
 
-func replaceTagsInText(text string, data map[string]any, funcMap *template.FuncMap) (string, error) {
-	tmpl, err := template.New("").Funcs(*funcMap).Parse(text)
+func ReplaceTagsInText(text string, data map[string]any, funcMap template.FuncMap) (string, error) {
+	tmpl, err := template.New("").Funcs(funcMap).Parse(text)
 	if err != nil {
-		return "", fmt.Errorf("Error parsing template: %v", err)
+		return "", fmt.Errorf("error parsing template: %v", err)
 	}
 
 	buf := &bytes.Buffer{}

@@ -1,4 +1,4 @@
-package docxtpl
+package tags
 
 import (
 	"regexp"

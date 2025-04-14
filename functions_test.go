@@ -159,12 +159,3 @@ func TestGoodFunc(t *testing.T) {
 		})
 	}
 }
-
-// Custom functions
-
-func TestTitle(t *testing.T) {
-	titleCase := title("tom watkins")
-	if titleCase != "Tom Watkins" {
-		t.Fatalf("Should return in title case but returned: %v", titleCase)
-	}
-}

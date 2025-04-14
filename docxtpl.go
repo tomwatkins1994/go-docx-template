@@ -11,11 +11,13 @@ import (
 
 	"github.com/fumiama/go-docx"
 	"github.com/tomwatkins1994/go-docx-template/internal"
+	"github.com/tomwatkins1994/go-docx-template/internal/functions"
+	"github.com/tomwatkins1994/go-docx-template/internal/tags"
 )
 
 type DocxTmpl struct {
 	*docx.Docx
-	funcMap      *template.FuncMap
+	funcMap      template.FuncMap
 	contentTypes *internal.ContentTypes
 }
 
@@ -44,9 +46,9 @@ func Parse(reader io.ReaderAt, size int64) (*DocxTmpl, error) {
 	}
 
 	funcMap := make(template.FuncMap)
-	maps.Copy(funcMap, defaultFuncMap)
+	maps.Copy(funcMap, functions.DefaultFuncMap)
 
-	return &DocxTmpl{doc, &funcMap, contentTypes}, nil
+	return &DocxTmpl{doc, funcMap, contentTypes}, nil
 }
 
 // Parse the document from a filename and store it in memory.
@@ -98,7 +100,7 @@ func ParseFromFilename(filename string) (*DocxTmpl, error) {
 // err = doc.Render(data)
 func (d *DocxTmpl) Render(data any) error {
 	// Ensure that there are no 'part tags' in the XML document
-	mergeTags(d.Document.Body.Items)
+	tags.MergeTags(d.Document.Body.Items)
 
 	// Process the template data
 	processedData, err := d.processTemplateData(data)
@@ -119,7 +121,7 @@ func (d *DocxTmpl) Render(data any) error {
 	}
 
 	// Replace the tags in XML
-	documentXmlString, err = replaceTagsInText(documentXmlString, processedData, d.funcMap)
+	documentXmlString, err = tags.ReplaceTagsInText(documentXmlString, processedData, d.funcMap)
 	if err != nil {
 		return err
 	}

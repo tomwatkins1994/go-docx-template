@@ -4,19 +4,9 @@ import (
 	"fmt"
 	"maps"
 	"reflect"
-	"strings"
 	"text/template"
 	"unicode"
-
-	"golang.org/x/text/cases"
-	"golang.org/x/text/language"
 )
-
-var defaultFuncMap = template.FuncMap{
-	"upper": strings.ToUpper,
-	"lower": strings.ToLower,
-	"title": title,
-}
 
 // Register a function which can then be used within your template
 //
@@ -35,7 +25,7 @@ func (d *DocxTmpl) RegisterFunction(name string, fn any) error {
 	}
 
 	// Add to the function map
-	(*d.funcMap)[name] = fn
+	d.funcMap[name] = fn
 
 	return nil
 }
@@ -43,7 +33,7 @@ func (d *DocxTmpl) RegisterFunction(name string, fn any) error {
 // Get a pointer to the documents function map. This will include built-in functions.
 func (d *DocxTmpl) GetRegisteredFunctions() *template.FuncMap {
 	copiedFuncMap := make(template.FuncMap)
-	maps.Copy(copiedFuncMap, *d.funcMap)
+	maps.Copy(copiedFuncMap, d.funcMap)
 	return &copiedFuncMap
 }
 
@@ -84,11 +74,4 @@ func goodFunc(fn any) error {
 	default:
 		return fmt.Errorf("function has %d return values; should be 1 or 2", typ.NumOut())
 	}
-}
-
-// Custom functions
-
-func title(text string) string {
-	caser := cases.Title(language.English)
-	return caser.String(text)
 }
