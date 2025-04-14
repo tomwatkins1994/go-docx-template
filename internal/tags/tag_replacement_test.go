@@ -1,4 +1,4 @@
-package docxtpl
+package tags
 
 import (
 	"regexp"
@@ -7,6 +7,7 @@ import (
 	"text/template"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/tomwatkins1994/go-docx-template/internal/functions"
 )
 
 func TestReplaceTagsInText(t *testing.T) {
@@ -15,7 +16,7 @@ func TestReplaceTagsInText(t *testing.T) {
 		inputXml          string
 		expectedOutputXml string
 		data              map[string]any
-		funcMap           *template.FuncMap
+		funcMap           template.FuncMap
 		expectError       bool
 	}{
 		{
@@ -53,7 +54,7 @@ func TestReplaceTagsInText(t *testing.T) {
 			data: map[string]any{
 				"Name": "Tom Watkins",
 			},
-			funcMap:     &defaultFuncMap,
+			funcMap:     functions.DefaultFuncMap,
 			expectError: false,
 		},
 		{
@@ -103,7 +104,7 @@ func TestReplaceTagsInText(t *testing.T) {
 			data: map[string]any{
 				"Name": "Tom Watkins",
 			},
-			funcMap:     &defaultFuncMap,
+			funcMap:     functions.DefaultFuncMap,
 			expectError: false,
 		},
 		{
@@ -189,7 +190,7 @@ func TestReplaceTagsInText(t *testing.T) {
 					{"Name": "Evie Argyle"},
 				},
 			},
-			funcMap:     &defaultFuncMap,
+			funcMap:     functions.DefaultFuncMap,
 			expectError: false,
 		},
 		{
@@ -199,7 +200,7 @@ func TestReplaceTagsInText(t *testing.T) {
 			data: map[string]any{
 				"Name": "Tom Watkins",
 			},
-			funcMap:     &defaultFuncMap,
+			funcMap:     functions.DefaultFuncMap,
 			expectError: true,
 		},
 		{
@@ -209,7 +210,7 @@ func TestReplaceTagsInText(t *testing.T) {
 			data: map[string]any{
 				"Name": "Tom Watkins",
 			},
-			funcMap: &template.FuncMap{
+			funcMap: template.FuncMap{
 				"fail": func() string {
 					panic("forced function error")
 				},
@@ -222,7 +223,7 @@ func TestReplaceTagsInText(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			assert := assert.New(t)
 
-			outputXml, err := replaceTagsInText(tt.inputXml, tt.data, tt.funcMap)
+			outputXml, err := ReplaceTagsInXml(tt.inputXml, tt.data, tt.funcMap)
 			assert.Equal((err != nil), tt.expectError)
 			assert.Equal(removeXmlFormatting(outputXml), removeXmlFormatting(tt.expectedOutputXml))
 		})

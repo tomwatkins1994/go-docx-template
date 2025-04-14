@@ -1,4 +1,4 @@
-package docxtpl
+package tags
 
 import (
 	"testing"
@@ -61,7 +61,7 @@ func TestMergeTagsh(t *testing.T) {
 		&tbl,
 	}
 
-	mergeTags(items)
+	MergeTags(items)
 
 	assert.Equal(pStartText.Text, "")
 	assert.Equal(pEndText.Text, "{{ .tag }}")

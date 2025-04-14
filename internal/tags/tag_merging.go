@@ -1,4 +1,4 @@
-package docxtpl
+package tags
 
 import (
 	"sync"
@@ -6,7 +6,7 @@ import (
 	"github.com/fumiama/go-docx"
 )
 
-func mergeTags(items []any) {
+func MergeTags(items []any) {
 	var wg sync.WaitGroup
 
 	for _, item := range items {

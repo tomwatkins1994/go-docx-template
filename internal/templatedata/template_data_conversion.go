@@ -1,11 +1,11 @@
-package docxtpl
+package templatedata
 
 import (
 	"fmt"
 	"reflect"
 )
 
-func dataToMap(data any) (map[string]any, error) {
+func DataToMap(data any) (map[string]any, error) {
 	if data == nil {
 		return nil, fmt.Errorf("data is nil")
 	}

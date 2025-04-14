@@ -10,12 +10,16 @@ import (
 	"text/template"
 
 	"github.com/fumiama/go-docx"
+	"github.com/tomwatkins1994/go-docx-template/internal/contenttypes"
+	"github.com/tomwatkins1994/go-docx-template/internal/functions"
+	"github.com/tomwatkins1994/go-docx-template/internal/tags"
+	"github.com/tomwatkins1994/go-docx-template/internal/templatedata"
 )
 
 type DocxTmpl struct {
 	*docx.Docx
-	funcMap      *template.FuncMap
-	contentTypes *ContentTypes
+	funcMap      template.FuncMap
+	contentTypes *contenttypes.ContentTypes
 }
 
 // Parse the document from a reader and store it in memory.
@@ -37,15 +41,15 @@ func Parse(reader io.ReaderAt, size int64) (*DocxTmpl, error) {
 		return nil, err
 	}
 
-	contentTypes, err := getContentTypes(reader, size)
+	contentTypes, err := contenttypes.GetContentTypes(reader, size)
 	if err != nil {
 		return nil, err
 	}
 
 	funcMap := make(template.FuncMap)
-	maps.Copy(funcMap, defaultFuncMap)
+	maps.Copy(funcMap, functions.DefaultFuncMap)
 
-	return &DocxTmpl{doc, &funcMap, contentTypes}, nil
+	return &DocxTmpl{doc, funcMap, contentTypes}, nil
 }
 
 // Parse the document from a filename and store it in memory.
@@ -97,7 +101,7 @@ func ParseFromFilename(filename string) (*DocxTmpl, error) {
 // err = doc.Render(data)
 func (d *DocxTmpl) Render(data any) error {
 	// Ensure that there are no 'part tags' in the XML document
-	mergeTags(d.Document.Body.Items)
+	tags.MergeTags(d.Document.Body.Items)
 
 	// Process the template data
 	processedData, err := d.processTemplateData(data)
@@ -111,20 +115,11 @@ func (d *DocxTmpl) Render(data any) error {
 		return err
 	}
 
-	// Prepare the XML for tag replacement
-	documentXmlString, err = prepareXmlForTagReplacement(documentXmlString)
-	if err != nil {
-		return err
-	}
-
 	// Replace the tags in XML
-	documentXmlString, err = replaceTagsInText(documentXmlString, processedData, d.funcMap)
+	documentXmlString, err = tags.ReplaceTagsInXml(documentXmlString, processedData, d.funcMap)
 	if err != nil {
 		return err
 	}
-
-	// Fix any issues in the XML
-	documentXmlString = fixXmlIssuesPostTagReplacement(documentXmlString)
 
 	// Unmarshal the modified XML and replace the document body with it
 	decoder := xml.NewDecoder(bytes.NewBufferString(documentXmlString))
@@ -190,7 +185,7 @@ func (d *DocxTmpl) Save(writer io.Writer) error {
 		// Override content types with out calculated types
 		// Copy across all other files
 		if f.Name == "[Content_Types].xml" {
-			contentTypesXml, err := d.contentTypes.marshalXml()
+			contentTypesXml, err := d.contentTypes.MarshalXml()
 			if err != nil {
 				return err
 			}
@@ -217,4 +212,70 @@ func (d *DocxTmpl) Save(writer io.Writer) error {
 	}
 
 	return nil
+}
+
+func (d *DocxTmpl) getDocumentXml() (string, error) {
+	out, err := xml.Marshal(d.Document.Body)
+	if err != nil {
+		return "", nil
+	}
+
+	return string(out), err
+}
+
+func (d *DocxTmpl) processTemplateData(data any) (map[string]any, error) {
+	convertedData, err := templatedata.DataToMap(data)
+	if err != nil {
+		return nil, err
+	}
+
+	var processTagValues func(data *map[string]any) error
+	processTagValues = func(data *map[string]any) error {
+		for key, value := range *data {
+			if stringVal, ok := value.(string); ok {
+				// Check for files
+				if isImage, err := templatedata.IsImageFilePath(stringVal); err != nil {
+					return err
+				} else {
+					if isImage {
+						image, err := CreateInlineImage(stringVal)
+						if err != nil {
+							return err
+						}
+						imageXml, err := d.addInlineImage(image)
+						if err != nil {
+							return err
+						}
+						(*data)[key] = imageXml
+					}
+				}
+			} else if nestedMap, ok := value.(map[string]any); ok {
+				if err := processTagValues(&nestedMap); err != nil {
+					return err
+				}
+				(*data)[key] = nestedMap
+			} else if sliceValue, ok := value.([]map[string]any); ok {
+				for i := range sliceValue {
+					if err := processTagValues(&sliceValue[i]); err != nil {
+						return err
+					}
+				}
+			} else if inlineImage, ok := value.(*InlineImage); ok {
+				imageXml, err := d.addInlineImage(inlineImage)
+				if err != nil {
+					return err
+				}
+				(*data)[key] = imageXml
+			}
+		}
+
+		return nil
+	}
+
+	err = processTagValues(&convertedData)
+	if err != nil {
+		return nil, err
+	}
+
+	return convertedData, nil
 }
