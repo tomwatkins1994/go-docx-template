@@ -1,4 +1,4 @@
-package docxtpl
+package internal
 
 import (
 	"archive/zip"
@@ -25,7 +25,7 @@ type Override struct {
 	ContentType string `xml:"ContentType,attr"`
 }
 
-func getContentTypes(reader io.ReaderAt, size int64) (*ContentTypes, error) {
+func GetContentTypes(reader io.ReaderAt, size int64) (*ContentTypes, error) {
 	zipReader, err := zip.NewReader(reader, size)
 	if err != nil {
 		return nil, err
@@ -62,14 +62,14 @@ var PNG_CONTENT_TYPE = ContentType{Extension: "png", ContentType: "image/png"}
 var JPG_CONTENT_TYPE = ContentType{Extension: "jpg", ContentType: "image/jpg"}
 var JPEG_CONTENT_TYPE = ContentType{Extension: "jpeg", ContentType: "image/jpeg"}
 
-func (ct *ContentTypes) addContentType(contentType *ContentType) {
+func (ct *ContentTypes) AddContentType(contentType *ContentType) {
 	if slices.Contains(ct.Defaults, *contentType) {
 		return
 	}
 	ct.Defaults = append(ct.Defaults, *contentType)
 }
 
-func (ct *ContentTypes) marshalXml() (string, error) {
+func (ct *ContentTypes) MarshalXml() (string, error) {
 	output, err := xml.MarshalIndent(ct, "", "  ")
 	if err != nil {
 		return "", err

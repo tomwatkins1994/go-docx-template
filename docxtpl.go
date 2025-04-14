@@ -10,12 +10,13 @@ import (
 	"text/template"
 
 	"github.com/fumiama/go-docx"
+	"github.com/tomwatkins1994/go-docx-template/internal"
 )
 
 type DocxTmpl struct {
 	*docx.Docx
 	funcMap      *template.FuncMap
-	contentTypes *ContentTypes
+	contentTypes *internal.ContentTypes
 }
 
 // Parse the document from a reader and store it in memory.
@@ -37,7 +38,7 @@ func Parse(reader io.ReaderAt, size int64) (*DocxTmpl, error) {
 		return nil, err
 	}
 
-	contentTypes, err := getContentTypes(reader, size)
+	contentTypes, err := internal.GetContentTypes(reader, size)
 	if err != nil {
 		return nil, err
 	}
@@ -190,7 +191,7 @@ func (d *DocxTmpl) Save(writer io.Writer) error {
 		// Override content types with out calculated types
 		// Copy across all other files
 		if f.Name == "[Content_Types].xml" {
-			contentTypesXml, err := d.contentTypes.marshalXml()
+			contentTypesXml, err := d.contentTypes.MarshalXml()
 			if err != nil {
 				return err
 			}

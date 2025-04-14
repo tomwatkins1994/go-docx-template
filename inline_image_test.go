@@ -7,6 +7,7 @@ import (
 	"github.com/bep/imagemeta"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/tomwatkins1994/go-docx-template/internal"
 )
 
 func TestCreateInlineImage(t *testing.T) {
@@ -242,8 +243,8 @@ func TestContentTypes(t *testing.T) {
 
 		contentTypes, err := inlineImage.getContentTypes()
 		assert.Nil(err)
-		assert.Equal(contentTypes[0], &JPG_CONTENT_TYPE)
-		assert.Equal(contentTypes[1], &JPEG_CONTENT_TYPE)
+		assert.Equal(contentTypes[0], &internal.JPG_CONTENT_TYPE)
+		assert.Equal(contentTypes[1], &internal.JPEG_CONTENT_TYPE)
 	})
 
 	t.Run("Get content types for a png image", func(t *testing.T) {
@@ -255,7 +256,7 @@ func TestContentTypes(t *testing.T) {
 
 		contentTypes, err := inlineImage.getContentTypes()
 		assert.Nil(err)
-		assert.Equal(contentTypes[0], &PNG_CONTENT_TYPE)
+		assert.Equal(contentTypes[0], &internal.PNG_CONTENT_TYPE)
 	})
 }
 
