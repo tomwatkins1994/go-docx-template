@@ -115,7 +115,7 @@ func (d *DocxTmpl) Render(data any) error {
 	}
 
 	// Replace the tags in XML
-	documentXmlString, err = tags.ReplaceTagsInText(documentXmlString, processedData, d.funcMap)
+	documentXmlString, err = tags.ReplaceTagsInXml(documentXmlString, processedData, d.funcMap)
 	if err != nil {
 		return err
 	}

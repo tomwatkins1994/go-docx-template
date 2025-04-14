@@ -8,7 +8,7 @@ import (
 	"github.com/tomwatkins1994/go-docx-template/internal/xmlutils"
 )
 
-func ReplaceTagsInText(xmlString string, data map[string]any, funcMap template.FuncMap) (string, error) {
+func ReplaceTagsInXml(xmlString string, data map[string]any, funcMap template.FuncMap) (string, error) {
 	// Prepare the XML for tag replacement
 	preparedXmlString, err := xmlutils.PrepareXmlForTagReplacement(xmlString)
 	if err != nil {

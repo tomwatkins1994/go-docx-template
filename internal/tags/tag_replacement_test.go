@@ -223,7 +223,7 @@ func TestReplaceTagsInText(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			assert := assert.New(t)
 
-			outputXml, err := ReplaceTagsInText(tt.inputXml, tt.data, tt.funcMap)
+			outputXml, err := ReplaceTagsInXml(tt.inputXml, tt.data, tt.funcMap)
 			assert.Equal((err != nil), tt.expectError)
 			assert.Equal(removeXmlFormatting(outputXml), removeXmlFormatting(tt.expectedOutputXml))
 		})
