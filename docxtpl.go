@@ -14,6 +14,7 @@ import (
 	"github.com/tomwatkins1994/go-docx-template/internal/functions"
 	"github.com/tomwatkins1994/go-docx-template/internal/tags"
 	"github.com/tomwatkins1994/go-docx-template/internal/templatedata"
+	"github.com/tomwatkins1994/go-docx-template/internal/xmlutils"
 )
 
 type DocxTmpl struct {
@@ -247,6 +248,12 @@ func (d *DocxTmpl) processTemplateData(data any) (map[string]any, error) {
 							return err
 						}
 						(*data)[key] = imageXml
+					} else {
+						xmlEscapedText, err := xmlutils.EscapeXmlString(stringVal)
+						if err != nil {
+							return err
+						}
+						(*data)[key] = xmlEscapedText
 					}
 				}
 			} else if nestedMap, ok := value.(map[string]any); ok {

@@ -43,6 +43,19 @@ func getTests() ([]test, error) {
 			},
 		},
 		{
+			name:     "Basic document with XML escaped",
+			filename: "test_basic_with_escaping.docx",
+			data: struct {
+				ProjectNumber string
+				Client        string
+				Status        string
+			}{
+				ProjectNumber: "'Single quoted text' and \"Quoted text\"",
+				Client:        "Text & more text",
+				Status:        "<tag>New</tag>",
+			},
+		},
+		{
 			name:     "Basic document with images",
 			filename: "test_basic_with_images.docx",
 			data: struct {
@@ -232,6 +245,40 @@ func TestParseAndRender(t *testing.T) {
 			assert.Nil(err, "Error closing document")
 		})
 	}
+}
+
+func TestProcessTemplateData(t *testing.T) {
+	t.Run("Test XML escaping", func(t *testing.T) {
+		assert := assert.New(t)
+		require := require.New(t)
+
+		doc, err := ParseFromFilename("test_templates/test_basic.docx")
+		require.NoError(err, "Parsing error")
+
+		data := struct {
+			ProjectNumber string
+			Client        string
+			Status        string
+			CreatedBy     string
+		}{
+			ProjectNumber: "'Single quoted text'",
+			Client:        "Text & more text",
+			Status:        "\"Quoted text\"",
+			CreatedBy:     "<tag>Text</tag>",
+		}
+
+		processedData, err := doc.processTemplateData(data)
+		require.NoError(err)
+
+		expectedData := map[string]any{
+			"ProjectNumber": "&#39;Single quoted text&#39;",
+			"Client":        "Text &amp; more text",
+			"Status":        "&#34;Quoted text&#34;",
+			"CreatedBy":     "&lt;tag&gt;Text&lt;/tag&gt;",
+		}
+
+		assert.Equal(expectedData, processedData)
+	})
 }
 
 func BenchmarkParseAndRender(b *testing.B) {
