@@ -1,14 +1,16 @@
 package xmlutils
 
-import "strings"
+import (
+	"bytes"
+	"encoding/xml"
+)
 
 // Escape special XML characters in a string.
-func EscapeXmlString(xmlString string) string {
-	xmlString = strings.ReplaceAll(xmlString, "&", "&amp;")
-	xmlString = strings.ReplaceAll(xmlString, "<", "&lt;")
-	xmlString = strings.ReplaceAll(xmlString, ">", "&gt;")
-	xmlString = strings.ReplaceAll(xmlString, "\"", "&quot;")
-	xmlString = strings.ReplaceAll(xmlString, "'", "&apos;")
-
-	return xmlString
+func EscapeXmlString(xmlString string) (string, error) {
+	var buf bytes.Buffer
+	err := xml.EscapeText(&buf, []byte(xmlString))
+	if err != nil {
+		return "", err
+	}
+	return buf.String(), nil
 }

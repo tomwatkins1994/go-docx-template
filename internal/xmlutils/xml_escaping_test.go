@@ -21,18 +21,17 @@ func TestEscapeXmlString(t *testing.T) {
 		},
 		{
 			input:    "\"Quoted text\"",
-			expected: "&quot;Quoted text&quot;",
+			expected: "&#34;Quoted text&#34;",
 		},
 		{
 			input:    "'Single quoted text'",
-			expected: "&apos;Single quoted text&apos;",
+			expected: "&#39;Single quoted text&#39;",
 		},
 	}
 
 	for _, test := range tests {
-		result := EscapeXmlString(test.input)
-		if result != test.expected {
-			assert.Equal(t, test.expected, result)
-		}
+		result, err := EscapeXmlString(test.input)
+		assert.NoError(t, err)
+		assert.Equal(t, test.expected, result)
 	}
 }
