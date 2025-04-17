@@ -8,6 +8,7 @@ import (
 	"github.com/tomwatkins1994/go-docx-template/internal/xmlutils"
 )
 
+// Data should already be processed and have been XML escaped (aside from embedded objects like images) before being passed into this function
 func ReplaceTagsInXml(xmlString string, data map[string]any, funcMap template.FuncMap) (string, error) {
 	// Prepare the XML for tag replacement
 	preparedXmlString, err := xmlutils.PrepareXmlForTagReplacement(xmlString)
