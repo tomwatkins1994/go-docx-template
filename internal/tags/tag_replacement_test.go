@@ -217,6 +217,44 @@ func TestReplaceTagsInText(t *testing.T) {
 			},
 			expectError: true,
 		},
+		{
+			name: "Basic template with XML in the data",
+			inputXml: `
+			<w:document>  
+				<w:body>  
+					<w:p>  
+					<w:r>  
+						<w:t>Text</w:t>  
+					</w:r>  
+					<w:fldSimple w:instr="AUTHOR">  
+						<w:r>  
+							<w:t>Author Name: {{.Name}}</w:t>  
+						</w:r>  
+					</w:fldSimple>  
+					</w:p>  
+				</w:body>  
+			</w:document>`,
+			expectedOutputXml: `
+			<w:document>  
+				<w:body>  
+					<w:p>  
+					<w:r>  
+						<w:t>Text</w:t>  
+					</w:r>  
+					<w:fldSimple w:instr="AUTHOR">  
+						<w:r>  
+							<w:t>Author Name: &lt;Tom Watkins&gt;</w:t>
+						</w:r>  
+					</w:fldSimple>  
+					</w:p>  
+				</w:body>  
+			</w:document>`,
+			data: map[string]any{
+				"Name": "<Tom Watkins>",
+			},
+			funcMap:     functions.DefaultFuncMap,
+			expectError: false,
+		},
 	}
 
 	for _, tt := range tests {
