@@ -43,6 +43,19 @@ func getTests() ([]test, error) {
 			},
 		},
 		{
+			name:     "Basic document with XML escaped",
+			filename: "test_basic_with_escaping.docx",
+			data: struct {
+				ProjectNumber string
+				Client        string
+				Status        string
+			}{
+				ProjectNumber: "'Single quoted text' and \"Quoted text\"",
+				Client:        "Text & more text",
+				Status:        "<tag>New</tag>",
+			},
+		},
+		{
 			name:     "Basic document with images",
 			filename: "test_basic_with_images.docx",
 			data: struct {
