@@ -4,7 +4,8 @@ import "io"
 
 type DocxWrapper interface {
 	GetDocumentXml() (string, error)
-	ReplaceDocumentXml(xml string) error
+	ReplaceDocumentXml(xmlString string) error
 	MergeTags()
-	Write(w io.Writer) error
+	AddInlineImage(img *InlineImage) (xmlString string, err error)
+	Save(w io.Writer) error
 }

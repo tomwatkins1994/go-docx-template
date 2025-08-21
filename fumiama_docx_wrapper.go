@@ -1,17 +1,22 @@
 package docxtpl
 
 import (
+	"archive/zip"
 	"bytes"
 	"encoding/xml"
 	"io"
+	"strings"
 	"sync"
 
 	"github.com/fumiama/go-docx"
+	"github.com/tomwatkins1994/go-docx-template/internal/contenttypes"
 	"github.com/tomwatkins1994/go-docx-template/internal/tags"
 )
 
 type FumiamaDocx struct {
 	*docx.Docx
+
+	contentTypes *contenttypes.ContentTypes
 }
 
 func NewFumiamaDocx(reader io.ReaderAt, size int64) (*FumiamaDocx, error) {
@@ -20,7 +25,12 @@ func NewFumiamaDocx(reader io.ReaderAt, size int64) (*FumiamaDocx, error) {
 		return nil, err
 	}
 
-	return &FumiamaDocx{doc}, nil
+	contentTypes, err := contenttypes.GetContentTypes(reader, size)
+	if err != nil {
+		return nil, err
+	}
+
+	return &FumiamaDocx{doc, contentTypes}, nil
 }
 
 func (d *FumiamaDocx) GetDocumentXml() (string, error) {
@@ -32,8 +42,8 @@ func (d *FumiamaDocx) GetDocumentXml() (string, error) {
 	return string(out), err
 }
 
-func (d *FumiamaDocx) ReplaceDocumentXml(xmlContent string) error {
-	decoder := xml.NewDecoder(bytes.NewBufferString(xmlContent))
+func (d *FumiamaDocx) ReplaceDocumentXml(xmlString string) error {
+	decoder := xml.NewDecoder(bytes.NewBufferString(xmlString))
 	for {
 		t, err := decoder.Token()
 		if err == io.EOF {
@@ -126,9 +136,114 @@ func mergeTagsInTable(table *docx.Table) {
 	wg.Wait()
 }
 
-func (d *FumiamaDocx) Write(w io.Writer) error {
+func (d *FumiamaDocx) AddInlineImage(i *InlineImage) (xmlString string, err error) {
+	// Add the image to the document
+	paragraph := d.AddParagraph()
+	run, err := paragraph.AddInlineDrawing(*i.data)
+	if err != nil {
+		return "", err
+	}
+
+	// Append the content types
+	contentTypes, err := i.getContentTypes()
+	if err != nil {
+		return "", err
+	}
+	for _, contentType := range contentTypes {
+		d.contentTypes.AddContentType(contentType)
+	}
+
+	// Correctly size the image
+	w, h, err := i.GetSize()
+	if err != nil {
+		return "", err
+	}
+	for _, child := range run.Children {
+		if drawing, ok := child.(*docx.Drawing); ok {
+			drawing.Inline.Extent.CX = w
+			drawing.Inline.Extent.CY = h
+			break
+		}
+	}
+
+	// Get the image XML
+	out, err := xml.Marshal(run)
+	if err != nil {
+		return "", err
+	}
+
+	// Remove run tags as the tag should be in a run already
+	xmlString = string(out)
+	xmlString = strings.Replace(xmlString, "<w:r>", "", 1)
+	xmlString = strings.Replace(xmlString, "<w:rPr></w:rPr>", "", 1)
+	lastIndex := strings.LastIndex(xmlString, "</w:r")
+	if lastIndex > -1 {
+		xmlString = xmlString[:lastIndex]
+	}
+
+	// Remove the paragraph from the word doc so we don't get the image twice
+	var newItems []interface{}
+	for _, item := range d.Document.Body.Items {
+		switch o := item.(type) {
+		case *docx.Paragraph:
+			if o == paragraph {
+				continue
+			}
+		}
+		newItems = append(newItems, item)
+	}
+	d.Document.Body.Items = newItems
+
+	return xmlString, nil
+}
+
+func (d *FumiamaDocx) Save(w io.Writer) error {
 	_, err := d.WriteTo(w)
 	if err != nil {
+		return err
+	}
+
+	var buf bytes.Buffer
+	reader := bytes.NewReader(buf.Bytes())
+	zipReader, err := zip.NewReader(reader, int64(buf.Len()))
+	if err != nil {
+		return err
+	}
+
+	generatedZip := zip.NewWriter(w)
+
+	for _, f := range zipReader.File {
+		newFile, err := generatedZip.Create(f.Name)
+		if err != nil {
+			return err
+		}
+
+		// Override content types with out calculated types
+		// Copy across all other files
+		if f.Name == "[Content_Types].xml" {
+			contentTypesXml, err := d.contentTypes.MarshalXml()
+			if err != nil {
+				return err
+			}
+
+			_, err = newFile.Write([]byte(contentTypesXml))
+			if err != nil {
+				return err
+			}
+		} else {
+			zf, err := f.Open()
+			if err != nil {
+				return err
+			}
+			defer zf.Close()
+
+			if _, err := io.Copy(newFile, zf); err != nil {
+				return err
+			}
+		}
+	}
+
+	if err := generatedZip.Close(); err != nil {
 		return err
 	}
 

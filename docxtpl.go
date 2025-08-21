@@ -1,14 +1,11 @@
 package docxtpl
 
 import (
-	"archive/zip"
-	"bytes"
 	"io"
 	"maps"
 	"os"
 	"text/template"
 
-	"github.com/tomwatkins1994/go-docx-template/internal/contenttypes"
 	"github.com/tomwatkins1994/go-docx-template/internal/functions"
 	"github.com/tomwatkins1994/go-docx-template/internal/tags"
 	"github.com/tomwatkins1994/go-docx-template/internal/templatedata"
@@ -16,9 +13,8 @@ import (
 )
 
 type DocxTmpl struct {
-	docx         DocxWrapper
-	funcMap      template.FuncMap
-	contentTypes *contenttypes.ContentTypes
+	docx    DocxWrapper
+	funcMap template.FuncMap
 }
 
 // Parse the document from a reader and store it in memory.
@@ -40,15 +36,10 @@ func Parse(reader io.ReaderAt, size int64) (*DocxTmpl, error) {
 		return nil, err
 	}
 
-	contentTypes, err := contenttypes.GetContentTypes(reader, size)
-	if err != nil {
-		return nil, err
-	}
-
 	funcMap := make(template.FuncMap)
 	maps.Copy(funcMap, functions.DefaultFuncMap)
 
-	return &DocxTmpl{docx, funcMap, contentTypes}, nil
+	return &DocxTmpl{docx, funcMap}, nil
 }
 
 // Parse the document from a filename and store it in memory.
@@ -140,53 +131,9 @@ func (d *DocxTmpl) Render(data any) error {
 //	if err != nil {
 //		panic(err)
 //	}
-func (d *DocxTmpl) Save(writer io.Writer) error {
-	var buf bytes.Buffer
-	err := d.docx.Write(&buf)
+func (d *DocxTmpl) Save(w io.Writer) error {
+	err := d.docx.Save(w)
 	if err != nil {
-		return err
-	}
-
-	reader := bytes.NewReader(buf.Bytes())
-	zipReader, err := zip.NewReader(reader, int64(buf.Len()))
-	if err != nil {
-		return err
-	}
-
-	generatedZip := zip.NewWriter(writer)
-
-	for _, f := range zipReader.File {
-		newFile, err := generatedZip.Create(f.Name)
-		if err != nil {
-			return err
-		}
-
-		// Override content types with out calculated types
-		// Copy across all other files
-		if f.Name == "[Content_Types].xml" {
-			contentTypesXml, err := d.contentTypes.MarshalXml()
-			if err != nil {
-				return err
-			}
-
-			_, err = newFile.Write([]byte(contentTypesXml))
-			if err != nil {
-				return err
-			}
-		} else {
-			zf, err := f.Open()
-			if err != nil {
-				return err
-			}
-			defer zf.Close()
-
-			if _, err := io.Copy(newFile, zf); err != nil {
-				return err
-			}
-		}
-	}
-
-	if err := generatedZip.Close(); err != nil {
 		return err
 	}
 
@@ -212,7 +159,7 @@ func (d *DocxTmpl) processTemplateData(data any) (map[string]any, error) {
 						if err != nil {
 							return err
 						}
-						imageXml, err := d.addInlineImage(image)
+						imageXml, err := d.docx.AddInlineImage(image)
 						if err != nil {
 							return err
 						}
@@ -237,7 +184,7 @@ func (d *DocxTmpl) processTemplateData(data any) (map[string]any, error) {
 					}
 				}
 			} else if inlineImage, ok := value.(*InlineImage); ok {
-				imageXml, err := d.addInlineImage(inlineImage)
+				imageXml, err := d.docx.AddInlineImage(inlineImage)
 				if err != nil {
 					return err
 				}

@@ -2,7 +2,6 @@ package docxtpl
 
 import (
 	"bytes"
-	"encoding/xml"
 	"errors"
 	"fmt"
 	"image"
@@ -15,7 +14,6 @@ import (
 	"strings"
 
 	"github.com/bep/imagemeta"
-	"github.com/fumiama/go-docx"
 	"github.com/fumiama/imgsz"
 	"github.com/tomwatkins1994/go-docx-template/internal/contenttypes"
 	"github.com/tomwatkins1994/go-docx-template/internal/templatedata"
@@ -252,65 +250,4 @@ func (i *InlineImage) getContentTypes() ([]*contenttypes.ContentType, error) {
 	}
 
 	return []*contenttypes.ContentType{}, nil
-}
-
-func (d *DocxTmpl) addInlineImage(i *InlineImage) (xmlString string, err error) {
-	// Add the image to the document
-	paragraph := d.AddParagraph()
-	run, err := paragraph.AddInlineDrawing(*i.data)
-	if err != nil {
-		return "", err
-	}
-
-	// Append the content types
-	contentTypes, err := i.getContentTypes()
-	if err != nil {
-		return "", err
-	}
-	for _, contentType := range contentTypes {
-		d.contentTypes.AddContentType(contentType)
-	}
-
-	// Correctly size the image
-	w, h, err := i.GetSize()
-	if err != nil {
-		return "", err
-	}
-	for _, child := range run.Children {
-		if drawing, ok := child.(*docx.Drawing); ok {
-			drawing.Inline.Extent.CX = w
-			drawing.Inline.Extent.CY = h
-			break
-		}
-	}
-
-	// Get the image XML
-	out, err := xml.Marshal(run)
-	if err != nil {
-		return "", err
-	}
-
-	// Remove run tags as the tag should be in a run already
-	xmlString = string(out)
-	xmlString = strings.Replace(xmlString, "<w:r>", "", 1)
-	xmlString = strings.Replace(xmlString, "<w:rPr></w:rPr>", "", 1)
-	lastIndex := strings.LastIndex(xmlString, "</w:r")
-	if lastIndex > -1 {
-		xmlString = xmlString[:lastIndex]
-	}
-
-	// Remove the paragraph from the word doc so we don't get the image twice
-	var newItems []interface{}
-	for _, item := range d.Document.Body.Items {
-		switch o := item.(type) {
-		case *docx.Paragraph:
-			if o == paragraph {
-				continue
-			}
-		}
-		newItems = append(newItems, item)
-	}
-	d.Document.Body.Items = newItems
-
-	return xmlString, nil
 }
