@@ -69,20 +69,24 @@ func (d *FumiamaDocx) ReplaceDocumentXml(xmlString string) error {
 }
 
 func (d *FumiamaDocx) MergeTags() {
+	mergeTags(d.Document.Body.Items)
+}
+
+func mergeTags(items []any) {
 	var wg sync.WaitGroup
 
-	for _, item := range d.Document.Body.Items {
+	for _, item := range items {
 		wg.Add(1)
-		go func() {
+		go func(i any) {
 			defer wg.Done()
 
-			switch i := item.(type) {
+			switch o := i.(type) {
 			case *docx.Paragraph:
-				mergeTagsInParagraph(i)
+				mergeTagsInParagraph(o)
 			case *docx.Table:
-				mergeTagsInTable(i)
+				mergeTagsInTable(o)
 			}
-		}()
+		}(item)
 	}
 
 	wg.Wait()

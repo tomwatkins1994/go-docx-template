@@ -1,4 +1,4 @@
-package tags
+package docx_wrappers
 
 import (
 	"testing"
@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestMergeTagsh(t *testing.T) {
+func TestMergeTags(t *testing.T) {
 	assert := assert.New(t)
 
 	pStartText := docx.Text{
@@ -61,7 +61,7 @@ func TestMergeTagsh(t *testing.T) {
 		&tbl,
 	}
 
-	MergeTags(items)
+	mergeTags(items)
 
 	assert.Equal(pStartText.Text, "")
 	assert.Equal(pEndText.Text, "{{ .tag }}")
