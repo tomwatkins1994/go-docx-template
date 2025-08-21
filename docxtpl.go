@@ -6,7 +6,7 @@ import (
 	"os"
 	"text/template"
 
-	"github.com/tomwatkins1994/go-docx-template/internal/docx_wrappers"
+	"github.com/tomwatkins1994/go-docx-template/internal/docxwrappers"
 	"github.com/tomwatkins1994/go-docx-template/internal/functions"
 	"github.com/tomwatkins1994/go-docx-template/internal/images"
 	"github.com/tomwatkins1994/go-docx-template/internal/tags"
@@ -15,7 +15,7 @@ import (
 )
 
 type DocxTmpl struct {
-	docx    docx_wrappers.DocxWrapper
+	docx    docxwrappers.DocxWrapper
 	funcMap template.FuncMap
 }
 
@@ -33,7 +33,7 @@ type DocxTmpl struct {
 //	size := fileinfo.Size()
 //	doc, err := docxtpl.Parse(reader, int64(size))
 func Parse(reader io.ReaderAt, size int64) (*DocxTmpl, error) {
-	docx, err := docx_wrappers.NewFumiamaDocx(reader, size)
+	docx, err := docxwrappers.NewFumiamaDocx(reader, size)
 	if err != nil {
 		return nil, err
 	}

@@ -1,4 +1,4 @@
-package docx_wrappers
+package docxwrappers
 
 import (
 	"archive/zip"
