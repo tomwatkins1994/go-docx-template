@@ -203,12 +203,12 @@ func (d *FumiamaDocx) AddInlineImage(i *images.InlineImage) (xmlString string, e
 }
 
 func (d *FumiamaDocx) Save(w io.Writer) error {
-	_, err := d.WriteTo(w)
+	var buf bytes.Buffer
+	_, err := d.WriteTo(&buf)
 	if err != nil {
 		return err
 	}
 
-	var buf bytes.Buffer
 	reader := bytes.NewReader(buf.Bytes())
 	zipReader, err := zip.NewReader(reader, int64(buf.Len()))
 	if err != nil {
