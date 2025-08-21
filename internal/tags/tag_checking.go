@@ -7,10 +7,10 @@ import (
 var tagRegex = regexp.MustCompile("{{.*?}}")
 var incompleteTagRegex = regexp.MustCompile("{{[^}]*?(}$|$)|{$|^}")
 
-func textContainsTags(text string) bool {
+func TextContainsTags(text string) bool {
 	return tagRegex.MatchString(text)
 }
 
-func textContainsIncompleteTags(text string) bool {
+func TextContainsIncompleteTags(text string) bool {
 	return incompleteTagRegex.MatchString(text)
 }

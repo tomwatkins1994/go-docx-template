@@ -40,13 +40,13 @@ func mergeTagsInParagraph(paragraph *docx.Paragraph) {
 					} else {
 						currentText = text.Text
 					}
-					containsIncompleteTags := textContainsIncompleteTags(currentText)
+					containsIncompleteTags := TextContainsIncompleteTags(currentText)
 					if containsIncompleteTags {
 						text.Text = ""
 						inIncompleteTag = true
 					} else {
 						inIncompleteTag = false
-						containsTags := textContainsTags(currentText)
+						containsTags := TextContainsTags(currentText)
 						if containsTags {
 							text.Text = currentText
 						}
