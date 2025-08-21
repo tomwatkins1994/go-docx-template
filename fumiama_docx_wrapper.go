@@ -125,3 +125,12 @@ func mergeTagsInTable(table *docx.Table) {
 
 	wg.Wait()
 }
+
+func (d *FumiamaDocx) Write(w io.Writer) error {
+	_, err := d.WriteTo(w)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
