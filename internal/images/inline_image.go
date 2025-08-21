@@ -1,4 +1,4 @@
-package docxtpl
+package images
 
 import (
 	"bytes"
@@ -131,6 +131,13 @@ func (i *InlineImage) Resize(width int, height int) error {
 	return nil
 }
 
+func (i *InlineImage) GetData() *[]byte {
+	if i.data == nil {
+		return nil
+	}
+	return i.data
+}
+
 func (i *InlineImage) getImage() (*image.Image, error) {
 	format, err := i.getImageFormat()
 	if err != nil {
@@ -138,7 +145,7 @@ func (i *InlineImage) getImage() (*image.Image, error) {
 	}
 
 	var img image.Image
-	imgReader := bytes.NewReader(*i.data)
+	imgReader := bytes.NewReader(*i.GetData())
 
 	switch format {
 	case imagemeta.JPEG:
@@ -236,7 +243,7 @@ func getResolutionFromString(resolution string) (int, error) {
 	return result, nil
 }
 
-func (i *InlineImage) getContentTypes() ([]*contenttypes.ContentType, error) {
+func (i *InlineImage) GetContentTypes() ([]*contenttypes.ContentType, error) {
 	format, err := i.getImageFormat()
 	if err != nil {
 		return nil, err

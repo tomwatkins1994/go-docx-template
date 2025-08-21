@@ -1,4 +1,4 @@
-package docxtpl
+package images
 
 import (
 	"image"
@@ -241,7 +241,7 @@ func TestContentTypes(t *testing.T) {
 		inlineImage, err := CreateInlineImage("test_templates/test_image.jpg")
 		require.Nil(err)
 
-		contentTypes, err := inlineImage.getContentTypes()
+		contentTypes, err := inlineImage.GetContentTypes()
 		assert.Nil(err)
 		assert.Equal(contentTypes[0], &contenttypes.JPG_CONTENT_TYPE)
 		assert.Equal(contentTypes[1], &contenttypes.JPEG_CONTENT_TYPE)
@@ -254,23 +254,8 @@ func TestContentTypes(t *testing.T) {
 		inlineImage, err := CreateInlineImage("test_templates/test_image.png")
 		require.Nil(err)
 
-		contentTypes, err := inlineImage.getContentTypes()
+		contentTypes, err := inlineImage.GetContentTypes()
 		assert.Nil(err)
 		assert.Equal(contentTypes[0], &contenttypes.PNG_CONTENT_TYPE)
 	})
-}
-
-func TestAddInlineImage(t *testing.T) {
-	require := require.New(t)
-	assert := assert.New(t)
-
-	doc, err := ParseFromFilename("test_templates/test_basic.docx")
-	require.Nil(err, "Parsing error")
-
-	inlineImage, err := CreateInlineImage("test_templates/test_image.jpg")
-	require.Nil(err)
-
-	imageXml, err := doc.addInlineImage(inlineImage)
-	assert.Nil(err)
-	assert.Greater(len(imageXml), 0)
 }

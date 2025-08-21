@@ -1,4 +1,4 @@
-package docxtpl
+package docx_wrappers
 
 import (
 	"archive/zip"
@@ -10,6 +10,7 @@ import (
 
 	"github.com/fumiama/go-docx"
 	"github.com/tomwatkins1994/go-docx-template/internal/contenttypes"
+	"github.com/tomwatkins1994/go-docx-template/internal/images"
 	"github.com/tomwatkins1994/go-docx-template/internal/tags"
 )
 
@@ -136,16 +137,16 @@ func mergeTagsInTable(table *docx.Table) {
 	wg.Wait()
 }
 
-func (d *FumiamaDocx) AddInlineImage(i *InlineImage) (xmlString string, err error) {
+func (d *FumiamaDocx) AddInlineImage(i *images.InlineImage) (xmlString string, err error) {
 	// Add the image to the document
 	paragraph := d.AddParagraph()
-	run, err := paragraph.AddInlineDrawing(*i.data)
+	run, err := paragraph.AddInlineDrawing(*i.GetData())
 	if err != nil {
 		return "", err
 	}
 
 	// Append the content types
-	contentTypes, err := i.getContentTypes()
+	contentTypes, err := i.GetContentTypes()
 	if err != nil {
 		return "", err
 	}

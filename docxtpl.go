@@ -6,14 +6,16 @@ import (
 	"os"
 	"text/template"
 
+	"github.com/tomwatkins1994/go-docx-template/internal/docx_wrappers"
 	"github.com/tomwatkins1994/go-docx-template/internal/functions"
+	"github.com/tomwatkins1994/go-docx-template/internal/images"
 	"github.com/tomwatkins1994/go-docx-template/internal/tags"
 	"github.com/tomwatkins1994/go-docx-template/internal/templatedata"
 	"github.com/tomwatkins1994/go-docx-template/internal/xmlutils"
 )
 
 type DocxTmpl struct {
-	docx    DocxWrapper
+	docx    docx_wrappers.DocxWrapper
 	funcMap template.FuncMap
 }
 
@@ -31,7 +33,7 @@ type DocxTmpl struct {
 //	size := fileinfo.Size()
 //	doc, err := docxtpl.Parse(reader, int64(size))
 func Parse(reader io.ReaderAt, size int64) (*DocxTmpl, error) {
-	docx, err := NewFumiamaDocx(reader, size)
+	docx, err := docx_wrappers.NewFumiamaDocx(reader, size)
 	if err != nil {
 		return nil, err
 	}
@@ -155,7 +157,7 @@ func (d *DocxTmpl) processTemplateData(data any) (map[string]any, error) {
 					return err
 				} else {
 					if isImage {
-						image, err := CreateInlineImage(stringVal)
+						image, err := images.CreateInlineImage(stringVal)
 						if err != nil {
 							return err
 						}
@@ -183,7 +185,7 @@ func (d *DocxTmpl) processTemplateData(data any) (map[string]any, error) {
 						return err
 					}
 				}
-			} else if inlineImage, ok := value.(*InlineImage); ok {
+			} else if inlineImage, ok := value.(*images.InlineImage); ok {
 				imageXml, err := d.docx.AddInlineImage(inlineImage)
 				if err != nil {
 					return err

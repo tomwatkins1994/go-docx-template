@@ -8,6 +8,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/tomwatkins1994/go-docx-template/internal/images"
 )
 
 type test struct {
@@ -19,11 +20,11 @@ type test struct {
 }
 
 func getTests() ([]test, error) {
-	testImage, err := CreateInlineImage("test_templates/test_image.png")
+	testImage, err := images.CreateInlineImage("test_templates/test_image.png")
 	if err != nil {
 		return nil, err
 	}
-	profileImage, err := CreateInlineImage("test_templates/test_image.jpg")
+	profileImage, err := images.CreateInlineImage("test_templates/test_image.jpg")
 	if err != nil {
 		return nil, err
 	}
@@ -158,12 +159,12 @@ func getTests() ([]test, error) {
 				ProjectNumber string
 				Client        string
 				Status        string
-				Image         *InlineImage
+				Image         *images.InlineImage
 				People        []struct {
 					Name           string
 					Gender         string
 					Age            uint8
-					ProfilePicture *InlineImage
+					ProfilePicture *images.InlineImage
 				}
 			}{
 				ProjectNumber: "B-00001",
@@ -174,7 +175,7 @@ func getTests() ([]test, error) {
 					Name           string
 					Gender         string
 					Age            uint8
-					ProfilePicture *InlineImage
+					ProfilePicture *images.InlineImage
 				}{
 					{
 						Name:           "Tom Watkins",
@@ -324,4 +325,19 @@ func BenchmarkParseAndRender(b *testing.B) {
 			b.Logf("Total: %v\n", time.Since(start))
 		})
 	}
+}
+
+func TestAddInlineImage(t *testing.T) {
+	require := require.New(t)
+	assert := assert.New(t)
+
+	doc, err := ParseFromFilename("test_templates/test_basic.docx")
+	require.Nil(err, "Parsing error")
+
+	inlineImage, err := images.CreateInlineImage("test_templates/test_image.jpg")
+	require.Nil(err)
+
+	imageXml, err := doc.docx.AddInlineImage(inlineImage)
+	assert.Nil(err)
+	assert.Greater(len(imageXml), 0)
 }
