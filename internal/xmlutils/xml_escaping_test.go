@@ -29,9 +29,11 @@ func TestEscapeXmlString(t *testing.T) {
 		},
 	}
 
-	for _, test := range tests {
-		result, err := EscapeXmlString(test.input)
-		assert.NoError(t, err)
-		assert.Equal(t, test.expected, result)
+	for _, tt := range tests {
+		t.Run("Should escape: "+tt.input, func(t *testing.T) {
+			result, err := EscapeXmlString(tt.input)
+			assert.NoError(t, err)
+			assert.Equal(t, tt.expected, result)
+		})
 	}
 }
