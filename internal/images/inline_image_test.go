@@ -1,4 +1,4 @@
-package docxtpl
+package images
 
 import (
 	"image"
@@ -10,11 +10,14 @@ import (
 	"github.com/tomwatkins1994/go-docx-template/internal/contenttypes"
 )
 
+var testJpgImage string = "../../test_templates/test_image.jpg"
+var testPngImage string = "../../test_templates/test_image.png"
+
 func TestCreateInlineImage(t *testing.T) {
 	t.Run("Should return an image for a valid filepath", func(t *testing.T) {
 		assert := assert.New(t)
 
-		img, err := CreateInlineImage("test_templates/test_image.jpg")
+		img, err := CreateInlineImage(testJpgImage)
 		assert.Nil(err)
 		assert.NotNil(img.data)
 		assert.Equal(img.Ext, ".jpg")
@@ -81,7 +84,7 @@ func TestGetExifData(t *testing.T) {
 	assert := assert.New(t)
 	require := require.New(t)
 
-	img, err := CreateInlineImage("test_templates/test_image.jpg")
+	img, err := CreateInlineImage(testJpgImage)
 	require.Nil(err)
 
 	exifData, err := img.GetExifData()
@@ -93,7 +96,7 @@ func TestResize(t *testing.T) {
 	require := require.New(t)
 	assert := assert.New(t)
 
-	inlineImage, err := CreateInlineImage("test_templates/test_image.jpg")
+	inlineImage, err := CreateInlineImage(testJpgImage)
 	require.Nil(err)
 
 	originalWEmu, originalHEmu, err := inlineImage.GetSize()
@@ -116,7 +119,7 @@ func TestGetImage(t *testing.T) {
 	t.Run("Get a jpeg image", func(t *testing.T) {
 		assert := assert.New(t)
 
-		inlineImage, err := CreateInlineImage("test_templates/test_image.jpg")
+		inlineImage, err := CreateInlineImage(testJpgImage)
 		assert.Nil(err)
 
 		img, err := inlineImage.getImage()
@@ -127,7 +130,7 @@ func TestGetImage(t *testing.T) {
 	t.Run("Get a png image", func(t *testing.T) {
 		assert := assert.New(t)
 
-		inlineImage, err := CreateInlineImage("test_templates/test_image.png")
+		inlineImage, err := CreateInlineImage(testPngImage)
 		assert.Nil(err)
 
 		img, err := inlineImage.getImage()
@@ -148,7 +151,7 @@ func TestReplaceImage(t *testing.T) {
 	t.Run("Replace a jpeg image", func(t *testing.T) {
 		assert := assert.New(t)
 
-		inlineImage, err := CreateInlineImage("test_templates/test_image.jpg")
+		inlineImage, err := CreateInlineImage(testJpgImage)
 		assert.Nil(err)
 
 		rgba := image.NewRGBA(image.Rect(0, 0, 100, 100))
@@ -160,7 +163,7 @@ func TestReplaceImage(t *testing.T) {
 	t.Run("Replace a png image", func(t *testing.T) {
 		assert := assert.New(t)
 
-		inlineImage, err := CreateInlineImage("test_templates/test_image.png")
+		inlineImage, err := CreateInlineImage(testPngImage)
 		assert.Nil(err)
 
 		rgba := image.NewRGBA(image.Rect(0, 0, 100, 100))
@@ -174,7 +177,7 @@ func TestGetSize(t *testing.T) {
 	require := require.New(t)
 	assert := assert.New(t)
 
-	inlineImage, err := CreateInlineImage("test_templates/test_image.jpg")
+	inlineImage, err := CreateInlineImage(testJpgImage)
 	require.Nil(err)
 
 	w, h, err := inlineImage.GetSize()
@@ -187,7 +190,7 @@ func TestGetResolution(t *testing.T) {
 	require := require.New(t)
 	assert := assert.New(t)
 
-	inlineImage, err := CreateInlineImage("test_templates/test_image.jpg")
+	inlineImage, err := CreateInlineImage(testJpgImage)
 	require.Nil(err)
 
 	wDpi, hDpi := inlineImage.GetResolution()
@@ -238,10 +241,10 @@ func TestContentTypes(t *testing.T) {
 		require := require.New(t)
 		assert := assert.New(t)
 
-		inlineImage, err := CreateInlineImage("test_templates/test_image.jpg")
+		inlineImage, err := CreateInlineImage(testJpgImage)
 		require.Nil(err)
 
-		contentTypes, err := inlineImage.getContentTypes()
+		contentTypes, err := inlineImage.GetContentTypes()
 		assert.Nil(err)
 		assert.Equal(contentTypes[0], &contenttypes.JPG_CONTENT_TYPE)
 		assert.Equal(contentTypes[1], &contenttypes.JPEG_CONTENT_TYPE)
@@ -251,26 +254,11 @@ func TestContentTypes(t *testing.T) {
 		require := require.New(t)
 		assert := assert.New(t)
 
-		inlineImage, err := CreateInlineImage("test_templates/test_image.png")
+		inlineImage, err := CreateInlineImage(testPngImage)
 		require.Nil(err)
 
-		contentTypes, err := inlineImage.getContentTypes()
+		contentTypes, err := inlineImage.GetContentTypes()
 		assert.Nil(err)
 		assert.Equal(contentTypes[0], &contenttypes.PNG_CONTENT_TYPE)
 	})
-}
-
-func TestAddInlineImage(t *testing.T) {
-	require := require.New(t)
-	assert := assert.New(t)
-
-	doc, err := ParseFromFilename("test_templates/test_basic.docx")
-	require.Nil(err, "Parsing error")
-
-	inlineImage, err := CreateInlineImage("test_templates/test_image.jpg")
-	require.Nil(err)
-
-	imageXml, err := doc.addInlineImage(inlineImage)
-	assert.Nil(err)
-	assert.Greater(len(imageXml), 0)
 }

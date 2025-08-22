@@ -1,26 +1,22 @@
 package docxtpl
 
 import (
-	"archive/zip"
-	"bytes"
-	"encoding/xml"
 	"io"
 	"maps"
 	"os"
 	"text/template"
 
-	"github.com/fumiama/go-docx"
-	"github.com/tomwatkins1994/go-docx-template/internal/contenttypes"
+	"github.com/tomwatkins1994/go-docx-template/internal/docxwrappers"
 	"github.com/tomwatkins1994/go-docx-template/internal/functions"
+	"github.com/tomwatkins1994/go-docx-template/internal/images"
 	"github.com/tomwatkins1994/go-docx-template/internal/tags"
 	"github.com/tomwatkins1994/go-docx-template/internal/templatedata"
 	"github.com/tomwatkins1994/go-docx-template/internal/xmlutils"
 )
 
 type DocxTmpl struct {
-	*docx.Docx
-	funcMap      template.FuncMap
-	contentTypes *contenttypes.ContentTypes
+	docx    docxwrappers.DocxWrapper
+	funcMap template.FuncMap
 }
 
 // Parse the document from a reader and store it in memory.
@@ -37,12 +33,7 @@ type DocxTmpl struct {
 //	size := fileinfo.Size()
 //	doc, err := docxtpl.Parse(reader, int64(size))
 func Parse(reader io.ReaderAt, size int64) (*DocxTmpl, error) {
-	doc, err := docx.Parse(reader, size)
-	if err != nil {
-		return nil, err
-	}
-
-	contentTypes, err := contenttypes.GetContentTypes(reader, size)
+	docx, err := docxwrappers.NewFumiamaDocx(reader, size)
 	if err != nil {
 		return nil, err
 	}
@@ -50,7 +41,7 @@ func Parse(reader io.ReaderAt, size int64) (*DocxTmpl, error) {
 	funcMap := make(template.FuncMap)
 	maps.Copy(funcMap, functions.DefaultFuncMap)
 
-	return &DocxTmpl{doc, funcMap, contentTypes}, nil
+	return &DocxTmpl{docx, funcMap}, nil
 }
 
 // Parse the document from a filename and store it in memory.
@@ -102,7 +93,7 @@ func ParseFromFilename(filename string) (*DocxTmpl, error) {
 // err = doc.Render(data)
 func (d *DocxTmpl) Render(data any) error {
 	// Ensure that there are no 'part tags' in the XML document
-	tags.MergeTags(d.Document.Body.Items)
+	d.docx.MergeTags()
 
 	// Process the template data
 	processedData, err := d.processTemplateData(data)
@@ -111,7 +102,7 @@ func (d *DocxTmpl) Render(data any) error {
 	}
 
 	// Get the document XML
-	documentXmlString, err := d.getDocumentXml()
+	documentXmlString, err := d.docx.GetDocumentXml()
 	if err != nil {
 		return err
 	}
@@ -122,27 +113,7 @@ func (d *DocxTmpl) Render(data any) error {
 		return err
 	}
 
-	// Unmarshal the modified XML and replace the document body with it
-	decoder := xml.NewDecoder(bytes.NewBufferString(documentXmlString))
-	for {
-		t, err := decoder.Token()
-		if err == io.EOF {
-			break
-		}
-		if err != nil {
-			return err
-		}
-		if start, ok := t.(xml.StartElement); ok {
-			if start.Name.Local == "Body" {
-				clear(d.Document.Body.Items)
-				err = d.Document.Body.UnmarshalXML(decoder, start)
-				if err != nil {
-					return err
-				}
-				break
-			}
-		}
-	}
+	d.docx.ReplaceDocumentXml(documentXmlString)
 
 	return nil
 }
@@ -162,66 +133,13 @@ func (d *DocxTmpl) Render(data any) error {
 //	if err != nil {
 //		panic(err)
 //	}
-func (d *DocxTmpl) Save(writer io.Writer) error {
-	var buf bytes.Buffer
-	_, err := d.WriteTo(&buf)
+func (d *DocxTmpl) Save(w io.Writer) error {
+	err := d.docx.Save(w)
 	if err != nil {
-		return err
-	}
-
-	reader := bytes.NewReader(buf.Bytes())
-	zipReader, err := zip.NewReader(reader, int64(buf.Len()))
-	if err != nil {
-		return err
-	}
-
-	generatedZip := zip.NewWriter(writer)
-
-	for _, f := range zipReader.File {
-		newFile, err := generatedZip.Create(f.Name)
-		if err != nil {
-			return err
-		}
-
-		// Override content types with out calculated types
-		// Copy across all other files
-		if f.Name == "[Content_Types].xml" {
-			contentTypesXml, err := d.contentTypes.MarshalXml()
-			if err != nil {
-				return err
-			}
-
-			_, err = newFile.Write([]byte(contentTypesXml))
-			if err != nil {
-				return err
-			}
-		} else {
-			zf, err := f.Open()
-			if err != nil {
-				return err
-			}
-			defer zf.Close()
-
-			if _, err := io.Copy(newFile, zf); err != nil {
-				return err
-			}
-		}
-	}
-
-	if err := generatedZip.Close(); err != nil {
 		return err
 	}
 
 	return nil
-}
-
-func (d *DocxTmpl) getDocumentXml() (string, error) {
-	out, err := xml.Marshal(d.Document.Body)
-	if err != nil {
-		return "", nil
-	}
-
-	return string(out), err
 }
 
 func (d *DocxTmpl) processTemplateData(data any) (map[string]any, error) {
@@ -239,11 +157,11 @@ func (d *DocxTmpl) processTemplateData(data any) (map[string]any, error) {
 					return err
 				} else {
 					if isImage {
-						image, err := CreateInlineImage(stringVal)
+						image, err := images.CreateInlineImage(stringVal)
 						if err != nil {
 							return err
 						}
-						imageXml, err := d.addInlineImage(image)
+						imageXml, err := d.docx.AddInlineImage(image)
 						if err != nil {
 							return err
 						}
@@ -267,8 +185,8 @@ func (d *DocxTmpl) processTemplateData(data any) (map[string]any, error) {
 						return err
 					}
 				}
-			} else if inlineImage, ok := value.(*InlineImage); ok {
-				imageXml, err := d.addInlineImage(inlineImage)
+			} else if inlineImage, ok := value.(*images.InlineImage); ok {
+				imageXml, err := d.docx.AddInlineImage(inlineImage)
 				if err != nil {
 					return err
 				}

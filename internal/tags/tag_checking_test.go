@@ -36,7 +36,7 @@ func TestTextContainsTags(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result := textContainsTags(tt.text)
+			result := TextContainsTags(tt.text)
 			assert.Equal(t, result, tt.expectedResult)
 		})
 	}
@@ -72,7 +72,7 @@ func TestTextContainsIncompleteTags(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result := textContainsIncompleteTags(tt.text)
+			result := TextContainsIncompleteTags(tt.text)
 			assert.Equal(t, result, tt.expectedResult)
 		})
 	}
