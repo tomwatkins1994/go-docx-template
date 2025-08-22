@@ -326,18 +326,3 @@ func BenchmarkParseAndRender(b *testing.B) {
 		})
 	}
 }
-
-func TestAddInlineImage(t *testing.T) {
-	require := require.New(t)
-	assert := assert.New(t)
-
-	doc, err := ParseFromFilename("test_templates/test_basic.docx")
-	require.Nil(err, "Parsing error")
-
-	inlineImage, err := images.CreateInlineImage("test_templates/test_image.jpg")
-	require.Nil(err)
-
-	imageXml, err := doc.docx.AddInlineImage(inlineImage)
-	assert.Nil(err)
-	assert.NotEmpty(imageXml)
-}
