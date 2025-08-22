@@ -7,6 +7,8 @@ import (
 	"github.com/fumiama/go-docx"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/tomwatkins1994/go-docx-template/internal/contenttypes"
+	"github.com/tomwatkins1994/go-docx-template/internal/images"
 )
 
 func TestGetDocumentXml(t *testing.T) {
@@ -226,4 +228,48 @@ func TestMergeTagsInTable(t *testing.T) {
 	assert.Equal(p1EndText.Text, "{{ .tag1 }}")
 	assert.Equal(p2StartText.Text, "")
 	assert.Equal(p2EndText.Text, "{{ .tag2 }}")
+}
+
+func TestAddInlineImage(t *testing.T) {
+	assert := assert.New(t)
+	require := require.New(t)
+
+	t.Run("Should return the XML string for the image", func(t *testing.T) {
+		reader, err := os.Open("../../test_templates/test_basic.docx")
+		require.NoError(err)
+
+		fileinfo, err := reader.Stat()
+		require.NoError(err)
+		size := fileinfo.Size()
+
+		docx, err := NewFumiamaDocx(reader, size)
+		require.NoError(err)
+
+		image, err := images.CreateInlineImage("../../test_templates/test_image.png")
+		require.NoError(err)
+
+		xmlString, err := docx.AddInlineImage(image)
+		require.NoError(err)
+		assert.NotEmpty(xmlString)
+	})
+
+	t.Run("Should add the PNG content type to the documents content types", func(t *testing.T) {
+		reader, err := os.Open("../../test_templates/test_basic.docx")
+		require.NoError(err)
+
+		fileinfo, err := reader.Stat()
+		require.NoError(err)
+		size := fileinfo.Size()
+
+		docx, err := NewFumiamaDocx(reader, size)
+		require.NoError(err)
+
+		image, err := images.CreateInlineImage("../../test_templates/test_image.png")
+		require.NoError(err)
+
+		_, err = docx.AddInlineImage(image)
+		require.NoError(err)
+		assert.Contains(docx.contentTypes.Defaults, contenttypes.PNG_CONTENT_TYPE)
+	})
+
 }
