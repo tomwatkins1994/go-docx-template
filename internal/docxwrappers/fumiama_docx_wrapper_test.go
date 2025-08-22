@@ -271,5 +271,25 @@ func TestAddInlineImage(t *testing.T) {
 		assert.NoError(err)
 		assert.Contains(docx.contentTypes.Defaults, contenttypes.PNG_CONTENT_TYPE)
 	})
+}
 
+func TestSave(t *testing.T) {
+	assert := assert.New(t)
+	require := require.New(t)
+
+	reader, err := os.Open("../../test_templates/test_basic.docx")
+	require.NoError(err)
+
+	fileinfo, err := reader.Stat()
+	require.NoError(err)
+	size := fileinfo.Size()
+
+	docx, err := NewFumiamaDocx(reader, size)
+	require.NoError(err)
+
+	f, err := os.Create("../../test_templates/generated_fumiama_test_basic.docx")
+	require.Nil(err, "Error creating document")
+
+	err = docx.Save(f)
+	assert.Nil(err, "Error saving document")
 }
