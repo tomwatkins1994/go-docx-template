@@ -339,5 +339,5 @@ func TestAddInlineImage(t *testing.T) {
 
 	imageXml, err := doc.docx.AddInlineImage(inlineImage)
 	assert.Nil(err)
-	assert.Greater(len(imageXml), 0)
+	assert.NotEmpty(imageXml)
 }

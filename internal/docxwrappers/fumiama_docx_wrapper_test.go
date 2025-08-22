@@ -248,9 +248,9 @@ func TestAddInlineImage(t *testing.T) {
 		image, err := images.CreateInlineImage("../../test_templates/test_image.png")
 		require.NoError(err)
 
-		xmlString, err := docx.AddInlineImage(image)
-		require.NoError(err)
-		assert.NotEmpty(xmlString)
+		imageXml, err := docx.AddInlineImage(image)
+		assert.NoError(err)
+		assert.NotEmpty(imageXml)
 	})
 
 	t.Run("Should add the PNG content type to the documents content types", func(t *testing.T) {
@@ -268,7 +268,7 @@ func TestAddInlineImage(t *testing.T) {
 		require.NoError(err)
 
 		_, err = docx.AddInlineImage(image)
-		require.NoError(err)
+		assert.NoError(err)
 		assert.Contains(docx.contentTypes.Defaults, contenttypes.PNG_CONTENT_TYPE)
 	})
 
