@@ -1,11 +1,56 @@
 package docxwrappers
 
 import (
+	"os"
 	"testing"
 
 	"github.com/fumiama/go-docx"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
+
+func TestGetDocumentXml(t *testing.T) {
+	assert := assert.New(t)
+	require := require.New(t)
+
+	reader, err := os.Open("../../test_templates/test_basic.docx")
+	require.NoError(err)
+
+	fileinfo, err := reader.Stat()
+	require.NoError(err)
+	size := fileinfo.Size()
+
+	docx, err := NewFumiamaDocx(reader, size)
+	require.NoError(err)
+
+	xmlString, err := docx.GetDocumentXml()
+	require.NoError(err)
+	assert.NotEmpty(xmlString)
+}
+
+func TestSetDocumentXml(t *testing.T) {
+	assert := assert.New(t)
+	require := require.New(t)
+
+	reader, err := os.Open("../../test_templates/test_basic.docx")
+	require.NoError(err)
+
+	fileinfo, err := reader.Stat()
+	require.NoError(err)
+	size := fileinfo.Size()
+
+	docx, err := NewFumiamaDocx(reader, size)
+	require.NoError(err)
+
+	newXmlString := "<Body><w:p><w:r><w:t>Hello, World!</w:t></w:r></w:p></Body>"
+	err = docx.ReplaceDocumentXml(newXmlString)
+	require.NoError(err)
+
+	xmlString, err := docx.GetDocumentXml()
+	println(xmlString)
+	require.NoError(err)
+	assert.Equal(newXmlString, xmlString)
+}
 
 func TestMergeTags(t *testing.T) {
 	assert := assert.New(t)
