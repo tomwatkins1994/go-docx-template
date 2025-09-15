@@ -4,9 +4,11 @@ import (
 	"bytes"
 	"encoding/xml"
 	"io"
+	"sync"
 
 	"github.com/gomutex/godocx"
 	"github.com/gomutex/godocx/docx"
+	"github.com/tomwatkins1994/go-docx-template/internal/tags"
 )
 
 type GomutexDocx struct {
@@ -55,3 +57,72 @@ func (d *GomutexDocx) ReplaceDocumentXml(xmlString string) error {
 
 	return nil
 }
+
+func (d *GomutexDocx) MergeTags() {
+	mergeGomutexTags(d.Document.Body.Children)
+}
+
+func mergeGomutexTags(items []docx.DocumentChild) {
+	var wg sync.WaitGroup
+
+	for _, item := range items {
+		wg.Add(1)
+		go func(i any) {
+			defer wg.Done()
+
+			switch o := i.(type) {
+			case *docx.Paragraph:
+				mergeGomutexTagsInParagraph(o)
+				// case *docx.Table:
+				// 	mergeTagsInTable(o)
+			}
+		}(item)
+	}
+
+	wg.Wait()
+}
+
+func mergeGomutexTagsInParagraph(paragraph *docx.Paragraph) {
+	currentText := ""
+	inIncompleteTag := false
+	for _, pChild := range paragraph.GetCT().Children {
+		run := pChild.Run
+		for _, rChild := range run.Children {
+			text := rChild.Text
+			if inIncompleteTag {
+				currentText += text.Text
+			} else {
+				currentText = text.Text
+			}
+			containsIncompleteTags := tags.TextContainsIncompleteTags(currentText)
+			if containsIncompleteTags {
+				text.Text = ""
+				inIncompleteTag = true
+			} else {
+				inIncompleteTag = false
+				containsTags := tags.TextContainsTags(currentText)
+				if containsTags {
+					text.Text = currentText
+				}
+			}
+		}
+	}
+}
+
+// func mergeGomutexTagsInTable(table *docx.Table) {
+// 	var wg sync.WaitGroup
+
+// 	for _, row := range table. {
+// 		for _, cell := range row.TableCells {
+// 			for _, paragraph := range cell.Paragraphs {
+// 				wg.Add(1)
+// 				go func() {
+// 					defer wg.Done()
+// 					mergeTagsInParagraph(paragraph)
+// 				}()
+// 			}
+// 		}
+// 	}
+
+// 	wg.Wait()
+// }

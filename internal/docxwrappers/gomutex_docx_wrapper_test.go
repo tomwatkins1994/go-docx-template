@@ -4,6 +4,7 @@ import (
 	"encoding/xml"
 	"testing"
 
+	"github.com/gomutex/godocx/wml/ctypes"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -39,7 +40,7 @@ func TestGomutexSetDocumentXml(t *testing.T) {
 	assert.Equal(newXmlString, xmlString)
 }
 
-// func TestMergeTags(t *testing.T) {
+// func TestGomutexMergeTags(t *testing.T) {
 // 	assert := assert.New(t)
 
 // 	pStartText := docx.Text{
@@ -48,116 +49,145 @@ func TestGomutexSetDocumentXml(t *testing.T) {
 // 	pEndText := docx.Text{
 // 		Text: "}}",
 // 	}
-// 	p := docx.Paragraph{
-// 		Children: []any{
-// 			&docx.Run{
-// 				Children: []any{
-// 					&pStartText,
-// 					&pEndText,
-// 				},
-// 			},
-// 		},
-// 	}
+// 	p := docx.Paragraph
+// 	p.Children = []any
 
-// 	tblStartText := docx.Text{
-// 		Text: "{{ .tag ",
-// 	}
-// 	tblEndText := docx.Text{
-// 		Text: "}}",
-// 	}
-// 	tbl := docx.Table{
-// 		TableRows: []*docx.WTableRow{
-// 			{
-// 				TableCells: []*docx.WTableCell{
-// 					{
-// 						Paragraphs: []*docx.Paragraph{
-// 							{
-// 								Children: []any{
-// 									&docx.Run{
-// 										Children: []any{
-// 											&tblStartText,
-// 											&tblEndText,
-// 										},
-// 									},
-// 								},
-// 							},
-// 						},
-// 					},
-// 				},
-// 			},
-// 		},
-// 	}
+// 	// {
+// 	// 	Children: []any{
+// 	// 		&docx.Run{
+// 	// 			Children: []any{
+// 	// 				&pStartText,
+// 	// 				&pEndText,
+// 	// 			},
+// 	// 		},
+// 	// 	},
+// 	// }
 
-// 	items := []any{
+// 	// tblStartText := docx.Text{
+// 	// 	Text: "{{ .tag ",
+// 	// }
+// 	// tblEndText := docx.Text{
+// 	// 	Text: "}}",
+// 	// }
+// 	// tbl := docx.Table{
+// 	// 	TableRows: []*docx.WTableRow{
+// 	// 		{
+// 	// 			TableCells: []*docx.WTableCell{
+// 	// 				{
+// 	// 					Paragraphs: []*docx.Paragraph{
+// 	// 						{
+// 	// 							Children: []any{
+// 	// 								&docx.Run{
+// 	// 									Children: []any{
+// 	// 										&tblStartText,
+// 	// 										&tblEndText,
+// 	// 									},
+// 	// 								},
+// 	// 							},
+// 	// 						},
+// 	// 					},
+// 	// 				},
+// 	// 			},
+// 	// 		},
+// 	// 	},
+// 	// }
+
+// 	items := []docx.DocumentChild{
 // 		&p,
-// 		&tbl,
+// 		// &tbl,
 // 	}
 
-// 	mergeTags(items)
+// 	mergeGomutexTags(items)
 
 // 	assert.Equal(pStartText.Text, "")
 // 	assert.Equal(pEndText.Text, "{{ .tag }}")
-// 	assert.Equal(tblStartText.Text, "")
-// 	assert.Equal(tblEndText.Text, "{{ .tag }}")
+// 	// assert.Equal(tblStartText.Text, "")
+// 	// assert.Equal(tblEndText.Text, "{{ .tag }}")
 // }
 
-// func TestMergeTagsInParagraph(t *testing.T) {
-// 	t.Run("Tags in text nodes in same run should get merged", func(t *testing.T) {
-// 		assert := assert.New(t)
+func TestGomutexMergeTagsInParagraph(t *testing.T) {
+	t.Run("Tags in text nodes in same run should get merged", func(t *testing.T) {
+		assert := assert.New(t)
+		require := require.New(t)
 
-// 		startText := docx.Text{
-// 			Text: "{{ .tag ",
-// 		}
-// 		endText := docx.Text{
-// 			Text: "}}",
-// 		}
-// 		p := docx.Paragraph{
-// 			Children: []any{
-// 				&docx.Run{
-// 					Children: []any{
-// 						&startText,
-// 						&endText,
-// 					},
-// 				},
-// 			},
-// 		}
+		docx, err := NewGomutexDocxFromFilename("../../test_templates/test_basic.docx")
+		require.NoError(err)
 
-// 		mergeTagsInParagraph(&p)
+		p := docx.RootDoc.AddParagraph("")
+		pct := p.GetCT()
 
-// 		assert.Equal(startText.Text, "")
-// 		assert.Equal(endText.Text, "{{ .tag }}")
-// 	})
+		startText := ctypes.Text{
+			Text: "{{ .tag ",
+		}
+		endText := ctypes.Text{
+			Text: "}}",
+		}
 
-// 	t.Run("Tags in text nodes in different runs should get merged", func(t *testing.T) {
-// 		assert := assert.New(t)
+		pct.Children = []ctypes.ParagraphChild{
+			{
+				Run: &ctypes.Run{
+					Children: []ctypes.RunChild{
+						{
+							Text: &startText,
+						},
+						{
+							Text: &endText,
+						},
+					},
+				},
+			},
+		}
 
-// 		startText := docx.Text{
-// 			Text: "{{ .tag ",
-// 		}
-// 		endText := docx.Text{
-// 			Text: "}}",
-// 		}
-// 		p := docx.Paragraph{
-// 			Children: []any{
-// 				&docx.Run{
-// 					Children: []any{
-// 						&startText,
-// 					},
-// 				},
-// 				&docx.Run{
-// 					Children: []any{
-// 						&endText,
-// 					},
-// 				},
-// 			},
-// 		}
+		mergeGomutexTagsInParagraph(p)
 
-// 		mergeTagsInParagraph(&p)
+		assert.Equal(startText.Text, "")
+		assert.Equal(endText.Text, "{{ .tag }}")
+	})
 
-// 		assert.Equal(startText.Text, "")
-// 		assert.Equal(endText.Text, "{{ .tag }}")
-// 	})
-// }
+	t.Run("Tags in text nodes in different runs should get merged", func(t *testing.T) {
+		assert := assert.New(t)
+		require := require.New(t)
+
+		docx, err := NewGomutexDocxFromFilename("../../test_templates/test_basic.docx")
+		require.NoError(err)
+
+		p := docx.RootDoc.AddParagraph("")
+		pct := p.GetCT()
+
+		startText := ctypes.Text{
+			Text: "{{ .tag ",
+		}
+		endText := ctypes.Text{
+			Text: "}}",
+		}
+
+		pct.Children = []ctypes.ParagraphChild{
+			{
+				Run: &ctypes.Run{
+					Children: []ctypes.RunChild{
+						{
+							Text: &startText,
+						},
+					},
+				},
+			},
+			{
+				Run: &ctypes.Run{
+					Children: []ctypes.RunChild{
+						{
+							Text: &endText,
+						},
+					},
+				},
+			},
+		}
+
+		mergeGomutexTagsInParagraph(p)
+
+		assert.Equal(startText.Text, "")
+		assert.Equal(endText.Text, "{{ .tag }}")
+	})
+}
 
 // func TestMergeTagsInTable(t *testing.T) {
 // 	assert := assert.New(t)

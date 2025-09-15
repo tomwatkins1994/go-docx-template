@@ -90,10 +90,10 @@ func (d *FumiamaDocx) ReplaceDocumentXml(xmlString string) error {
 }
 
 func (d *FumiamaDocx) MergeTags() {
-	mergeTags(d.Document.Body.Items)
+	mergeFumiamaTags(d.Document.Body.Items)
 }
 
-func mergeTags(items []any) {
+func mergeFumiamaTags(items []any) {
 	var wg sync.WaitGroup
 
 	for _, item := range items {
