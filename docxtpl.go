@@ -3,7 +3,6 @@ package docxtpl
 import (
 	"io"
 	"maps"
-	"os"
 	"text/template"
 
 	"github.com/tomwatkins1994/go-docx-template/internal/docxwrappers"
@@ -38,33 +37,26 @@ func Parse(reader io.ReaderAt, size int64) (*DocxTmpl, error) {
 		return nil, err
 	}
 
+	return newDocxTmpl(docx), nil
+}
+
+func newDocxTmpl(docx docxwrappers.DocxWrapper) *DocxTmpl {
 	funcMap := make(template.FuncMap)
 	maps.Copy(funcMap, functions.DefaultFuncMap)
 
-	return &DocxTmpl{docx, funcMap}, nil
+	return &DocxTmpl{docx, funcMap}
 }
 
 // Parse the document from a filename and store it in memory.
 //
 //	doc, err := docxtpl.ParseFromFilename("path_to_doc.docx")
 func ParseFromFilename(filename string) (*DocxTmpl, error) {
-	reader, err := os.Open(filename)
+	docx, err := docxwrappers.NewFumiamaDocxFromFilename(filename)
 	if err != nil {
 		return nil, err
 	}
 
-	fileinfo, err := reader.Stat()
-	if err != nil {
-		return nil, err
-	}
-	size := fileinfo.Size()
-
-	docxtpl, err := Parse(reader, size)
-	if err != nil {
-		return nil, err
-	}
-
-	return docxtpl, nil
+	return newDocxTmpl(docx), nil
 }
 
 // Replace the placeholders in the document with passed in data.

@@ -8,6 +8,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/tomwatkins1994/go-docx-template/internal/docxwrappers"
 	"github.com/tomwatkins1994/go-docx-template/internal/images"
 )
 
@@ -17,6 +18,24 @@ type test struct {
 	outputFilename string
 	data           any
 	fns            map[string]any
+}
+
+type testWrapper struct {
+	name             string
+	docxFromFilename func(filename string) (docxwrappers.DocxWrapper, error)
+}
+
+func getWrappers() []testWrapper {
+	var wrappers = []testWrapper{
+		{
+			name: "Fumiama",
+			docxFromFilename: func(filename string) (docxwrappers.DocxWrapper, error) {
+				return docxwrappers.NewFumiamaDocxFromFilename(filename)
+			},
+		},
+	}
+
+	return wrappers
 }
 
 func getTests() ([]test, error) {
@@ -216,113 +235,129 @@ func getTests() ([]test, error) {
 }
 
 func TestParseAndRender(t *testing.T) {
+	docxWrappers := getWrappers()
+
 	tests, err := getTests()
 	require.Nil(t, err)
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			assert := assert.New(t)
+	for _, wrapper := range docxWrappers {
+		for _, tt := range tests {
+			t.Run(wrapper.name+"_"+tt.name, func(t *testing.T) {
+				assert := assert.New(t)
+				require := require.New(t)
 
-			doc, err := ParseFromFilename("test_templates/" + tt.filename)
-			assert.Nil(err, "Parsing error")
+				docx, err := wrapper.docxFromFilename("test_templates/" + tt.filename)
+				require.Nil(err, "Parsing error")
+				docxtpl := newDocxTmpl(docx)
 
-			for fnName, fn := range tt.fns {
-				err = doc.RegisterFunction(fnName, fn)
-				assert.Nil(err)
-			}
+				for fnName, fn := range tt.fns {
+					err = docxtpl.RegisterFunction(fnName, fn)
+					assert.Nil(err)
+				}
 
-			err = doc.Render(tt.data)
-			assert.Nil(err, "Rendering error")
+				err = docxtpl.Render(tt.data)
+				assert.Nil(err, "Rendering error")
 
-			outputFilename := tt.filename
-			if len(tt.outputFilename) > 0 {
-				outputFilename = tt.outputFilename
-			}
-			f, err := os.Create("test_templates/generated_" + outputFilename)
-			assert.Nil(err, "Error creating document")
-			err = doc.Save(f)
-			assert.Nil(err, "Error saving document")
-			err = f.Close()
-			assert.Nil(err, "Error closing document")
-		})
+				outputFilename := tt.filename
+				if len(tt.outputFilename) > 0 {
+					outputFilename = tt.outputFilename
+				}
+				f, err := os.Create("test_templates/generated_" + outputFilename)
+				assert.Nil(err, "Error creating document")
+				err = docxtpl.Save(f)
+				assert.Nil(err, "Error saving document")
+				err = f.Close()
+				assert.Nil(err, "Error closing document")
+			})
+		}
 	}
 }
 
 func TestProcessTemplateData(t *testing.T) {
-	t.Run("Test XML escaping", func(t *testing.T) {
-		assert := assert.New(t)
-		require := require.New(t)
+	docxWrappers := getWrappers()
 
-		doc, err := ParseFromFilename("test_templates/test_basic.docx")
-		require.NoError(err, "Parsing error")
+	for _, wrapper := range docxWrappers {
+		t.Run(wrapper.name+" Test XML escaping", func(t *testing.T) {
+			assert := assert.New(t)
+			require := require.New(t)
 
-		data := struct {
-			ProjectNumber string
-			Client        string
-			Status        string
-			CreatedBy     string
-		}{
-			ProjectNumber: "'Single quoted text'",
-			Client:        "Text & more text",
-			Status:        "\"Quoted text\"",
-			CreatedBy:     "<tag>Text</tag>",
-		}
+			docx, err := wrapper.docxFromFilename("test_templates/test_basic.docx")
+			require.NoError(err, "Parsing error")
+			docxtpl := newDocxTmpl(docx)
 
-		processedData, err := doc.processTemplateData(data)
-		require.NoError(err)
+			data := struct {
+				ProjectNumber string
+				Client        string
+				Status        string
+				CreatedBy     string
+			}{
+				ProjectNumber: "'Single quoted text'",
+				Client:        "Text & more text",
+				Status:        "\"Quoted text\"",
+				CreatedBy:     "<tag>Text</tag>",
+			}
 
-		expectedData := map[string]any{
-			"ProjectNumber": "&#39;Single quoted text&#39;",
-			"Client":        "Text &amp; more text",
-			"Status":        "&#34;Quoted text&#34;",
-			"CreatedBy":     "&lt;tag&gt;Text&lt;/tag&gt;",
-		}
+			processedData, err := docxtpl.processTemplateData(data)
+			require.NoError(err)
 
-		assert.Equal(expectedData, processedData)
-	})
+			expectedData := map[string]any{
+				"ProjectNumber": "&#39;Single quoted text&#39;",
+				"Client":        "Text &amp; more text",
+				"Status":        "&#34;Quoted text&#34;",
+				"CreatedBy":     "&lt;tag&gt;Text&lt;/tag&gt;",
+			}
+
+			assert.Equal(expectedData, processedData)
+		})
+	}
 }
 
 func BenchmarkParseAndRender(b *testing.B) {
+	docxWrappers := getWrappers()
+
 	tests, err := getTests()
 	require.Nil(b, err)
 	b.ResetTimer()
 
-	for _, tt := range tests {
-		b.Run(tt.name, func(b *testing.B) {
-			require := require.New(b)
-			start := time.Now()
+	for _, wrapper := range docxWrappers {
+		for _, tt := range tests {
+			b.Run(wrapper.name+" "+tt.name, func(b *testing.B) {
+				require := require.New(b)
+				start := time.Now()
 
-			parseStart := time.Now()
-			doc, err := ParseFromFilename("test_templates/" + tt.filename)
-			require.Nil(err, "Parsing error")
-			b.Logf("Parse: %v\n", time.Since(parseStart))
+				parseStart := time.Now()
+				docx, err := wrapper.docxFromFilename("test_templates/" + tt.filename)
+				require.Nil(err, "Parsing error")
+				docxtpl := newDocxTmpl(docx)
+				b.Logf("Parse: %v\n", time.Since(parseStart))
 
-			functionsStart := time.Now()
-			for fnName, fn := range tt.fns {
-				err = doc.RegisterFunction(fnName, fn)
-				require.Nil(err)
-			}
-			b.Logf("Register custom functions: %v\n", time.Since(functionsStart))
+				functionsStart := time.Now()
+				for fnName, fn := range tt.fns {
+					err = docxtpl.RegisterFunction(fnName, fn)
+					require.Nil(err)
+				}
+				b.Logf("Register custom functions: %v\n", time.Since(functionsStart))
 
-			renderStart := time.Now()
-			err = doc.Render(tt.data)
-			require.Nil(err, "Rendering error")
-			b.Logf("Render: %v\n", time.Since(renderStart))
+				renderStart := time.Now()
+				err = docxtpl.Render(tt.data)
+				require.Nil(err, "Rendering error")
+				b.Logf("Render: %v\n", time.Since(renderStart))
 
-			saveStart := time.Now()
-			outputFilename := tt.filename
-			if len(tt.outputFilename) > 0 {
-				outputFilename = tt.outputFilename
-			}
-			f, err := os.Create("test_templates/generated_" + outputFilename)
-			require.Nil(err, "Error creating document")
-			err = doc.Save(f)
-			require.Nil(err, "Error saving document")
-			err = f.Close()
-			require.Nil(err, "Error closing document")
-			b.Logf("Save: %v\n", time.Since(saveStart))
+				saveStart := time.Now()
+				outputFilename := tt.filename
+				if len(tt.outputFilename) > 0 {
+					outputFilename = tt.outputFilename
+				}
+				f, err := os.Create("test_templates/generated_" + outputFilename)
+				require.Nil(err, "Error creating document")
+				err = docxtpl.Save(f)
+				require.Nil(err, "Error saving document")
+				err = f.Close()
+				require.Nil(err, "Error closing document")
+				b.Logf("Save: %v\n", time.Since(saveStart))
 
-			b.Logf("Total: %v\n", time.Since(start))
-		})
+				b.Logf("Total: %v\n", time.Since(start))
+			})
+		}
 	}
 }
