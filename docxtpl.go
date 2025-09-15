@@ -59,12 +59,12 @@ func ParseFromFilename(filename string) (*DocxTmpl, error) {
 	}
 	size := fileinfo.Size()
 
-	doxtpl, err := Parse(reader, size)
+	docxtpl, err := Parse(reader, size)
 	if err != nil {
 		return nil, err
 	}
 
-	return doxtpl, nil
+	return docxtpl, nil
 }
 
 // Replace the placeholders in the document with passed in data.
