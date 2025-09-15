@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"encoding/xml"
 	"io"
+	"os"
 	"strings"
 	"sync"
 
@@ -32,6 +33,26 @@ func NewFumiamaDocx(reader io.ReaderAt, size int64) (*FumiamaDocx, error) {
 	}
 
 	return &FumiamaDocx{doc, contentTypes}, nil
+}
+
+func NewFumiamaDocxFromFilename(filename string) (*FumiamaDocx, error) {
+	reader, err := os.Open(filename)
+	if err != nil {
+		return nil, err
+	}
+
+	fileinfo, err := reader.Stat()
+	if err != nil {
+		return nil, err
+	}
+	size := fileinfo.Size()
+
+	docxtpl, err := NewFumiamaDocx(reader, size)
+	if err != nil {
+		return nil, err
+	}
+
+	return docxtpl, nil
 }
 
 func (d *FumiamaDocx) GetDocumentXml() (string, error) {
