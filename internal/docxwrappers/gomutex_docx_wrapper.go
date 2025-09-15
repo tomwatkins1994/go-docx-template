@@ -1,6 +1,8 @@
 package docxwrappers
 
 import (
+	"encoding/xml"
+
 	"github.com/gomutex/godocx"
 	"github.com/gomutex/godocx/docx"
 )
@@ -16,4 +18,13 @@ func NewGomutexDocxFromFilename(filename string) (*GomutexDocx, error) {
 	}
 
 	return &GomutexDocx{docx}, nil
+}
+
+func (d *GomutexDocx) GetDocumentXml() (string, error) {
+	out, err := xml.Marshal(d.Document.Body)
+	if err != nil {
+		return "", nil
+	}
+
+	return string(out), err
 }
