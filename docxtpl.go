@@ -38,10 +38,14 @@ func Parse(reader io.ReaderAt, size int64) (*DocxTmpl, error) {
 		return nil, err
 	}
 
+	return newDocxTmpl(docx), nil
+}
+
+func newDocxTmpl(docx docxwrappers.DocxWrapper) *DocxTmpl {
 	funcMap := make(template.FuncMap)
 	maps.Copy(funcMap, functions.DefaultFuncMap)
 
-	return &DocxTmpl{docx, funcMap}, nil
+	return &DocxTmpl{docx, funcMap}
 }
 
 // Parse the document from a filename and store it in memory.
