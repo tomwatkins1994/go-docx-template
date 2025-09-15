@@ -33,6 +33,12 @@ func getWrappers() []testWrapper {
 				return docxwrappers.NewFumiamaDocxFromFilename(filename)
 			},
 		},
+		{
+			name: "Gomutex",
+			docxFromFilename: func(filename string) (docxwrappers.DocxWrapper, error) {
+				return docxwrappers.NewGomutexDocxFromFilename(filename)
+			},
+		},
 	}
 
 	return wrappers
