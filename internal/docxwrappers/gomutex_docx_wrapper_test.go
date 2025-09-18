@@ -70,15 +70,14 @@ func TestGomutexMergeTags(t *testing.T) {
 		},
 	}
 
-	tblCell := docx.AddTable().AddRow().AddCell()
-	tblP1 := tblCell.AddParagraph("").GetCT()
+	tblPara := docx.AddTable().AddRow().AddCell().AddParagraph("").GetCT()
 	tblStartText := ctypes.Text{
 		Text: "{{ .tbltag ",
 	}
 	tblEndText := ctypes.Text{
 		Text: "}}",
 	}
-	tblP1.Children = []ctypes.ParagraphChild{
+	tblPara.Children = []ctypes.ParagraphChild{
 		{
 			Run: &ctypes.Run{
 				Children: []ctypes.RunChild{
@@ -92,21 +91,6 @@ func TestGomutexMergeTags(t *testing.T) {
 			},
 		},
 	}
-	// tblP2 := tblCell.AddParagraph("").GetCT()
-	// tblEndText := ctypes.Text{
-	// 	Text: "}}",
-	// }
-	// tblP2.Children = []ctypes.ParagraphChild{
-	// 	{
-	// 		Run: &ctypes.Run{
-	// 			Children: []ctypes.RunChild{
-	// 				{
-	// 					Text: &tblEndText,
-	// 				},
-	// 			},
-	// 		},
-	// 	},
-	// }
 
 	mergeGomutexTags(docx.Document.Body.Children)
 
