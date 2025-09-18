@@ -8,6 +8,7 @@ import (
 
 	"github.com/gomutex/godocx"
 	"github.com/gomutex/godocx/docx"
+	"github.com/gomutex/godocx/wml/ctypes"
 	"github.com/tomwatkins1994/go-docx-template/internal/tags"
 )
 
@@ -66,26 +67,29 @@ func mergeGomutexTags(items []docx.DocumentChild) {
 	var wg sync.WaitGroup
 
 	for _, item := range items {
-		wg.Add(1)
-		go func(i any) {
-			defer wg.Done()
-
-			switch o := i.(type) {
-			case *docx.Paragraph:
-				mergeGomutexTagsInParagraph(o)
-				// case *docx.Table:
-				// 	mergeTagsInTable(o)
-			}
-		}(item)
+		if item.Para != nil {
+			wg.Add(1)
+			go func() {
+				defer wg.Done()
+				mergeGomutexTagsInParagraph(item.Para.GetCT())
+			}()
+		}
+		if item.Table != nil {
+			wg.Add(1)
+			go func() {
+				defer wg.Done()
+				mergeGomutexTagsInTable(item.Table.GetCT())
+			}()
+		}
 	}
 
 	wg.Wait()
 }
 
-func mergeGomutexTagsInParagraph(paragraph *docx.Paragraph) {
+func mergeGomutexTagsInParagraph(paragraph *ctypes.Paragraph) {
 	currentText := ""
 	inIncompleteTag := false
-	for _, pChild := range paragraph.GetCT().Children {
+	for _, pChild := range paragraph.Children {
 		run := pChild.Run
 		for _, rChild := range run.Children {
 			text := rChild.Text
@@ -109,20 +113,29 @@ func mergeGomutexTagsInParagraph(paragraph *docx.Paragraph) {
 	}
 }
 
-// func mergeGomutexTagsInTable(table *docx.Table) {
-// 	var wg sync.WaitGroup
+func mergeGomutexTagsInTable(table *ctypes.Table) {
+	var wg sync.WaitGroup
 
-// 	for _, row := range table. {
-// 		for _, cell := range row.TableCells {
-// 			for _, paragraph := range cell.Paragraphs {
-// 				wg.Add(1)
-// 				go func() {
-// 					defer wg.Done()
-// 					mergeTagsInParagraph(paragraph)
-// 				}()
-// 			}
-// 		}
-// 	}
+	for _, row := range table.RowContents {
+		for _, rowContents := range row.Row.Contents {
+			for _, cellContent := range rowContents.Cell.Contents {
+				if cellContent.Paragraph != nil {
+					wg.Add(1)
+					go func() {
+						defer wg.Done()
+						mergeGomutexTagsInParagraph(cellContent.Paragraph)
+					}()
+				}
+				if cellContent.Table != nil {
+					wg.Add(1)
+					go func() {
+						defer wg.Done()
+						mergeGomutexTagsInTable(cellContent.Table)
+					}()
+				}
+			}
+		}
+	}
 
-// 	wg.Wait()
-// }
+	wg.Wait()
+}
