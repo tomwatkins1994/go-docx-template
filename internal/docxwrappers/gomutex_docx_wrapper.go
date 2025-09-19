@@ -95,6 +95,9 @@ func mergeGomutexTagsInParagraph(paragraph *ctypes.Paragraph) {
 		run := pChild.Run
 		for _, rChild := range run.Children {
 			text := rChild.Text
+			if text == nil {
+				continue
+			}
 			if inIncompleteTag {
 				currentText += text.Text
 			} else {
