@@ -164,16 +164,17 @@ func (d *GomutexDocx) AddInlineImage(i *images.InlineImage) (xmlString string, e
 		return "", err
 	}
 
-	xmlString = string(out)
+	// Remove the paragraph from the word doc so we don't get the image twice
+	newItems := []docx.DocumentChild{}
+	for _, item := range d.Document.Body.Children {
+		if item.Para == image.Para {
+			continue
+		}
+		newItems = append(newItems, item)
+	}
+	d.Document.Body.Children = newItems
 
-	// Remove run tags as the tag should be in a run already
-	// xmlString = string(out)
-	// xmlString = strings.Replace(xmlString, "<w:r>", "", 1)
-	// xmlString = strings.Replace(xmlString, "<w:rPr></w:rPr>", "", 1)
-	// lastIndex := strings.LastIndex(xmlString, "</w:r")
-	// if lastIndex > -1 {
-	// 	xmlString = xmlString[:lastIndex]
-	// }
+	xmlString = string(out)
 
 	return xmlString, nil
 }
