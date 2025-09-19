@@ -3,6 +3,7 @@ package docxtpl
 import (
 	"fmt"
 	"os"
+	"strings"
 	"testing"
 	"time"
 
@@ -268,7 +269,7 @@ func TestParseAndRender(t *testing.T) {
 				if len(tt.outputFilename) > 0 {
 					outputFilename = tt.outputFilename
 				}
-				f, err := os.Create("test_templates/generated_" + outputFilename)
+				f, err := os.Create("test_templates/generated_" + strings.ToLower(wrapper.name) + "_" + outputFilename)
 				assert.Nil(err, "Error creating document")
 				err = docxtpl.Save(f)
 				assert.Nil(err, "Error saving document")
@@ -354,7 +355,7 @@ func BenchmarkParseAndRender(b *testing.B) {
 				if len(tt.outputFilename) > 0 {
 					outputFilename = tt.outputFilename
 				}
-				f, err := os.Create("test_templates/generated_" + outputFilename)
+				f, err := os.Create("test_templates/generated_" + strings.ToLower(wrapper.name) + "_" + outputFilename)
 				require.Nil(err, "Error creating document")
 				err = docxtpl.Save(f)
 				require.Nil(err, "Error saving document")
