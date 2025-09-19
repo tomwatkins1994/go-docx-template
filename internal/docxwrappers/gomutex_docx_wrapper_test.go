@@ -2,6 +2,7 @@ package docxwrappers
 
 import (
 	"encoding/xml"
+	"os"
 	"testing"
 
 	"github.com/gomutex/godocx"
@@ -283,23 +284,16 @@ func TestGomutexAddInlineImage(t *testing.T) {
 	})
 }
 
-// func TestSave(t *testing.T) {
-// 	assert := assert.New(t)
-// 	require := require.New(t)
+func TestGomutexSave(t *testing.T) {
+	assert := assert.New(t)
+	require := require.New(t)
 
-// 	reader, err := os.Open("../../test_templates/test_basic.docx")
-// 	require.NoError(err)
+	docx, err := NewGomutexDocxFromFilename("../../test_templates/test_basic.docx")
+	require.NoError(err)
 
-// 	fileinfo, err := reader.Stat()
-// 	require.NoError(err)
-// 	size := fileinfo.Size()
+	f, err := os.Create("../../test_templates/generated_gomutex_test_basic.docx")
+	require.Nil(err, "Error creating document")
 
-// 	docx, err := NewFumiamaDocx(reader, size)
-// 	require.NoError(err)
-
-// 	f, err := os.Create("../../test_templates/generated_fumiama_test_basic.docx")
-// 	require.Nil(err, "Error creating document")
-
-// 	err = docx.Save(f)
-// 	assert.Nil(err, "Error saving document")
-// }
+	err = docx.Save(f)
+	assert.Nil(err, "Error saving document")
+}

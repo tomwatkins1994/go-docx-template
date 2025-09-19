@@ -180,3 +180,12 @@ func (d *GomutexDocx) AddInlineImage(i *images.InlineImage) (xmlString string, e
 
 	return xmlString, nil
 }
+
+func (d *GomutexDocx) Save(w io.Writer) error {
+	_, err := d.Document.Root.WriteTo(w)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
