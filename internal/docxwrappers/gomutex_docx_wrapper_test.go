@@ -280,7 +280,7 @@ func TestGomutexAddInlineImage(t *testing.T) {
 
 		imageXml, err := docx.AddInlineImage(image)
 		assert.NoError(err)
-		assert.Empty(imageXml)
+		assert.NotEmpty(imageXml)
 	})
 }
 
