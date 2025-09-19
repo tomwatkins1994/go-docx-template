@@ -180,7 +180,7 @@ func (d *FumiamaDocx) AddInlineImage(i *images.InlineImage) (xmlString string, e
 	}
 
 	// Correctly size the image
-	w, h, err := i.GetSize()
+	w, h, err := i.GetSizeEmus()
 	if err != nil {
 		return "", err
 	}

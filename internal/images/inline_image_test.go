@@ -99,7 +99,7 @@ func TestResize(t *testing.T) {
 	inlineImage, err := CreateInlineImage(testJpgImage)
 	require.Nil(err)
 
-	originalWEmu, originalHEmu, err := inlineImage.GetSize()
+	originalWEmu, originalHEmu, err := inlineImage.GetSizeEmus()
 	require.Nil(err)
 
 	wDpi, hDpi := inlineImage.GetResolution()
@@ -109,7 +109,7 @@ func TestResize(t *testing.T) {
 	err = inlineImage.Resize(newWidthPx, newHeightPx)
 	assert.Nil(err)
 
-	w, h, err := inlineImage.GetSize()
+	w, h, err := inlineImage.GetSizeEmus()
 	assert.Nil(err)
 	assert.Equal(w, originalWEmu*2)
 	assert.Equal(h, originalHEmu*2)
@@ -186,14 +186,14 @@ func TestGetSizeImages(t *testing.T) {
 	assert.Greater(h, int64(0))
 }
 
-func TestGetSize(t *testing.T) {
+func TestGetSizeEmus(t *testing.T) {
 	require := require.New(t)
 	assert := assert.New(t)
 
 	inlineImage, err := CreateInlineImage(testJpgImage)
 	require.Nil(err)
 
-	w, h, err := inlineImage.GetSize()
+	w, h, err := inlineImage.GetSizeEmus()
 	assert.Nil(err)
 	assert.Greater(w, int64(0))
 	assert.Greater(h, int64(0))

@@ -197,7 +197,7 @@ func (i *InlineImage) GetSizeInches() (w int64, h int64, err error) {
 }
 
 // Get the size of the image in EMUs.
-func (i *InlineImage) GetSize() (w int64, h int64, err error) {
+func (i *InlineImage) GetSizeEmus() (w int64, h int64, err error) {
 	wInches, hInches, err := i.GetSizeInches()
 	if err != nil {
 		return 0, 0, err
