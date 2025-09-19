@@ -8,6 +8,7 @@ import (
 	"github.com/gomutex/godocx/wml/ctypes"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/tomwatkins1994/go-docx-template/internal/images"
 )
 
 func TestGomutexGetDocumentXml(t *testing.T) {
@@ -265,48 +266,22 @@ func TestGomutexMergeTagsInTable(t *testing.T) {
 	assert.Equal("{{ .tag2 }}", p2EndText.Text)
 }
 
-// func TestAddInlineImage(t *testing.T) {
-// 	assert := assert.New(t)
-// 	require := require.New(t)
+func TestGomutexAddInlineImage(t *testing.T) {
+	assert := assert.New(t)
+	require := require.New(t)
 
-// 	t.Run("Should return the XML string for the image", func(t *testing.T) {
-// 		reader, err := os.Open("../../test_templates/test_basic.docx")
-// 		require.NoError(err)
+	t.Run("Should return the XML string for the image", func(t *testing.T) {
+		docx, err := NewGomutexDocxFromFilename("../../test_templates/test_basic.docx")
+		require.NoError(err)
 
-// 		fileinfo, err := reader.Stat()
-// 		require.NoError(err)
-// 		size := fileinfo.Size()
+		image, err := images.CreateInlineImage("../../test_templates/test_image.png")
+		require.NoError(err)
 
-// 		docx, err := NewFumiamaDocx(reader, size)
-// 		require.NoError(err)
-
-// 		image, err := images.CreateInlineImage("../../test_templates/test_image.png")
-// 		require.NoError(err)
-
-// 		imageXml, err := docx.AddInlineImage(image)
-// 		assert.NoError(err)
-// 		assert.NotEmpty(imageXml)
-// 	})
-
-// 	t.Run("Should add the PNG content type to the documents content types", func(t *testing.T) {
-// 		reader, err := os.Open("../../test_templates/test_basic.docx")
-// 		require.NoError(err)
-
-// 		fileinfo, err := reader.Stat()
-// 		require.NoError(err)
-// 		size := fileinfo.Size()
-
-// 		docx, err := NewFumiamaDocx(reader, size)
-// 		require.NoError(err)
-
-// 		image, err := images.CreateInlineImage("../../test_templates/test_image.png")
-// 		require.NoError(err)
-
-// 		_, err = docx.AddInlineImage(image)
-// 		assert.NoError(err)
-// 		assert.Contains(docx.contentTypes.Defaults, contenttypes.PNG_CONTENT_TYPE)
-// 	})
-// }
+		imageXml, err := docx.AddInlineImage(image)
+		assert.NoError(err)
+		assert.Empty(imageXml)
+	})
+}
 
 // func TestSave(t *testing.T) {
 // 	assert := assert.New(t)

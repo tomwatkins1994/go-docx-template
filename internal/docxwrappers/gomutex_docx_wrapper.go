@@ -7,8 +7,10 @@ import (
 	"sync"
 
 	"github.com/gomutex/godocx"
+	"github.com/gomutex/godocx/common/units"
 	"github.com/gomutex/godocx/docx"
 	"github.com/gomutex/godocx/wml/ctypes"
+	"github.com/tomwatkins1994/go-docx-template/internal/images"
 	"github.com/tomwatkins1994/go-docx-template/internal/tags"
 )
 
@@ -138,4 +140,43 @@ func mergeGomutexTagsInTable(table *ctypes.Table) {
 	}
 
 	wg.Wait()
+}
+
+func (d *GomutexDocx) AddInlineImage(i *images.InlineImage) (xmlString string, err error) {
+	// Correctly size the image
+	w, h, err := i.GetSizeInches()
+	if err != nil {
+		return "", err
+	}
+
+	// Create blank docx
+	docx, err := godocx.NewDocument()
+	if err != nil {
+		return "", err
+	}
+
+	// Add the image to the document
+	image, err := docx.AddPicture(i.Filepath, units.Inch(w), units.Inch(h))
+	if err != nil {
+		return "", err
+	}
+
+	// Get the image XML
+	out, err := xml.Marshal(image.Inline)
+	if err != nil {
+		return "", err
+	}
+
+	xmlString = string(out)
+
+	// Remove run tags as the tag should be in a run already
+	// xmlString = string(out)
+	// xmlString = strings.Replace(xmlString, "<w:r>", "", 1)
+	// xmlString = strings.Replace(xmlString, "<w:rPr></w:rPr>", "", 1)
+	// lastIndex := strings.LastIndex(xmlString, "</w:r")
+	// if lastIndex > -1 {
+	// 	xmlString = xmlString[:lastIndex]
+	// }
+
+	return xmlString, nil
 }
