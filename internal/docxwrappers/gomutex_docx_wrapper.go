@@ -152,20 +152,14 @@ func (d *GomutexDocx) AddInlineImage(i *images.InlineImage) (xmlString string, e
 		return "", err
 	}
 
-	// Create blank docx
-	docx, err := godocx.NewDocument()
-	if err != nil {
-		return "", err
-	}
-
 	// Add the image to the document
-	image, err := docx.AddPicture(i.Filepath, units.Inch(w), units.Inch(h))
+	image, err := d.AddPicture(i.Filepath, units.Inch(w), units.Inch(h))
 	if err != nil {
 		return "", err
 	}
 
 	// Get the image XML
-	out, err := xml.Marshal(image.Inline)
+	out, err := xml.Marshal(image.Para.GetCT().Children[0].Run.Children[0].Drawing)
 	if err != nil {
 		return "", err
 	}
@@ -185,7 +179,7 @@ func (d *GomutexDocx) AddInlineImage(i *images.InlineImage) (xmlString string, e
 }
 
 func (d *GomutexDocx) Save(w io.Writer) error {
-	_, err := d.Document.Root.WriteTo(w)
+	err := d.Document.Root.Write(w)
 	if err != nil {
 		return err
 	}
