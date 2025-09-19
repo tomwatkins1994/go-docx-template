@@ -26,8 +26,9 @@ const (
 )
 
 type InlineImage struct {
-	data *[]byte
-	Ext  string
+	data     *[]byte
+	Filepath string
+	Ext      string
 }
 
 type InlineImageError struct {
@@ -58,7 +59,7 @@ func CreateInlineImage(filepath string) (*InlineImage, error) {
 
 	ext := path.Ext(filepath)
 
-	return &InlineImage{&file, ext}, nil
+	return &InlineImage{&file, filepath, ext}, nil
 }
 
 func (i *InlineImage) getImageFormat() (imagemeta.ImageFormat, error) {
@@ -180,8 +181,8 @@ func (i *InlineImage) replaceImage(rgba *image.Image) error {
 	return nil
 }
 
-// Get the size of the image in EMUs.
-func (i *InlineImage) GetSize() (w int64, h int64, err error) {
+// Get the size of the image in Inches.
+func (i *InlineImage) GetSizeInches() (w int64, h int64, err error) {
 	sz, _, err := imgsz.DecodeSize(bytes.NewReader(*i.data))
 	if err != nil {
 		return 0, 0, nil
@@ -189,8 +190,21 @@ func (i *InlineImage) GetSize() (w int64, h int64, err error) {
 
 	wDpi, hDpi := i.GetResolution()
 
-	w = int64(sz.Width/wDpi) * int64(EMUS_PER_INCH)
-	h = int64(sz.Height/hDpi) * int64(EMUS_PER_INCH)
+	w = int64(sz.Width / wDpi)
+	h = int64(sz.Height / hDpi)
+
+	return w, h, nil
+}
+
+// Get the size of the image in EMUs.
+func (i *InlineImage) GetSize() (w int64, h int64, err error) {
+	wInches, hInches, err := i.GetSizeInches()
+	if err != nil {
+		return 0, 0, err
+	}
+
+	w = wInches * int64(EMUS_PER_INCH)
+	h = hInches * int64(EMUS_PER_INCH)
 
 	return w, h, nil
 }
