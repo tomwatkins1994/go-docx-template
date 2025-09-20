@@ -1,7 +1,6 @@
 package docxwrappers
 
 import (
-	"bytes"
 	"encoding/xml"
 	"io"
 	"sync"
@@ -37,25 +36,10 @@ func (d *GomutexDocx) GetDocumentXml() (string, error) {
 }
 
 func (d *GomutexDocx) ReplaceDocumentXml(xmlString string) error {
-	decoder := xml.NewDecoder(bytes.NewBufferString(xmlString))
-	for {
-		t, err := decoder.Token()
-		if err == io.EOF {
-			break
-		}
-		if err != nil {
-			return err
-		}
-		if start, ok := t.(xml.StartElement); ok {
-			if start.Name.Local == "body" {
-				clear(d.Document.Body.Children)
-				err = d.Document.Body.UnmarshalXML(decoder, start)
-				if err != nil {
-					return err
-				}
-				break
-			}
-		}
+	clear(d.Document.Body.Children)
+	err := xml.Unmarshal([]byte(xmlString), &d.Document.Body)
+	if err != nil {
+		return err
 	}
 
 	return nil
@@ -165,14 +149,14 @@ func (d *GomutexDocx) AddInlineImage(i *images.InlineImage) (xmlString string, e
 	}
 
 	// Remove the paragraph from the word doc so we don't get the image twice
-	newItems := []docx.DocumentChild{}
-	for _, item := range d.Document.Body.Children {
-		if item.Para == image.Para {
-			continue
-		}
-		newItems = append(newItems, item)
-	}
-	d.Document.Body.Children = newItems
+	// newItems := []docx.DocumentChild{}
+	// for _, item := range d.Document.Body.Children {
+	// 	if item.Para == image.Para {
+	// 		continue
+	// 	}
+	// 	newItems = append(newItems, item)
+	// }
+	// d.Document.Body.Children = newItems
 
 	xmlString = string(out)
 
