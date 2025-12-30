@@ -49,7 +49,6 @@ func TestSetDocumentXml(t *testing.T) {
 	require.NoError(err)
 
 	xmlString, err := docx.GetDocumentXml()
-	println(xmlString)
 	require.NoError(err)
 	assert.Equal(newXmlString, xmlString)
 }
