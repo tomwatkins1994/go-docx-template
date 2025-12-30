@@ -181,14 +181,14 @@ func (d *GomutexDocx) AddInlineImage(i *images.InlineImage) (xmlString string, e
 	}
 
 	// Remove the paragraph from the word doc so we don't get the image twice
-	// newItems := []docx.DocumentChild{}
-	// for _, item := range d.Document.Body.Children {
-	// 	if item.Para == image.Para {
-	// 		continue
-	// 	}
-	// 	newItems = append(newItems, item)
-	// }
-	// d.Document.Body.Children = newItems
+	newItems := []docx.DocumentChild{}
+	for _, item := range d.Document.Body.Children {
+		if item.Para == image.Para {
+			continue
+		}
+		newItems = append(newItems, item)
+	}
+	d.Document.Body.Children = newItems
 
 	xmlString = string(out)
 
