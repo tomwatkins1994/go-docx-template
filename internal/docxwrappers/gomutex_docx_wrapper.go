@@ -1,6 +1,7 @@
 package docxwrappers
 
 import (
+	"bytes"
 	"encoding/xml"
 	"io"
 	"sync"
@@ -36,10 +37,25 @@ func (d *GomutexDocx) GetDocumentXml() (string, error) {
 }
 
 func (d *GomutexDocx) ReplaceDocumentXml(xmlString string) error {
-	clear(d.Document.Body.Children)
-	err := xml.Unmarshal([]byte(xmlString), &d.Document.Body)
-	if err != nil {
-		return err
+	decoder := xml.NewDecoder(bytes.NewBufferString(xmlString))
+	for {
+		t, err := decoder.Token()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			return err
+		}
+		if start, ok := t.(xml.StartElement); ok {
+			if start.Name.Local == "Body" {
+				clear(d.Document.Body.Children)
+				err = d.Document.Body.UnmarshalXML(decoder, start)
+				if err != nil {
+					return err
+				}
+				break
+			}
+		}
 	}
 
 	return nil
