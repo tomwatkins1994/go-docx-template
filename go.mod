@@ -12,7 +12,7 @@ require (
 
 require golang.org/x/text v0.19.0
 
-require github.com/gomutex/godocx v0.1.6-0.20250811222946-aefd2d814cd1 // indirect
+require github.com/gomutex/godocx v0.1.6-0.20250811222946-aefd2d814cd1
 
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
