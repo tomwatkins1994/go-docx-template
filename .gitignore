@@ -1,6 +1,9 @@
-generated_*.docx
-~*.docx
-*.
+# Ignore generated test template files
+/test_templates/generated_*.docx
+/test_templates/generated_*.zip
+/test_templates/generated_*/**
+
+# Ignore coverage reports
 cover.out
 coverage.out
 coverage.html
