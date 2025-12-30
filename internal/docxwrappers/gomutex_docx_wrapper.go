@@ -3,7 +3,9 @@ package docxwrappers
 import (
 	"bytes"
 	"encoding/xml"
+	"fmt"
 	"io"
+	"strings"
 	"sync"
 
 	"github.com/gomutex/godocx"
@@ -37,6 +39,21 @@ func (d *GomutexDocx) GetDocumentXml() (string, error) {
 }
 
 func (d *GomutexDocx) ReplaceDocumentXml(xmlString string) error {
+	// Clear the existing body to avoid duplication
+	d.Document.Body = nil
+
+	// Wrap the body XML with the document tags so it can be unmarshalled correctly
+	documentWrapperBytes, err := xml.Marshal(d.Document)
+	if err != nil {
+		return err
+	}
+	docXML := string(documentWrapperBytes)
+	tagEnd := strings.LastIndex(docXML, "</w:document>")
+	if tagEnd == -1 {
+		return fmt.Errorf("no </w:document>")
+	}
+	xmlString = docXML[:tagEnd] + xmlString + docXML[tagEnd:]
+
 	decoder := xml.NewDecoder(bytes.NewBufferString(xmlString))
 	for {
 		t, err := decoder.Token()
@@ -47,9 +64,8 @@ func (d *GomutexDocx) ReplaceDocumentXml(xmlString string) error {
 			return err
 		}
 		if start, ok := t.(xml.StartElement); ok {
-			if start.Name.Local == "body" {
-				clear(d.Document.Body.Children)
-				err = d.Document.Body.UnmarshalXML(decoder, start)
+			if start.Name.Local == "document" {
+				err = d.Document.UnmarshalXML(decoder, start)
 				if err != nil {
 					return err
 				}
