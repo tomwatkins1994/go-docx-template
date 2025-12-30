@@ -247,8 +247,8 @@ func TestParseAndRender(t *testing.T) {
 	tests, err := getTests()
 	require.Nil(t, err)
 
-	for _, wrapper := range docxWrappers {
-		for _, tt := range tests {
+	for _, tt := range tests {
+		for _, wrapper := range docxWrappers {
 			t.Run(wrapper.name+"_"+tt.name, func(t *testing.T) {
 				assert := assert.New(t)
 				require := require.New(t)
@@ -326,8 +326,8 @@ func BenchmarkParseAndRender(b *testing.B) {
 	require.Nil(b, err)
 	b.ResetTimer()
 
-	for _, wrapper := range docxWrappers {
-		for _, tt := range tests {
+	for _, tt := range tests {
+		for _, wrapper := range docxWrappers {
 			b.Run(wrapper.name+" "+tt.name, func(b *testing.B) {
 				require := require.New(b)
 				start := time.Now()
