@@ -32,7 +32,6 @@ func convertStructToMap(s any) (map[string]any, error) {
 
 	// Ensure we have a struct type
 	if val.Kind() != reflect.Struct {
-		fmt.Printf("is error\n")
 		return nil, fmt.Errorf("expected a struct, got %s", val.Kind())
 	}
 
