@@ -1,6 +1,8 @@
 module github.com/tomwatkins1994/go-docx-template
 
-go 1.23.2
+go 1.24
+
+toolchain go1.25.5
 
 require (
 	github.com/bep/imagemeta v0.8.1
