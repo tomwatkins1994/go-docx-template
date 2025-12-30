@@ -10,17 +10,31 @@ jobs:
         go-version: ["1.23.x"]
 
     steps:
-      - uses: actions/checkout@v5
+      - name: Checkout code
+        uses: actions/checkout@v4
+
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
           go-version: ${{ matrix.go-version }}
-      - name: Install dependencies
-        run: go get .
-      - name: Test with Go
-        run: go test -json > TestResults-${{ matrix.go-version }}.json
-      - name: Upload Go test results
+          cache: true
+
+      - name: Install gotestsum
+        run: go install gotest.tools/gotestsum@latest
+
+      - name: Run tests
+        run: |
+          mkdir -p test-results
+          gotestsum \
+            --format testname \
+            --junitfile test-results/tests.xml \
+            -- \
+            -race \
+            -cover \
+            ./...
+
+      - name: Upload test results
         uses: actions/upload-artifact@v4
         with:
-          name: Go-results-${{ matrix.go-version }}
-          path: TestResults-${{ matrix.go-version }}.json
+          name: test-results
+          path: test-results/tests.xml
