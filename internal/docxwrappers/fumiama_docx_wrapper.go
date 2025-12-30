@@ -90,10 +90,10 @@ func (d *FumiamaDocx) ReplaceDocumentXml(xmlString string) error {
 }
 
 func (d *FumiamaDocx) MergeTags() {
-	mergeTags(d.Document.Body.Items)
+	mergeFumiamaTags(d.Document.Body.Items)
 }
 
-func mergeTags(items []any) {
+func mergeFumiamaTags(items []any) {
 	var wg sync.WaitGroup
 
 	for _, item := range items {
@@ -180,7 +180,7 @@ func (d *FumiamaDocx) AddInlineImage(i *images.InlineImage) (xmlString string, e
 	}
 
 	// Correctly size the image
-	w, h, err := i.GetSize()
+	w, h, err := i.GetSizeEmus()
 	if err != nil {
 		return "", err
 	}

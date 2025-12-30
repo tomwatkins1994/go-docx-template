@@ -108,7 +108,7 @@ func TestMergeTags(t *testing.T) {
 		&tbl,
 	}
 
-	mergeTags(items)
+	mergeFumiamaTags(items)
 
 	assert.Equal(pStartText.Text, "")
 	assert.Equal(pEndText.Text, "{{ .tag }}")

@@ -3,6 +3,7 @@ package docxtpl
 import (
 	"fmt"
 	"os"
+	"strings"
 	"testing"
 	"time"
 
@@ -31,6 +32,12 @@ func getWrappers() []testWrapper {
 			name: "Fumiama",
 			docxFromFilename: func(filename string) (docxwrappers.DocxWrapper, error) {
 				return docxwrappers.NewFumiamaDocxFromFilename(filename)
+			},
+		},
+		{
+			name: "Gomutex",
+			docxFromFilename: func(filename string) (docxwrappers.DocxWrapper, error) {
+				return docxwrappers.NewGomutexDocxFromFilename(filename)
 			},
 		},
 	}
@@ -240,8 +247,8 @@ func TestParseAndRender(t *testing.T) {
 	tests, err := getTests()
 	require.Nil(t, err)
 
-	for _, wrapper := range docxWrappers {
-		for _, tt := range tests {
+	for _, tt := range tests {
+		for _, wrapper := range docxWrappers {
 			t.Run(wrapper.name+"_"+tt.name, func(t *testing.T) {
 				assert := assert.New(t)
 				require := require.New(t)
@@ -262,7 +269,7 @@ func TestParseAndRender(t *testing.T) {
 				if len(tt.outputFilename) > 0 {
 					outputFilename = tt.outputFilename
 				}
-				f, err := os.Create("test_templates/generated_" + outputFilename)
+				f, err := os.Create("test_templates/generated_" + strings.ToLower(wrapper.name) + "_" + outputFilename)
 				assert.Nil(err, "Error creating document")
 				err = docxtpl.Save(f)
 				assert.Nil(err, "Error saving document")
@@ -319,8 +326,8 @@ func BenchmarkParseAndRender(b *testing.B) {
 	require.Nil(b, err)
 	b.ResetTimer()
 
-	for _, wrapper := range docxWrappers {
-		for _, tt := range tests {
+	for _, tt := range tests {
+		for _, wrapper := range docxWrappers {
 			b.Run(wrapper.name+" "+tt.name, func(b *testing.B) {
 				require := require.New(b)
 				start := time.Now()
@@ -348,7 +355,7 @@ func BenchmarkParseAndRender(b *testing.B) {
 				if len(tt.outputFilename) > 0 {
 					outputFilename = tt.outputFilename
 				}
-				f, err := os.Create("test_templates/generated_" + outputFilename)
+				f, err := os.Create("test_templates/generated_" + strings.ToLower(wrapper.name) + "_" + outputFilename)
 				require.Nil(err, "Error creating document")
 				err = docxtpl.Save(f)
 				require.Nil(err, "Error saving document")

@@ -10,6 +10,8 @@ github.com/fumiama/go-docx v0.0.0-20240924153044-f7d29bb5c371 h1:zKTZh3yEWAt3Bf2
 github.com/fumiama/go-docx v0.0.0-20240924153044-f7d29bb5c371/go.mod h1:ssRF0IaB1hCcKIObp3FkZOsjTcAHpgii70JelNb4H8M=
 github.com/fumiama/imgsz v0.0.2 h1:fAkC0FnIscdKOXwAxlyw3EUba5NzxZdSxGaq3Uyfxak=
 github.com/fumiama/imgsz v0.0.2/go.mod h1:dR71mI3I2O5u6+PCpd47M9TZptzP+39tRBcbdIkoqM4=
+github.com/gomutex/godocx v0.1.6-0.20250811222946-aefd2d814cd1 h1:Swm1IHlVjX0ncYda96gAr/TaQstFgp1SjXyC6rhGoIQ=
+github.com/gomutex/godocx v0.1.6-0.20250811222946-aefd2d814cd1/go.mod h1:x2x+ZanJAhhG0vxU0nvW1WomfWD+qSB6tcMpP4shP50=
 github.com/google/go-cmp v0.5.9 h1:O2Tfq5qg4qc4AmwVlvv0oLiVAGB7enBSJ2x2DqQFi38=
 github.com/google/go-cmp v0.5.9/go.mod h1:17dUlkBOakJ0+DkrSSNjCkIjxS6bF9zb3elmeNGIjoY=
 github.com/kr/pretty v0.3.1 h1:flRD4NNwYAUpkphVc1HcthR4KEIFJ65n8Mw5qdRn3LE=
