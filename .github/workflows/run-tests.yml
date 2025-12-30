@@ -35,5 +35,5 @@ jobs:
       - name: Upload test results
         uses: actions/upload-artifact@v4
         with:
-          name: test-results
-          path: test-results/tests_${{ matrix.go-version }}.xml
+          name: test-results-go-${{ matrix.go-version }}
+          path: test-results/tests.xml
