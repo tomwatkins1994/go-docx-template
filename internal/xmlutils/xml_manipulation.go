@@ -2,6 +2,7 @@ package xmlutils
 
 import (
 	"strings"
+	"time"
 
 	"github.com/dlclark/regexp2"
 )
@@ -15,7 +16,7 @@ func PrepareXmlForTagReplacement(xmlString string) (string, error) {
 var tableRangeRowRegex = regexp2.MustCompile("<w:tr>(?:(?!<w:tr>).)*?({{range .*?}}|{{ range .*? }}|{{end}}|{{ end }})(?:(?!<w:tr>).)*?</w:tr>", 0)
 
 func replaceTableRangeRows(xmlString string) (string, error) {
-	tableRangeRowRegex.MatchTimeout = 500
+	tableRangeRowRegex.MatchTimeout = 50 * time.Millisecond
 
 	newXmlString := xmlString
 
