@@ -47,7 +47,7 @@ func (d *GomutexDocx) ReplaceDocumentXml(xmlString string) error {
 			return err
 		}
 		if start, ok := t.(xml.StartElement); ok {
-			if start.Name.Local == "Body" {
+			if start.Name.Local == "body" {
 				clear(d.Document.Body.Children)
 				err = d.Document.Body.UnmarshalXML(decoder, start)
 				if err != nil {
