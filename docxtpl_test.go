@@ -18,6 +18,7 @@ type test struct {
 	filename       string
 	outputFilename string
 	data           any
+	dataFn         func() any
 	fns            map[string]any
 }
 
@@ -70,6 +71,18 @@ func getTests() ([]test, error) {
 			},
 		},
 		{
+			name:           "Basic document with map data",
+			filename:       "test_basic.docx",
+			outputFilename: "test_basic_with_map_data.docx",
+			dataFn: func() any {
+				return map[string]any{
+					"ProjectNumber": "B-00001",
+					"Client":        "TW Software",
+					"Status":        "New",
+				}
+			},
+		},
+		{
 			name:     "Basic document with XML escaped",
 			filename: "test_basic_with_escaping.docx",
 			data: struct {
@@ -97,6 +110,20 @@ func getTests() ([]test, error) {
 				Status:        "New",
 				ImagePng:      "test_templates/test_image.png",
 				ImageJpg:      "test_templates/test_image.png",
+			},
+		},
+		{
+			name:           "Basic document with images in map data",
+			filename:       "test_basic_with_images.docx",
+			outputFilename: "test_basic_with_images_map_data.docx",
+			dataFn: func() any {
+				return map[string]any{
+					"ProjectNumber": "B-00001",
+					"Client":        "TW Software",
+					"Status":        "New",
+					"ImagePng":      "test_templates/test_image.png",
+					"ImageJpg":      "test_templates/test_image.png",
+				}
 			},
 		},
 		{
@@ -262,6 +289,9 @@ func TestParseAndRender(t *testing.T) {
 					assert.Nil(err)
 				}
 
+				if tt.dataFn != nil {
+					tt.data = tt.dataFn()
+				}
 				err = docxtpl.Render(tt.data)
 				assert.Nil(err, "Rendering error")
 
