@@ -3,6 +3,7 @@ package docxtpl
 import (
 	"io"
 	"maps"
+	"os"
 	"text/template"
 
 	"github.com/tomwatkins1994/go-docx-template/internal/docxwrappers"
@@ -127,6 +128,21 @@ func (d *DocxTmpl) Render(data any) error {
 //	}
 func (d *DocxTmpl) Save(w io.Writer) error {
 	err := d.docx.Save(w)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (d *DocxTmpl) SaveToFile(filename string) error {
+	f, err := os.Create(filename)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	err = d.Save(f)
 	if err != nil {
 		return err
 	}

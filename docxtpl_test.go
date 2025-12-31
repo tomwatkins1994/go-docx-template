@@ -269,12 +269,8 @@ func TestParseAndRender(t *testing.T) {
 				if len(tt.outputFilename) > 0 {
 					outputFilename = tt.outputFilename
 				}
-				f, err := os.Create("test_templates/generated_" + strings.ToLower(wrapper.name) + "_" + outputFilename)
-				assert.Nil(err, "Error creating document")
-				err = docxtpl.Save(f)
+				err = docxtpl.SaveToFile("test_templates/generated_" + strings.ToLower(wrapper.name) + "_" + outputFilename)
 				assert.Nil(err, "Error saving document")
-				err = f.Close()
-				assert.Nil(err, "Error closing document")
 			})
 		}
 	}
