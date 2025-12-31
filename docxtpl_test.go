@@ -407,6 +407,45 @@ func TestProcessTemplateData(t *testing.T) {
 				"CreatedBy":     "&lt;tag&gt;Text&lt;/tag&gt;",
 			},
 		},
+		{
+			name: "Map with nested struct",
+			dataFn: func() any {
+				return map[string]any{
+					"ProjectNumber": "A-0001",
+					"People": []struct {
+						Name   string
+						Gender string
+						Age    uint8
+					}{
+						{
+							Name:   "Tom Watkins",
+							Gender: "Male",
+							Age:    30,
+						},
+						{
+							Name:   "Evie Argyle",
+							Gender: "Female",
+							Age:    29,
+						},
+					},
+				}
+			},
+			expectedData: map[string]any{
+				"ProjectNumber": "A-0001",
+				"People": []map[string]any{
+					{
+						"Name":   "Tom Watkins",
+						"Gender": "Male",
+						"Age":    30,
+					},
+					{
+						"Name":   "Evie Argyle",
+						"Gender": "Female",
+						"Age":    29,
+					},
+				},
+			},
+		},
 	}
 
 	for _, wrapper := range docxWrappers {
