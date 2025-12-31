@@ -51,6 +51,8 @@ func convertStructToMap(s any) (map[string]any, error) {
 						return nil, err
 					}
 					newMapSlice[j] = newMap
+				} else if nestedMap, ok := sliceValue.Interface().(map[string]any); ok {
+					newMapSlice[j] = nestedMap
 				}
 			}
 			result[field.Name] = newMapSlice

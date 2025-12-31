@@ -18,6 +18,7 @@ type test struct {
 	filename       string
 	outputFilename string
 	data           any
+	dataFn         func() any
 	fns            map[string]any
 }
 
@@ -70,6 +71,18 @@ func getTests() ([]test, error) {
 			},
 		},
 		{
+			name:           "Basic document with map data",
+			filename:       "test_basic.docx",
+			outputFilename: "test_basic_with_map_data.docx",
+			dataFn: func() any {
+				return map[string]any{
+					"ProjectNumber": "B-00001",
+					"Client":        "TW Software",
+					"Status":        "New",
+				}
+			},
+		},
+		{
 			name:     "Basic document with XML escaped",
 			filename: "test_basic_with_escaping.docx",
 			data: struct {
@@ -97,6 +110,20 @@ func getTests() ([]test, error) {
 				Status:        "New",
 				ImagePng:      "test_templates/test_image.png",
 				ImageJpg:      "test_templates/test_image.png",
+			},
+		},
+		{
+			name:           "Basic document with images in map data",
+			filename:       "test_basic_with_images.docx",
+			outputFilename: "test_basic_with_images_map_data.docx",
+			dataFn: func() any {
+				return map[string]any{
+					"ProjectNumber": "B-00001",
+					"Client":        "TW Software",
+					"Status":        "New",
+					"ImagePng":      "test_templates/test_image.png",
+					"ImageJpg":      "test_templates/test_image.png",
+				}
 			},
 		},
 		{
@@ -138,6 +165,32 @@ func getTests() ([]test, error) {
 			},
 		},
 		{
+			name:           "Basic document with tables in map data",
+			filename:       "test_with_tables.docx",
+			outputFilename: "test_with_tables_map_data.docx",
+			dataFn: func() any {
+				return map[string]any{
+					"ProjectNumber": "B-00001",
+					"Client":        "TW Software",
+					"Status":        "New",
+					"CreatedBy":     "Tom Watkins",
+					"SignedOffBy":   "Tom Watkins",
+					"People": []map[string]any{
+						{
+							"Name":   "Tom Watkins1",
+							"Gender": "Male",
+							"Age":    30,
+						},
+						{
+							"Name":   "Evie Argyle",
+							"Gender": "Female",
+							"Age":    29,
+						},
+					},
+				}
+			},
+		},
+		{
 			name:     "Basic document with tables and images",
 			filename: "test_with_tables_and_images.docx",
 			data: struct {
@@ -175,6 +228,33 @@ func getTests() ([]test, error) {
 						ProfilePicture: "test_templates/test_image.jpeg",
 					},
 				},
+			},
+		},
+		{
+			name:           "Basic document with tables and images in map data",
+			filename:       "test_with_tables_and_images.docx",
+			outputFilename: "test_with_tables_and_images_map_data.docx",
+			dataFn: func() any {
+				return map[string]any{
+					"ProjectNumber": "B-00001",
+					"Client":        "TW Software",
+					"Status":        "New",
+					"Image":         "test_templates/test_image.png",
+					"People": []map[string]any{
+						{
+							"Name":           "Tom Watkins1",
+							"Gender":         "Male",
+							"Age":            30,
+							"ProfilePicture": "test_templates/test_image.jpg",
+						},
+						{
+							"Name":           "Evie Argyle",
+							"Gender":         "Female",
+							"Age":            29,
+							"ProfilePicture": "test_templates/test_image.jpeg",
+						},
+					},
+				}
 			},
 		},
 		{
@@ -262,7 +342,12 @@ func TestParseAndRender(t *testing.T) {
 					assert.Nil(err)
 				}
 
-				err = docxtpl.Render(tt.data)
+				if tt.dataFn != nil {
+					err = docxtpl.Render(tt.dataFn())
+				} else {
+					err = docxtpl.Render(tt.data)
+				}
+
 				assert.Nil(err, "Rendering error")
 
 				outputFilename := tt.filename
@@ -278,40 +363,268 @@ func TestParseAndRender(t *testing.T) {
 
 func TestProcessTemplateData(t *testing.T) {
 	docxWrappers := getWrappers()
-
-	for _, wrapper := range docxWrappers {
-		t.Run(wrapper.name+" Test XML escaping", func(t *testing.T) {
-			assert := assert.New(t)
-			require := require.New(t)
-
-			docx, err := wrapper.docxFromFilename("test_templates/test_basic.docx")
-			require.NoError(err, "Parsing error")
-			docxtpl := newDocxTmpl(docx)
-
-			data := struct {
-				ProjectNumber string
-				Client        string
-				Status        string
-				CreatedBy     string
-			}{
-				ProjectNumber: "'Single quoted text'",
-				Client:        "Text & more text",
-				Status:        "\"Quoted text\"",
-				CreatedBy:     "<tag>Text</tag>",
-			}
-
-			processedData, err := docxtpl.processTemplateData(data)
-			require.NoError(err)
-
-			expectedData := map[string]any{
+	tests := []struct {
+		name         string
+		dataFn       func() any
+		expectedData map[string]any
+	}{
+		{
+			name: "Test XML escaping with structs",
+			dataFn: func() any {
+				return struct {
+					ProjectNumber string
+					Client        string
+					Status        string
+					CreatedBy     string
+				}{
+					ProjectNumber: "'Single quoted text'",
+					Client:        "Text & more text",
+					Status:        "\"Quoted text\"",
+					CreatedBy:     "<tag>Text</tag>",
+				}
+			},
+			expectedData: map[string]any{
 				"ProjectNumber": "&#39;Single quoted text&#39;",
 				"Client":        "Text &amp; more text",
 				"Status":        "&#34;Quoted text&#34;",
 				"CreatedBy":     "&lt;tag&gt;Text&lt;/tag&gt;",
-			}
+			},
+		},
+		{
+			name: "Test XML escaping with maps",
+			dataFn: func() any {
+				return map[string]any{
+					"ProjectNumber": "'Single quoted text'",
+					"Client":        "Text & more text",
+					"Status":        "\"Quoted text\"",
+					"CreatedBy":     "<tag>Text</tag>",
+				}
+			},
+			expectedData: map[string]any{
+				"ProjectNumber": "&#39;Single quoted text&#39;",
+				"Client":        "Text &amp; more text",
+				"Status":        "&#34;Quoted text&#34;",
+				"CreatedBy":     "&lt;tag&gt;Text&lt;/tag&gt;",
+			},
+		},
+		{
+			name: "Struct with nested struct",
+			dataFn: func() any {
+				return struct {
+					ProjectNumber string
+					Person        struct {
+						Name string
+					}
+				}{
+					ProjectNumber: "A-0001",
+					Person: struct {
+						Name string
+					}{
+						Name: "Tom Watkins",
+					},
+				}
+			},
+			expectedData: map[string]any{
+				"ProjectNumber": "A-0001",
+				"Person": map[string]any{
+					"Name": "Tom Watkins",
+				},
+			},
+		},
+		{
+			name: "Struct with nested struct slice",
+			dataFn: func() any {
+				return struct {
+					ProjectNumber string
+					People        []struct {
+						Name string
+					}
+				}{
+					ProjectNumber: "A-0001",
+					People: []struct {
+						Name string
+					}{
+						{
+							Name: "Tom Watkins",
+						},
+						{
+							Name: "Evie Argyle",
+						},
+					},
+				}
+			},
+			expectedData: map[string]any{
+				"ProjectNumber": "A-0001",
+				"People": []map[string]any{
+					{
+						"Name": "Tom Watkins",
+					},
+					{
+						"Name": "Evie Argyle",
+					},
+				},
+			},
+		},
+		{
+			name: "Struct with nested map",
+			dataFn: func() any {
+				return struct {
+					ProjectNumber string
+					Person        map[string]any
+				}{
+					ProjectNumber: "A-0001",
+					Person: map[string]any{
+						"Name": "Tom Watkins",
+					},
+				}
+			},
+			expectedData: map[string]any{
+				"ProjectNumber": "A-0001",
+				"Person": map[string]any{
+					"Name": "Tom Watkins",
+				},
+			},
+		},
+		{
+			name: "Struct with nested map slice",
+			dataFn: func() any {
+				return struct {
+					ProjectNumber string
+					People        []map[string]any
+				}{
+					ProjectNumber: "A-0001",
+					People: []map[string]any{
+						{
+							"Name": "Tom Watkins",
+						},
+						{
+							"Name": "Evie Argyle",
+						},
+					},
+				}
+			},
+			expectedData: map[string]any{
+				"ProjectNumber": "A-0001",
+				"People": []map[string]any{
+					{
+						"Name": "Tom Watkins",
+					},
+					{
+						"Name": "Evie Argyle",
+					},
+				},
+			},
+		},
+		{
+			name: "Map with nested struct",
+			dataFn: func() any {
+				return map[string]any{
+					"ProjectNumber": "A-0001",
+					"Person": struct {
+						Name string
+					}{
+						Name: "Tom Watkins",
+					},
+				}
+			},
+			expectedData: map[string]any{
+				"ProjectNumber": "A-0001",
+				"Person": map[string]any{
+					"Name": "Tom Watkins",
+				},
+			},
+		},
+		{
+			name: "Map with nested struct slice",
+			dataFn: func() any {
+				return map[string]any{
+					"ProjectNumber": "A-0001",
+					"People": []struct {
+						Name string
+					}{
+						{
+							Name: "Tom Watkins",
+						},
+						{
+							Name: "Evie Argyle",
+						},
+					},
+				}
+			},
+			expectedData: map[string]any{
+				"ProjectNumber": "A-0001",
+				"People": []map[string]any{
+					{
+						"Name": "Tom Watkins",
+					},
+					{
+						"Name": "Evie Argyle",
+					},
+				},
+			},
+		},
+		{
+			name: "Map with nested map",
+			dataFn: func() any {
+				return map[string]any{
+					"ProjectNumber": "A-0001",
+					"Person": map[string]any{
+						"Name": "Tom Watkins",
+					},
+				}
+			},
+			expectedData: map[string]any{
+				"ProjectNumber": "A-0001",
+				"Person": map[string]any{
+					"Name": "Tom Watkins",
+				},
+			},
+		},
+		{
+			name: "Map with nested map slice",
+			dataFn: func() any {
+				return map[string]any{
+					"ProjectNumber": "A-0001",
+					"People": []map[string]any{
+						{
+							"Name": "Tom Watkins",
+						},
+						{
+							"Name": "Evie Argyle",
+						},
+					},
+				}
+			},
+			expectedData: map[string]any{
+				"ProjectNumber": "A-0001",
+				"People": []map[string]any{
+					{
+						"Name": "Tom Watkins",
+					},
+					{
+						"Name": "Evie Argyle",
+					},
+				},
+			},
+		},
+	}
 
-			assert.Equal(expectedData, processedData)
-		})
+	for _, wrapper := range docxWrappers {
+		for _, tt := range tests {
+			t.Run(wrapper.name+" "+tt.name, func(t *testing.T) {
+				assert := assert.New(t)
+				require := require.New(t)
+
+				docx, err := wrapper.docxFromFilename("test_templates/test_basic.docx")
+				require.NoError(err, "Parsing error")
+				docxtpl := newDocxTmpl(docx)
+
+				processedData, err := docxtpl.processTemplateData(tt.dataFn())
+				require.NoError(err)
+
+				assert.Equal(tt.expectedData, processedData)
+			})
+		}
 	}
 }
 
