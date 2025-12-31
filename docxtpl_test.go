@@ -165,6 +165,32 @@ func getTests() ([]test, error) {
 			},
 		},
 		{
+			name:           "Basic document with tables in map data",
+			filename:       "test_with_tables.docx",
+			outputFilename: "test_with_tables_map_data.docx",
+			dataFn: func() any {
+				return map[string]any{
+					"ProjectNumber": "B-00001",
+					"Client":        "TW Software",
+					"Status":        "New",
+					"CreatedBy":     "Tom Watkins",
+					"SignedOffBy":   "Tom Watkins",
+					"People": []map[string]any{
+						{
+							"Name":   "Tom Watkins1",
+							"Gender": "Male",
+							"Age":    30,
+						},
+						{
+							"Name":   "Evie Argyle",
+							"Gender": "Female",
+							"Age":    29,
+						},
+					},
+				}
+			},
+		},
+		{
 			name:     "Basic document with tables and images",
 			filename: "test_with_tables_and_images.docx",
 			data: struct {
@@ -290,9 +316,11 @@ func TestParseAndRender(t *testing.T) {
 				}
 
 				if tt.dataFn != nil {
-					tt.data = tt.dataFn()
+					err = docxtpl.Render(tt.dataFn())
+				} else {
+					err = docxtpl.Render(tt.data)
 				}
-				err = docxtpl.Render(tt.data)
+
 				assert.Nil(err, "Rendering error")
 
 				outputFilename := tt.filename
