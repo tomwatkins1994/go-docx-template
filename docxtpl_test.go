@@ -412,6 +412,30 @@ func TestProcessTemplateData(t *testing.T) {
 			dataFn: func() any {
 				return struct {
 					ProjectNumber string
+					Person        struct {
+						Name string
+					}
+				}{
+					ProjectNumber: "A-0001",
+					Person: struct {
+						Name string
+					}{
+						Name: "Tom Watkins",
+					},
+				}
+			},
+			expectedData: map[string]any{
+				"ProjectNumber": "A-0001",
+				"Person": map[string]any{
+					"Name": "Tom Watkins",
+				},
+			},
+		},
+		{
+			name: "Struct with nested struct slice",
+			dataFn: func() any {
+				return struct {
+					ProjectNumber string
 					People        []struct {
 						Name string
 					}
@@ -446,6 +470,26 @@ func TestProcessTemplateData(t *testing.T) {
 			dataFn: func() any {
 				return struct {
 					ProjectNumber string
+					Person        map[string]any
+				}{
+					ProjectNumber: "A-0001",
+					Person: map[string]any{
+						"Name": "Tom Watkins",
+					},
+				}
+			},
+			expectedData: map[string]any{
+				"ProjectNumber": "A-0001",
+				"Person": map[string]any{
+					"Name": "Tom Watkins",
+				},
+			},
+		},
+		{
+			name: "Struct with nested map slice",
+			dataFn: func() any {
+				return struct {
+					ProjectNumber string
 					People        []map[string]any
 				}{
 					ProjectNumber: "A-0001",
@@ -476,6 +520,25 @@ func TestProcessTemplateData(t *testing.T) {
 			dataFn: func() any {
 				return map[string]any{
 					"ProjectNumber": "A-0001",
+					"Person": struct {
+						Name string
+					}{
+						Name: "Tom Watkins",
+					},
+				}
+			},
+			expectedData: map[string]any{
+				"ProjectNumber": "A-0001",
+				"Person": map[string]any{
+					"Name": "Tom Watkins",
+				},
+			},
+		},
+		{
+			name: "Map with nested struct slice",
+			dataFn: func() any {
+				return map[string]any{
+					"ProjectNumber": "A-0001",
 					"People": []struct {
 						Name string
 					}{
@@ -502,6 +565,23 @@ func TestProcessTemplateData(t *testing.T) {
 		},
 		{
 			name: "Map with nested map",
+			dataFn: func() any {
+				return map[string]any{
+					"ProjectNumber": "A-0001",
+					"Person": map[string]any{
+						"Name": "Tom Watkins",
+					},
+				}
+			},
+			expectedData: map[string]any{
+				"ProjectNumber": "A-0001",
+				"Person": map[string]any{
+					"Name": "Tom Watkins",
+				},
+			},
+		},
+		{
+			name: "Map with nested map slice",
 			dataFn: func() any {
 				return map[string]any{
 					"ProjectNumber": "A-0001",
