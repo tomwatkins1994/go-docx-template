@@ -4,6 +4,7 @@ import (
 	"io"
 	"maps"
 	"os"
+	"reflect"
 	"text/template"
 
 	"github.com/tomwatkins1994/go-docx-template/internal/docxwrappers"
@@ -199,6 +200,33 @@ func (d *DocxTmpl) processTemplateData(data any) (map[string]any, error) {
 					return err
 				}
 				(*data)[key] = imageXml
+			} else {
+				reflectVal := reflect.ValueOf(value)
+
+				if reflectVal.Kind() == reflect.Struct {
+					nestedMap, err := templatedata.DataToMap(value)
+					if err != nil {
+						return err
+					}
+					if err := processTagValues(&nestedMap); err != nil {
+						return err
+					}
+					(*data)[key] = nestedMap
+				} else if reflectVal.Kind() == reflect.Slice {
+					newMapSlice := make([]map[string]any, reflectVal.Len())
+					for i := 0; i < reflectVal.Len(); i++ {
+						sliceValue := reflectVal.Index(i).Interface()
+						mapValue, err := templatedata.DataToMap(sliceValue)
+						if err != nil {
+							return err
+						}
+						if err := processTagValues(&mapValue); err != nil {
+							return err
+						}
+						newMapSlice[i] = mapValue
+					}
+					(*data)[key] = newMapSlice
+				}
 			}
 		}
 

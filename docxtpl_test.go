@@ -408,24 +408,23 @@ func TestProcessTemplateData(t *testing.T) {
 			},
 		},
 		{
-			name: "Map with nested struct",
+			name: "Struct with nested struct",
 			dataFn: func() any {
-				return map[string]any{
-					"ProjectNumber": "A-0001",
-					"People": []struct {
-						Name   string
-						Gender string
-						Age    uint8
+				return struct {
+					ProjectNumber string
+					People        []struct {
+						Name string
+					}
+				}{
+					ProjectNumber: "A-0001",
+					People: []struct {
+						Name string
 					}{
 						{
-							Name:   "Tom Watkins",
-							Gender: "Male",
-							Age:    30,
+							Name: "Tom Watkins",
 						},
 						{
-							Name:   "Evie Argyle",
-							Gender: "Female",
-							Age:    29,
+							Name: "Evie Argyle",
 						},
 					},
 				}
@@ -434,14 +433,39 @@ func TestProcessTemplateData(t *testing.T) {
 				"ProjectNumber": "A-0001",
 				"People": []map[string]any{
 					{
-						"Name":   "Tom Watkins",
-						"Gender": "Male",
-						"Age":    30,
+						"Name": "Tom Watkins",
 					},
 					{
-						"Name":   "Evie Argyle",
-						"Gender": "Female",
-						"Age":    29,
+						"Name": "Evie Argyle",
+					},
+				},
+			},
+		},
+		{
+			name: "Map with nested struct",
+			dataFn: func() any {
+				return map[string]any{
+					"ProjectNumber": "A-0001",
+					"People": []struct {
+						Name string
+					}{
+						{
+							Name: "Tom Watkins",
+						},
+						{
+							Name: "Evie Argyle",
+						},
+					},
+				}
+			},
+			expectedData: map[string]any{
+				"ProjectNumber": "A-0001",
+				"People": []map[string]any{
+					{
+						"Name": "Tom Watkins",
+					},
+					{
+						"Name": "Evie Argyle",
 					},
 				},
 			},
