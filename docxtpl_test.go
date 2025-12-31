@@ -231,6 +231,33 @@ func getTests() ([]test, error) {
 			},
 		},
 		{
+			name:           "Basic document with tables and images in map data",
+			filename:       "test_with_tables_and_images.docx",
+			outputFilename: "test_with_tables_and_images_map_data.docx",
+			dataFn: func() any {
+				return map[string]any{
+					"ProjectNumber": "B-00001",
+					"Client":        "TW Software",
+					"Status":        "New",
+					"Image":         "test_templates/test_image.png",
+					"People": []map[string]any{
+						{
+							"Name":           "Tom Watkins1",
+							"Gender":         "Male",
+							"Age":            30,
+							"ProfilePicture": "test_templates/test_image.jpg",
+						},
+						{
+							"Name":           "Evie Argyle",
+							"Gender":         "Female",
+							"Age":            29,
+							"ProfilePicture": "test_templates/test_image.jpeg",
+						},
+					},
+				}
+			},
+		},
+		{
 			name:           "Basic document with image structs",
 			filename:       "test_with_tables_and_images.docx",
 			outputFilename: "test_with_image_structs.docx",
