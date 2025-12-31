@@ -138,7 +138,7 @@ func (d *DocxTmpl) Save(w io.Writer) error {
 func (d *DocxTmpl) SaveToFile(filename string) error {
 	f, err := os.Create(filename)
 	if err != nil {
-		panic(err)
+		return err
 	}
 	defer f.Close()
 
