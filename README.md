@@ -1,7 +1,7 @@
 # Go Docx Template
 
-> [!IMPORTANT] 
-> This library is currently in active development and is therefore not recommended for production use
+> [!IMPORTANT]
+> This library is currently in active development and is therefore not currently recommended for production use
 
 ## Introduction
 
@@ -12,10 +12,10 @@ A simple Go library for merging docx files with data.
 ### Installation
 
 ```sh
-go get github.com/tomwatkins1994/go-docx-template@latest 
+go get github.com/tomwatkins1994/go-docx-template@latest
 ```
 
-### Render a document 
+### Render a document
 
 ```go
 package main
@@ -27,7 +27,7 @@ import (
 )
 
 func main() {
-  // Parse the document 
+  // Parse the document
   // If using a reader, use docxtpl.Parse instead
   doc, err := docxtpl.ParseFromFilename("template.docx")
   if err != nil {
@@ -49,16 +49,8 @@ func main() {
     panic(err)
   }
 
-  // Create a new file for the output
-  f, err := os.Create("generated.docx")
-  if err != nil {
-    panic(err)
-  }
-  err = doc.Save(f)
-  if err != nil {
-    panic(err)
-  }
-  err = f.Close()
+  // Save the document to a file
+  err = doc.SaveToFile("generated.docx")
   if err != nil {
     panic(err)
   }
