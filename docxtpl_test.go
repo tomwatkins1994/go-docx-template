@@ -364,7 +364,7 @@ func TestProcessTemplateData(t *testing.T) {
 			},
 		},
 		{
-			name: "Test XML escaping with structs",
+			name: "Test XML escaping with maps",
 			dataFn: func() any {
 				return map[string]any{
 					"ProjectNumber": "'Single quoted text'",
