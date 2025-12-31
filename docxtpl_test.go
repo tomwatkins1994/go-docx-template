@@ -336,40 +336,68 @@ func TestParseAndRender(t *testing.T) {
 
 func TestProcessTemplateData(t *testing.T) {
 	docxWrappers := getWrappers()
-
-	for _, wrapper := range docxWrappers {
-		t.Run(wrapper.name+" Test XML escaping", func(t *testing.T) {
-			assert := assert.New(t)
-			require := require.New(t)
-
-			docx, err := wrapper.docxFromFilename("test_templates/test_basic.docx")
-			require.NoError(err, "Parsing error")
-			docxtpl := newDocxTmpl(docx)
-
-			data := struct {
-				ProjectNumber string
-				Client        string
-				Status        string
-				CreatedBy     string
-			}{
-				ProjectNumber: "'Single quoted text'",
-				Client:        "Text & more text",
-				Status:        "\"Quoted text\"",
-				CreatedBy:     "<tag>Text</tag>",
-			}
-
-			processedData, err := docxtpl.processTemplateData(data)
-			require.NoError(err)
-
-			expectedData := map[string]any{
+	tests := []struct {
+		name         string
+		dataFn       func() any
+		expectedData map[string]any
+	}{
+		{
+			name: "Test XML escaping with structs",
+			dataFn: func() any {
+				return struct {
+					ProjectNumber string
+					Client        string
+					Status        string
+					CreatedBy     string
+				}{
+					ProjectNumber: "'Single quoted text'",
+					Client:        "Text & more text",
+					Status:        "\"Quoted text\"",
+					CreatedBy:     "<tag>Text</tag>",
+				}
+			},
+			expectedData: map[string]any{
 				"ProjectNumber": "&#39;Single quoted text&#39;",
 				"Client":        "Text &amp; more text",
 				"Status":        "&#34;Quoted text&#34;",
 				"CreatedBy":     "&lt;tag&gt;Text&lt;/tag&gt;",
-			}
+			},
+		},
+		{
+			name: "Test XML escaping with structs",
+			dataFn: func() any {
+				return map[string]any{
+					"ProjectNumber": "'Single quoted text'",
+					"Client":        "Text & more text",
+					"Status":        "\"Quoted text\"",
+					"CreatedBy":     "<tag>Text</tag>",
+				}
+			},
+			expectedData: map[string]any{
+				"ProjectNumber": "&#39;Single quoted text&#39;",
+				"Client":        "Text &amp; more text",
+				"Status":        "&#34;Quoted text&#34;",
+				"CreatedBy":     "&lt;tag&gt;Text&lt;/tag&gt;",
+			},
+		},
+	}
 
-			assert.Equal(expectedData, processedData)
-		})
+	for _, wrapper := range docxWrappers {
+		for _, tt := range tests {
+			t.Run(wrapper.name+" "+tt.name, func(t *testing.T) {
+				assert := assert.New(t)
+				require := require.New(t)
+
+				docx, err := wrapper.docxFromFilename("test_templates/test_basic.docx")
+				require.NoError(err, "Parsing error")
+				docxtpl := newDocxTmpl(docx)
+
+				processedData, err := docxtpl.processTemplateData(tt.dataFn())
+				require.NoError(err)
+
+				assert.Equal(tt.expectedData, processedData)
+			})
+		}
 	}
 }
 
